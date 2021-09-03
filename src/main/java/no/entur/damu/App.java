@@ -16,18 +16,23 @@
 
 package no.entur.damu;
 
+import no.entur.damu.config.GcsStorageConfig;
+import no.entur.damu.config.GcsStorageStubConfig;
 import org.apache.camel.builder.RouteBuilder;
+import org.entur.pubsub.base.config.GooglePubSubConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
+import org.springframework.context.annotation.Import;
 
 /**
- * A spring-boot application that includes a Camel route builder to setup the Camel routes
+ * A spring-boot application that includes a Camel route builder to setup the Camel no.entur.damu.routes
  */
 @SpringBootApplication(exclude = {UserDetailsServiceAutoConfiguration.class})
+@Import({GcsStorageConfig.class, GooglePubSubConfig.class})
 public class App extends RouteBuilder {
 
     @Value("${damu.shutdown.timeout:300}")

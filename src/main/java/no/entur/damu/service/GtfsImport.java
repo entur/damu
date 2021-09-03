@@ -11,7 +11,9 @@ import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.serialization.GtfsWriter;
 import org.onebusaway.gtfs.services.GenericMutableDao;
 import org.onebusaway.gtfs.services.GtfsDao;
+import org.rutebanken.netex.model.Site_VersionStructure;
 import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.VersionOfObjectRefStructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import no.entur.damu.producer.AgencyProducer;
@@ -22,7 +24,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -83,36 +88,53 @@ public class GtfsImport {
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> netexStopEntitiesIndex.getStopPlaceIndex().getLatestVersion(entry.getValue())));
 
 
+        convertStops(timeZone, agency, stopPlaceByQuayId);
+        convertRoutes(agency);
 
+
+    }
+
+    private void convertRoutes(Agency agency) {
+        RouteProducer routeProducer = new RouteProducer(agency);
+        netexTimetableEntitiesIndex.getLineIndex().getAll().stream().map(routeProducer::produce).forEach(gtfsDao::saveEntity);
+    }
+
+    private void convertStops(String timeZone, Agency agency, Map<String, StopPlace> stopPlaceByQuayId) {
         StopProducer stopProducer = new StopProducer(agency, stopPlaceByQuayId, timeZone);
 
-        //stopPlaceByQuayId.values().stream().distinct().map(stopProducer::produceStop).forEach(gtfsDao::saveEntity);
-
-
-        netexTimetableEntitiesIndex.getQuayIdByStopPointRefIndex()
+        // Retrieve all quay IDs in use in the timetable dataset
+        Set<String> allQuaysId = netexTimetableEntitiesIndex.getQuayIdByStopPointRefIndex()
                 .values()
                 .stream()
                 .distinct()
+                .collect(Collectors.toSet());
+
+        // Persist the quays
+        allQuaysId.stream().map(netexStopEntitiesIndex.getQuayIndex()::getLatestVersion)
+                .map(stopProducer::produceStop)
+                .forEach(gtfsDao::saveEntity);
+
+
+        // Retrieve all the distinct stop places that reference the quays
+        Set<StopPlace> allStopPlacesAssignedToQuays = allQuaysId.stream()
                 .map(netexStopEntitiesIndex.getStopPlaceIdByQuayIdIndex()::get)
                 .distinct()
                 .map(netexStopEntitiesIndex.getStopPlaceIndex()::getLatestVersion)
+                .collect(Collectors.toSet());
+
+        // Retrieve the parent stop places if they exist
+        Set<StopPlace> allParentStopPlaces = allStopPlacesAssignedToQuays.stream()
+                .map(Site_VersionStructure::getParentSiteRef)
+                .filter(Objects::nonNull)
+                .map(VersionOfObjectRefStructure::getRef)
+                .map(netexStopEntitiesIndex.getStopPlaceIndex()::getLatestVersion).collect(Collectors.toSet());
+
+        // Persist the stop places and their parent stop places
+        Set<StopPlace> allStopPlaces = new HashSet<>(allStopPlacesAssignedToQuays);
+        allStopPlaces.addAll(allParentStopPlaces);
+        allStopPlaces.stream()
                 .map(stopProducer::produceStop)
                 .forEach(gtfsDao::saveEntity);
-
-        netexTimetableEntitiesIndex.getQuayIdByStopPointRefIndex()
-                .values()
-                .stream()
-                .distinct()
-                .map(netexStopEntitiesIndex.getQuayIndex()::getLatestVersion)
-                .map(stopProducer::produceStop)
-                .forEach(gtfsDao::saveEntity);
-
-
-
-        RouteProducer routeProducer = new RouteProducer(agency);
-        netexTimetableEntitiesIndex.getLineIndex().getAll().stream().map(routeProducer::produce).forEach(gtfsDao::saveEntity);
-
-
     }
 
     public InputStream exportGtfs() {
