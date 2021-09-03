@@ -20,11 +20,15 @@ public final class Constants {
     public static final String FILE_HANDLE = "RutebankenFileHandle";
     public static final String CORRELATION_ID = "RutebankenCorrelationId";
     public static final String BLOBSTORE_PATH_OUTBOUND = "outbound/";
+    public static final String BLOBSTORE_PATH_DAMU = "damu/";
 
     public static final String DATASET_CODESPACE = "EnturDatasetCodespace";
 
     public static final String NETEX_FILENAME_PREFIX = "netex/";
+    public static final String GTFS_FILENAME_PREFIX = "gtfs/";
+
     public static final String NETEX_FILENAME_SUFFIX = "-aggregated-netex.zip";
+    public static final String GTFS_FILENAME_SUFFIX = "-aggregated-gtfs.zip";
 
 
 

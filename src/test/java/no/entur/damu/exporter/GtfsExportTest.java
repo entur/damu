@@ -16,8 +16,9 @@
 
 package no.entur.damu.exporter;
 
-import no.entur.damu.service.GtfsImport;
+import no.entur.damu.service.GtfsExport;
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -28,11 +29,13 @@ import java.nio.file.StandardCopyOption;
 class GtfsExportTest {
 
     @Test
+    @Disabled
     void testExport() throws IOException {
-        GtfsImport gtfsImport = new GtfsImport(getClass().getResourceAsStream("/netex.zip"), getClass().getResourceAsStream("/Full_latest.zip"));
-        gtfsImport.importNetex();
-        gtfsImport.convertNetexToGtfs();
-        InputStream exportedGtfs = gtfsImport.exportGtfs();
+        GtfsExport gtfsExport = new GtfsExport(getClass().getResourceAsStream("/netex.zip"), getClass().getResourceAsStream("/Full_latest.zip"));
+
+        gtfsExport.importNetex();
+        gtfsExport.convertNetexToGtfs();
+        InputStream exportedGtfs = gtfsExport.exportGtfs();
 
         java.nio.file.Files.copy(
                 exportedGtfs,
