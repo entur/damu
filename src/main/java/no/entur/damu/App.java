@@ -17,7 +17,6 @@
 package no.entur.damu;
 
 import no.entur.damu.config.GcsStorageConfig;
-import no.entur.damu.config.GcsStorageStubConfig;
 import org.apache.camel.builder.RouteBuilder;
 import org.entur.pubsub.base.config.GooglePubSubConfig;
 import org.slf4j.Logger;
