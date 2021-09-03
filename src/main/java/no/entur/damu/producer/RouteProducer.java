@@ -1,6 +1,10 @@
 package no.entur.damu.producer;
 
+import no.entur.damu.model.RouteTypeEnum;
+import no.entur.damu.model.TransportModeNameEnum;
+import no.entur.damu.model.TransportSubModeNameEnum;
 import no.entur.damu.util.GtfsUtil;
+import no.entur.damu.util.NetexParserUtils;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
@@ -28,12 +32,12 @@ public class RouteProducer {
         route.setShortName(line.getPublicCode());
         route.setLongName(line.getName().getValue());
 
-        //TransportModeNameEnum transportMode = TransportModeNameEnum.valueOf(StringUtils.capitalize(line.getTransportMode().name()));
-        //TransportSubModeNameEnum subMode = TransportSubModeNameEnum.valueOf(StringUtils.capitalize(line.getTransportSubmode().toString()));
-        //route.setType(RouteTypeEnum.from(transportMode, subMode).getValue());
-        route.setType(1);
+        TransportModeNameEnum transportMode = NetexParserUtils.toTransportModeNameEnum(line.getTransportMode().value());
+        TransportSubModeNameEnum transportSubMode = NetexParserUtils.toTransportSubModeNameEnum(line.getTransportSubmode());
+        route.setType(RouteTypeEnum.from(transportMode, transportSubMode).getValue());
 
         return route;
 
     }
+
 }

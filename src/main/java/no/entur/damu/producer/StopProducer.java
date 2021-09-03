@@ -1,5 +1,8 @@
 package no.entur.damu.producer;
 
+import no.entur.damu.model.RouteTypeEnum;
+import no.entur.damu.model.TransportModeNameEnum;
+import no.entur.damu.util.NetexParserUtils;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
@@ -24,7 +27,7 @@ public class StopProducer {
     }
 
 
-    public Stop produceStop(StopPlace stopPlace) {
+    public Stop produceStopFromStopPlace(StopPlace stopPlace) {
         Stop stop = new Stop();
         AgencyAndId agencyAndId = new AgencyAndId();
         agencyAndId.setAgencyId(agency.getId());
@@ -59,12 +62,15 @@ public class StopProducer {
             stop.setWheelchairBoarding(WHEELCHAIR_BOARDING_TRUE);
         }
 
+        TransportModeNameEnum transportMode = NetexParserUtils.toTransportModeNameEnum(stopPlace.getTransportMode().value());
+        stop.setVehicleType(RouteTypeEnum.from(transportMode, null).getValue());
+
 
         return stop;
     }
 
 
-    public Stop produceStop(Quay quay) {
+    public Stop produceStopFromQuay(Quay quay) {
         Stop stop = new Stop();
         AgencyAndId agencyAndId = new AgencyAndId();
         agencyAndId.setAgencyId(agency.getId());
@@ -79,6 +85,9 @@ public class StopProducer {
 
         StopPlace stopPlace = stopPlaces.get(quay.getId());
         stop.setParentStation(stopPlace.getId());
+
+        TransportModeNameEnum transportMode = NetexParserUtils.toTransportModeNameEnum(stopPlace.getTransportMode().value());
+        stop.setVehicleType(RouteTypeEnum.from(transportMode, null).getValue());
 
         stop.setName(stopPlace.getName().getValue());
         if (quay.getDescription() != null) {

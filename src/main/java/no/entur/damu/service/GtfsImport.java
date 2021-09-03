@@ -103,37 +103,19 @@ public class GtfsImport {
         StopProducer stopProducer = new StopProducer(agency, stopPlaceByQuayId, timeZone);
 
         // Retrieve all quay IDs in use in the timetable dataset
-        Set<String> allQuaysId = netexTimetableEntitiesIndex.getQuayIdByStopPointRefIndex()
-                .values()
-                .stream()
-                .distinct()
-                .collect(Collectors.toSet());
+        Set<String> allQuaysId = new HashSet<>(netexTimetableEntitiesIndex.getQuayIdByStopPointRefIndex().values());
 
         // Persist the quays
         allQuaysId.stream().map(netexStopEntitiesIndex.getQuayIndex()::getLatestVersion)
-                .map(stopProducer::produceStop)
+                .map(stopProducer::produceStopFromQuay)
                 .forEach(gtfsDao::saveEntity);
 
-
-        // Retrieve all the distinct stop places that reference the quays
-        Set<StopPlace> allStopPlacesAssignedToQuays = allQuaysId.stream()
+        // Retrieve and persist all the stop places that contain the quays
+        allQuaysId.stream()
                 .map(netexStopEntitiesIndex.getStopPlaceIdByQuayIdIndex()::get)
                 .distinct()
                 .map(netexStopEntitiesIndex.getStopPlaceIndex()::getLatestVersion)
-                .collect(Collectors.toSet());
-
-        // Retrieve the parent stop places if they exist
-        Set<StopPlace> allParentStopPlaces = allStopPlacesAssignedToQuays.stream()
-                .map(Site_VersionStructure::getParentSiteRef)
-                .filter(Objects::nonNull)
-                .map(VersionOfObjectRefStructure::getRef)
-                .map(netexStopEntitiesIndex.getStopPlaceIndex()::getLatestVersion).collect(Collectors.toSet());
-
-        // Persist the stop places and their parent stop places
-        Set<StopPlace> allStopPlaces = new HashSet<>(allStopPlacesAssignedToQuays);
-        allStopPlaces.addAll(allParentStopPlaces);
-        allStopPlaces.stream()
-                .map(stopProducer::produceStop)
+                .map(stopProducer::produceStopFromStopPlace)
                 .forEach(gtfsDao::saveEntity);
     }
 
