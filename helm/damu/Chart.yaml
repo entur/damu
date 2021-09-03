@@ -1,0 +1,14 @@
+apiVersion: v1
+# template for application version, the actual version number is set at build time
+appVersion: "0.1.99.1"
+description: Backend integration
+name: damu
+version: 0.1.0
+keywords:
+  - damu
+sources:
+  - https://github.com/entur/damu
+maintainers:
+  - name: 'team-ror'
+    email: team.rutedata@entur.org
+engine: gotpl
