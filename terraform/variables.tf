@@ -44,21 +44,6 @@ variable "bucket_marduk_instance_name" {
   description = "Marduk bucket name"
 }
 
-variable "bucket_damu_instance_name" {
-  description = "damu bucket name"
-}
-
-variable "bucket_damu_exchange_instance_name" {
-  description = "damu exchange bucket name"
-}
-
-variable  ror-damu-kafka-username {
-  description = "damu kafka user name"
-}
-
-variable ror-damu-kafka-password {
-  description = "damu kafka user password"
-}
 
 
 
