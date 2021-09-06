@@ -9,7 +9,7 @@ service:
 
 resources:
   cpuLimit: 1000m
-  memLimit: 2000Mi
+  memLimit: 10000Mi
   cpuRequest: 1000m
-  memRequest: 1800Mi
-  xmx: 1600m
+  memRequest: 8000Mi
+  xmx: 7000m
