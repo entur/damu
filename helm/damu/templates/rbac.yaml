@@ -44,5 +44,5 @@ rules:
     verbs: ["create"]
   - apiGroups: ["coordination.k8s.io"]
     resources: ["leases"]
-    resourceNames: ["damu-leaders-lockonnetexexportnotificationqueueroute"]
+    resourceNames: ["damu-leaders-lockondamuexportgtfsqueueroute"]
     verbs: ["get", "update", "list"]
