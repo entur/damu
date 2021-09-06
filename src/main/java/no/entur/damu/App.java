@@ -34,11 +34,10 @@ import org.springframework.context.annotation.Import;
 @Import({GcsStorageConfig.class, GooglePubSubConfig.class})
 public class App extends RouteBuilder {
 
-    @Value("${damu.shutdown.timeout:300}")
-    private Long shutdownTimeout;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
 
+    @Value("${damu.shutdown.timeout:300}")
+    private Long shutdownTimeout;
 
     // must have a main method spring-boot can run
     public static void main(String[] args) {

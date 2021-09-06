@@ -58,7 +58,7 @@ public class StopProducer {
 
 
         if (stopPlace.getAccessibilityAssessment() != null
-                && stopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation().getWheelchairAccess().value().equals("true")) {
+                && "true".equals(stopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation().getWheelchairAccess().value())) {
             stop.setWheelchairBoarding(WHEELCHAIR_BOARDING_TRUE);
         }
 
@@ -100,7 +100,7 @@ public class StopProducer {
 
 
         if (quay.getAccessibilityAssessment() != null
-                && quay.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation().getWheelchairAccess().value().equals("true")) {
+                && "true".equals(quay.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation().getWheelchairAccess().value())) {
             stop.setWheelchairBoarding(WHEELCHAIR_BOARDING_TRUE);
         }
 
