@@ -8,11 +8,15 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.VehicleModeEnumeration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
 public class StopProducer {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(StopProducer.class);
     private static final int WHEELCHAIR_BOARDING_TRUE = 1;
 
 
@@ -24,6 +28,12 @@ public class StopProducer {
         this.stopPlaces = stopPlaces;
     }
 
+    /**
+     * Return an agency representing Entur.
+     * The OneBusAway API requires an agency linked to stops, even if it does not appear in the GTFS export
+     *
+     * @return an agency representing Entur.
+     */
     private Agency createEnturAgency() {
         Agency enturAgency = new Agency();
         enturAgency.setId("ENT");
@@ -66,9 +76,13 @@ public class StopProducer {
             stop.setWheelchairBoarding(WHEELCHAIR_BOARDING_TRUE);
         }
 
-        TransportModeNameEnum transportMode = NetexParserUtils.toTransportModeNameEnum(stopPlace.getTransportMode().value());
-        stop.setVehicleType(RouteTypeEnum.from(transportMode, null).getValue());
-
+        VehicleModeEnumeration netexTransportMode = stopPlace.getTransportMode();
+        if (netexTransportMode != null) {
+            TransportModeNameEnum transportMode = NetexParserUtils.toTransportModeNameEnum(netexTransportMode.value());
+            stop.setVehicleType(RouteTypeEnum.from(transportMode, null).getValue());
+        } else {
+            LOGGER.warn("Missing transport mode for stop place {}", stop.getId());
+        }
 
         return stop;
     }
@@ -89,8 +103,13 @@ public class StopProducer {
         StopPlace stopPlace = stopPlaces.get(quay.getId());
         stop.setParentStation(stopPlace.getId());
 
-        TransportModeNameEnum transportMode = NetexParserUtils.toTransportModeNameEnum(stopPlace.getTransportMode().value());
-        stop.setVehicleType(RouteTypeEnum.from(transportMode, null).getValue());
+        VehicleModeEnumeration netexTransportMode = stopPlace.getTransportMode();
+        if (netexTransportMode != null) {
+            TransportModeNameEnum transportMode = NetexParserUtils.toTransportModeNameEnum(netexTransportMode.value());
+            stop.setVehicleType(RouteTypeEnum.from(transportMode, null).getValue());
+        } else {
+            LOGGER.warn("Missing transport mode for quay {}", stop.getId());
+        }
 
         stop.setName(stopPlace.getName().getValue());
         if (quay.getDescription() != null) {
