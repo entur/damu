@@ -18,12 +18,18 @@ public class StopProducer {
 
     private final Agency agency;
     private final Map<String, StopPlace> stopPlaces;
-    private final String timezone;
 
-    public StopProducer(Agency agency, Map<String, StopPlace> stopPlaces, String timezone) {
-        this.agency = agency;
+    public StopProducer(Map<String, StopPlace> stopPlaces) {
+        this.agency = createEnturAgency();
         this.stopPlaces = stopPlaces;
-        this.timezone = timezone;
+    }
+
+    private Agency createEnturAgency() {
+        Agency enturAgency = new Agency();
+        enturAgency.setId("ENT");
+        enturAgency.setUrl("https://www.entur.org");
+        enturAgency.setName("Entur");
+        return enturAgency;
     }
 
 
@@ -34,7 +40,6 @@ public class StopProducer {
         agencyAndId.setId(stopPlace.getId());
         stop.setId(agencyAndId);
         stop.setLocationType(Stop.LOCATION_TYPE_STOP);
-        stop.setTimezone(timezone);
 
         if (stopPlace.getPrivateCode() != null) {
             stop.setPlatformCode(stopPlace.getPrivateCode().getValue());
@@ -51,7 +56,6 @@ public class StopProducer {
         if (stopPlace.getDescription() != null) {
             stop.setDesc(stopPlace.getDescription().getValue());
         }
-        //stop.setCode();
 
         stop.setLon(stopPlace.getCentroid().getLocation().getLongitude().doubleValue());
         stop.setLat(stopPlace.getCentroid().getLocation().getLatitude().doubleValue());
@@ -77,7 +81,6 @@ public class StopProducer {
         agencyAndId.setId(quay.getId());
         stop.setId(agencyAndId);
         stop.setLocationType(Stop.LOCATION_TYPE_STOP);
-        stop.setTimezone(timezone);
 
         if (quay.getPrivateCode() != null) {
             stop.setPlatformCode(quay.getPrivateCode().getValue());
@@ -93,7 +96,6 @@ public class StopProducer {
         if (quay.getDescription() != null) {
             stop.setDesc(quay.getDescription().getValue());
         }
-        //stop.setCode();
 
         stop.setLon(quay.getCentroid().getLocation().getLongitude().doubleValue());
         stop.setLat(quay.getCentroid().getLocation().getLatitude().doubleValue());
