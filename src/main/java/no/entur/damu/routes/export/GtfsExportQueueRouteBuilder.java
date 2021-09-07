@@ -55,7 +55,7 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
         super.configure();
 
 
-        from("master:lockOnDamuExportGtfsQueueRoute:google-pubsub:{{damu.pubsub.project.id}}:DamuExportGtfsQueue")
+        from("master:lockOnDamuExportGtfsQueueRoute:google-pubsub:{{damu.pubsub.project.id}}:DamuExportGtfsQueue?synchronousPull=true")
 
                 .process(this::setCorrelationIdIfMissing)
                 .setHeader(DATASET_CODESPACE, bodyAs(String.class))
