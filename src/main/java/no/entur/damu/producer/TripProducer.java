@@ -7,6 +7,8 @@ import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.Trip;
 import org.rutebanken.netex.model.DayType;
 import org.rutebanken.netex.model.ServiceJourney;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,6 +16,9 @@ import java.util.stream.Collectors;
 import static no.entur.damu.util.GtfsUtil.toGtfsId;
 
 public class TripProducer {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TripProducer.class);
+
 
     private final Agency agency;
     private final Route route;
@@ -38,8 +43,19 @@ public class TripProducer {
         trip.setId(tripAgencyAndId);
 
         AgencyAndId serviceAgencyAndId = new AgencyAndId();
-        Set<DayType> dayTypes = serviceJourney.getDayTypes().getDayTypeRef().stream().map(jaxbElement -> jaxbElement.getValue().getRef()).map(netexTimetableEntitiesIndex.getDayTypeIndex()::get).collect(Collectors.toSet());
-        serviceAgencyAndId.setId(gtfsServiceRepository.getService(dayTypes).getId());
+
+        if (serviceJourney.getDayTypes() != null) {
+            Set<DayType> dayTypes = serviceJourney.getDayTypes()
+                    .getDayTypeRef()
+                    .stream()
+                    .map(jaxbElement -> jaxbElement.getValue().getRef())
+                    .map(netexTimetableEntitiesIndex.getDayTypeIndex()::get)
+                    .collect(Collectors.toSet());
+            serviceAgencyAndId.setId(gtfsServiceRepository.getService(dayTypes).getId());
+        } else {
+            LOGGER.info("Producing trip based on DatedServiceJourneys for ServiceJourney {}", serviceJourney);
+            serviceAgencyAndId.setId(serviceJourney.getId());
+        }
         serviceAgencyAndId.setAgencyId(agency.getId());
         trip.setServiceId(serviceAgencyAndId);
 

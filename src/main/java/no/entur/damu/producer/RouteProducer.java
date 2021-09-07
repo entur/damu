@@ -25,7 +25,7 @@ public class RouteProducer {
 
 
     public Route produce(Line line) {
-        String lineId = GtfsUtil.toGtfsId(line.getId(), "OST", true);
+        String lineId = GtfsUtil.toGtfsId(line.getId(), null, true);
         Route route = new Route();
 
         AgencyAndId agencyAndId = new AgencyAndId();
