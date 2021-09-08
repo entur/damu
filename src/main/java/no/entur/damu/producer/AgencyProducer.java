@@ -22,7 +22,12 @@ public class AgencyProducer {
         agency.setId(GtfsUtil.toGtfsId(authority.getId(), null, true));
         agency.setName(authority.getName().getValue());
         if (authority.getContactDetails() != null) {
-            agency.setUrl(authority.getContactDetails().getUrl());
+            if (authority.getContactDetails().getUrl() != null) {
+                agency.setUrl(authority.getContactDetails().getUrl());
+            } else {
+                LOGGER.warn("Missing URL for authority {}", authority.getId());
+                agency.setUrl("-");
+            }
             agency.setPhone(authority.getContactDetails().getPhone());
         } else {
             LOGGER.warn("Missing Contact details for authority {}", authority.getId());
@@ -38,7 +43,12 @@ public class AgencyProducer {
         agency.setName(operator.getName().getValue());
 
         if (operator.getContactDetails() != null) {
-            agency.setUrl(operator.getContactDetails().getUrl());
+            if (operator.getContactDetails().getUrl() != null) {
+                agency.setUrl(operator.getContactDetails().getUrl());
+            } else {
+                LOGGER.warn("Missing URL for operator {}", operator.getId());
+                agency.setUrl("-");
+            }
             agency.setPhone(operator.getContactDetails().getPhone());
         } else {
             LOGGER.warn("Missing Contact details for operator {}", operator.getId());

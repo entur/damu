@@ -19,8 +19,8 @@ package no.entur.damu.routes.export;
 import no.entur.damu.Constants;
 import no.entur.damu.routes.BaseRouteBuilder;
 import no.entur.damu.service.GtfsExport;
+import no.entur.damu.stop.StopAreaRepositoryFactory;
 import org.apache.camel.LoggingLevel;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
@@ -40,14 +40,12 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
     private static final String GTFS_EXPORT_FILE_NAME = BLOBSTORE_PATH_DAMU + Constants.GTFS_FILENAME_PREFIX + "${header." + DATASET_CODESPACE + "}" + Constants.GTFS_FILENAME_SUFFIX;
 
     private static final String TIMETABLE_DATASET_FILE = "TIMETABLE_DATASET_FILE";
-    private static final String STOP_DATASET_FILE = "STOP_DATASET_FILE";
 
-    private final String stopExportFilename;
+    private final StopAreaRepositoryFactory stopAreaRepositoryFactory;
 
-    public GtfsExportQueueRouteBuilder(@Value("${damu.netex.stop.filename:tiamat/Full_latest.zip}") String stopExportFilename) {
+    public GtfsExportQueueRouteBuilder(StopAreaRepositoryFactory stopAreaRepositoryFactory) {
         super();
-        this.stopExportFilename = stopExportFilename;
-
+        this.stopAreaRepositoryFactory = stopAreaRepositoryFactory;
     }
 
     @Override
@@ -65,10 +63,6 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
                 .log(LoggingLevel.INFO, correlation() + "NeTEx Timetable file downloaded")
                 .setHeader(TIMETABLE_DATASET_FILE, body())
 
-                .to("direct:downloadNetexStopDataset")
-                .log(LoggingLevel.INFO, correlation() + "NeTEx Stop file downloaded")
-                .setHeader(STOP_DATASET_FILE, body())
-
                 .to("direct:convertToGtfs")
                 .to("direct:uploadGtfsDataset")
                 .routeId("gtfs-export-queue");
@@ -84,25 +78,12 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
                 .end()
                 .routeId("download-netex-timetable-dataset");
 
-        from("direct:downloadNetexStopDataset")
-                .log(LoggingLevel.INFO, correlation() + "Downloading NeTEx Stop dataset")
-                .setHeader(FILE_HANDLE, constant(stopExportFilename))
-                .to("direct:getMardukBlob")
-                .filter(body().isNull())
-                .log(LoggingLevel.ERROR, correlation() + "NeTEx Stopfile not found")
-                .stop()
-                //end filter
-                .end()
-                .routeId("download-netex-stop-dataset");
 
         from("direct:convertToGtfs")
                 .log(LoggingLevel.INFO, correlation() + "Converting to GTFS")
                 .process(exchange -> {
                     InputStream timetableDataset = exchange.getIn().getHeader(TIMETABLE_DATASET_FILE, InputStream.class);
-                    InputStream stopDataset = exchange.getIn().getHeader(STOP_DATASET_FILE, InputStream.class);
-                    GtfsExport gtfsExport = new GtfsExport(timetableDataset, stopDataset);
-                    gtfsExport.importNetex();
-                    gtfsExport.convertNetexToGtfs();
+                    GtfsExport gtfsExport = new GtfsExport(timetableDataset, stopAreaRepositoryFactory.getStopAreaRepository());
                     exchange.getIn().setBody(gtfsExport.exportGtfs());
                 })
                 .log(LoggingLevel.INFO, correlation() + "Dataset processing complete")
