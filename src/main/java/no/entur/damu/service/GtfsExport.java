@@ -9,6 +9,8 @@ import no.entur.damu.producer.RouteProducer;
 import no.entur.damu.producer.StopProducer;
 import no.entur.damu.producer.StopTimeProducer;
 import no.entur.damu.producer.TripProducer;
+import no.entur.damu.stop.StopAreaRepository;
+import no.entur.damu.util.NetexDatasetParserUtil;
 import org.entur.netex.NetexParser;
 import org.entur.netex.index.api.NetexEntitiesIndex;
 import org.entur.netex.index.impl.NetexEntitiesIndexImpl;
@@ -23,12 +25,10 @@ import org.rutebanken.netex.model.JourneyPattern;
 import org.rutebanken.netex.model.Line;
 import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.ServiceJourney;
-import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.TimetabledPassingTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,10 +36,8 @@ import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class GtfsExport {
@@ -48,39 +46,37 @@ public class GtfsExport {
 
     private final NetexParser netexParser;
     private final NetexEntitiesIndex netexTimetableEntitiesIndex;
-    private final NetexEntitiesIndex netexStopEntitiesIndex;
     private final GtfsMutableDao gtfsDao;
     private final GtfsServiceRepository gtfsServiceRepository;
 
     private final InputStream timetableDataset;
-    private final InputStream stopDataset;
+    private final StopAreaRepository stopAreaRepository;
 
-    public GtfsExport(InputStream timetableDataset, InputStream stopDataset) {
+    public GtfsExport(InputStream timetableDataset, StopAreaRepository stopAreaRepository) {
         this.timetableDataset = timetableDataset;
-        this.stopDataset = stopDataset;
+        this.stopAreaRepository = stopAreaRepository;
         this.netexParser = new NetexParser();
         this.netexTimetableEntitiesIndex = new NetexEntitiesIndexImpl();
-        this.netexStopEntitiesIndex = new NetexEntitiesIndexImpl();
         this.gtfsDao = new GtfsRelationalDaoImpl();
         this.gtfsServiceRepository = new GtfsServiceRepository();
     }
 
-    public void importNetex() {
+    public InputStream exportGtfs() {
+        importNetex();
+        convertNetexToGtfs();
+        return writeGtfs();
+    }
+
+    private void importNetex() {
         LOGGER.info("Importing NeTEx Timetable dataset");
         try (ZipInputStream zipInputStream = new ZipInputStream(timetableDataset)) {
-            parse(netexParser, zipInputStream, netexTimetableEntitiesIndex);
+            NetexDatasetParserUtil.parse(netexParser, zipInputStream, netexTimetableEntitiesIndex);
         } catch (IOException e) {
             throw new GtfsImportException("Error while loading the NeTEx timetable dataset", e);
         }
-        LOGGER.info("Importing NeTEx Stop dataset");
-        try (ZipInputStream zipInputStream = new ZipInputStream(stopDataset)) {
-            parse(netexParser, zipInputStream, netexStopEntitiesIndex);
-        } catch (IOException e) {
-            throw new GtfsImportException("Error while loading the NeTEx stop dataset", e);
-        }
     }
 
-    public void convertNetexToGtfs() {
+    private void convertNetexToGtfs() {
         LOGGER.info("Converting NeTEx to GTFS");
 
         String timeZone = netexTimetableEntitiesIndex.getCompositeFrames()
@@ -115,7 +111,7 @@ public class GtfsExport {
                         TripProducer tripProducer = new TripProducer(agency, gtfsRoute, gtfsServiceRepository, netexTimetableEntitiesIndex);
                         Trip trip = tripProducer.produce(serviceJourney);
                         gtfsDao.saveEntity(trip);
-                        for(TimetabledPassingTime timetabledPassingTime: serviceJourney.getPassingTimes().getTimetabledPassingTime()) {
+                        for (TimetabledPassingTime timetabledPassingTime : serviceJourney.getPassingTimes().getTimetabledPassingTime()) {
                             StopTimeProducer stopTimeProducer = new StopTimeProducer(netexTimetableEntitiesIndex, gtfsDao);
                             StopTime stopTime = stopTimeProducer.produce(timetabledPassingTime, journeyPattern, trip);
                             gtfsDao.saveEntity(stopTime);
@@ -153,13 +149,7 @@ public class GtfsExport {
 
     private void convertStops() {
 
-        Map<String, StopPlace> stopPlaceByQuayId = netexStopEntitiesIndex.getStopPlaceIdByQuayIdIndex()
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> netexStopEntitiesIndex.getStopPlaceIndex().getLatestVersion(entry.getValue())));
-
-
-        StopProducer stopProducer = new StopProducer(stopPlaceByQuayId);
+        StopProducer stopProducer = new StopProducer(stopAreaRepository);
 
         // Retrieve all quay IDs in use in the timetable dataset
         Set<String> allQuaysId = new HashSet<>(netexTimetableEntitiesIndex.getQuayIdByStopPointRefIndex().values());
@@ -171,22 +161,21 @@ public class GtfsExport {
 
         // Retrieve and persist all the stop places that contain the quays
         allQuaysId.stream()
-                .map(netexStopEntitiesIndex.getStopPlaceIdByQuayIdIndex()::get)
+                .map(stopAreaRepository::getStopPlaceByQuayId)
                 .distinct()
-                .map(netexStopEntitiesIndex.getStopPlaceIndex()::getLatestVersion)
                 .map(stopProducer::produceStopFromStopPlace)
                 .forEach(gtfsDao::saveEntity);
     }
 
     private Quay findQuayById(String quayId) {
-        Quay quay = netexStopEntitiesIndex.getQuayIndex().getLatestVersion(quayId);
+        Quay quay = stopAreaRepository.getQuayById(quayId);
         if (quay == null) {
             throw new DamuException("Could not find Quay for id " + quayId);
         }
         return quay;
     }
 
-    public InputStream exportGtfs() {
+    private InputStream writeGtfs() {
         LOGGER.info("Exporting GTFS archive");
         GtfsWriter writer = null;
         try {
@@ -211,16 +200,6 @@ public class GtfsExport {
 
     }
 
-
-    private NetexEntitiesIndex parse(NetexParser parser, ZipInputStream zipInputStream, NetexEntitiesIndex index) throws IOException {
-        ZipEntry zipEntry = zipInputStream.getNextEntry();
-        while (zipEntry != null) {
-            byte[] allBytes = zipInputStream.readAllBytes();
-            parser.parse(new ByteArrayInputStream(allBytes), index);
-            zipEntry = zipInputStream.getNextEntry();
-        }
-        return index;
-    }
 
     /**
      * Open an input stream on a temporary file with the guarantee that the file will be delete when the stream is closed.

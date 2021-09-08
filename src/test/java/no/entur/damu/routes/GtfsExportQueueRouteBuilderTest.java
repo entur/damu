@@ -36,6 +36,7 @@ import static no.entur.damu.Constants.BLOBSTORE_PATH_OUTBOUND;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = TestApp.class)
+
 class GtfsExportQueueRouteBuilderTest extends DamuRouteBuilderIntegrationTestBase {
 
     private static final String CODESPACE = "rb_flb";
@@ -54,14 +55,13 @@ class GtfsExportQueueRouteBuilderTest extends DamuRouteBuilderIntegrationTestBas
 
         AdviceWith.adviceWith(context, "upload-gtfs-dataset", a -> a.weaveAddLast().to("mock:checkUploadedDataset"));
         checkUploadedDataset.expectedMessageCount(1);
-        checkUploadedDataset.setResultWaitTime(100000);
+        checkUploadedDataset.setResultWaitTime(200000);
 
         mardukInMemoryBlobStoreRepository.uploadBlob(BLOBSTORE_PATH_OUTBOUND + Constants.NETEX_FILENAME_PREFIX + CODESPACE + Constants.NETEX_FILENAME_SUFFIX,
                 getClass().getResourceAsStream("/rb_flb-aggregated-netex.zip"));
 
         mardukInMemoryBlobStoreRepository.uploadBlob(stopExportFilename,
                 getClass().getResourceAsStream("/RailStations_latest.zip"));
-
 
         context.start();
         gtfsExportQueueProducerTemplate.sendBody(CODESPACE);

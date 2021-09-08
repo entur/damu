@@ -17,6 +17,7 @@
 package no.entur.damu.exporter;
 
 import no.entur.damu.service.GtfsExport;
+import no.entur.damu.stop.FileStopAreaRepository;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -31,10 +32,10 @@ class GtfsExportTest {
     @Test
     @Disabled
     void testExport() throws IOException {
-        GtfsExport gtfsExport = new GtfsExport(getClass().getResourceAsStream("/netex.zip"), getClass().getResourceAsStream("/Full_latest.zip"));
 
-        gtfsExport.importNetex();
-        gtfsExport.convertNetexToGtfs();
+        FileStopAreaRepository fileStopAreaRepository = new FileStopAreaRepository();
+        fileStopAreaRepository.loadStopAreas(getClass().getResourceAsStream("/RailStations_latest.zip"));
+        GtfsExport gtfsExport = new GtfsExport(getClass().getResourceAsStream("/rb_flb-aggregated-netex.zip"), fileStopAreaRepository);
         InputStream exportedGtfs = gtfsExport.exportGtfs();
 
         java.nio.file.Files.copy(
@@ -44,9 +45,6 @@ class GtfsExportTest {
 
         IOUtils.closeQuietly(exportedGtfs);
     }
-
-
-
 
 
 }

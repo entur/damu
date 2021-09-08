@@ -2,6 +2,7 @@ package no.entur.damu.producer;
 
 import no.entur.damu.model.RouteTypeEnum;
 import no.entur.damu.model.TransportModeNameEnum;
+import no.entur.damu.stop.StopAreaRepository;
 import no.entur.damu.util.NetexParserUtils;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -12,8 +13,6 @@ import org.rutebanken.netex.model.VehicleModeEnumeration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-
 public class StopProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StopProducer.class);
@@ -21,11 +20,11 @@ public class StopProducer {
 
 
     private final Agency agency;
-    private final Map<String, StopPlace> stopPlaces;
+    private final StopAreaRepository stopAreaRepository;
 
-    public StopProducer(Map<String, StopPlace> stopPlaces) {
+    public StopProducer(StopAreaRepository stopAreaRepository) {
         this.agency = createEnturAgency();
-        this.stopPlaces = stopPlaces;
+        this.stopAreaRepository = stopAreaRepository;
     }
 
     /**
@@ -34,7 +33,7 @@ public class StopProducer {
      *
      * @return an agency representing Entur.
      */
-    private Agency createEnturAgency() {
+    private static Agency createEnturAgency() {
         Agency enturAgency = new Agency();
         enturAgency.setId("ENT");
         enturAgency.setUrl("https://www.entur.org");
@@ -100,7 +99,7 @@ public class StopProducer {
             stop.setPlatformCode(quay.getPrivateCode().getValue());
         }
 
-        StopPlace stopPlace = stopPlaces.get(quay.getId());
+        StopPlace stopPlace = stopAreaRepository.getStopPlaceByQuayId(quay.getId());
         stop.setParentStation(stopPlace.getId());
 
         VehicleModeEnumeration netexTransportMode = stopPlace.getTransportMode();

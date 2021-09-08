@@ -7,6 +7,9 @@ data:
     spring.profiles.active=gcs-blobstore
     server.port={{ .Values.service.http.internalPort }}
 
+    # Damu
+    damu.netex.stop.cache.refresh.quartz.trigger:?cron=0+0+3+?+*+*
+
     # Camel
     camel.springboot.name=damu
     camel.dataformat.json-jackson.module-refs=jacksonJavaTimeModule
