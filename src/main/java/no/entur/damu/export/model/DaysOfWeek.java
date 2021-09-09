@@ -1,4 +1,4 @@
-package no.entur.damu.model;
+package no.entur.damu.export.model;
 
 import org.onebusaway.gtfs.model.ServiceCalendar;
 import org.rutebanken.netex.model.DayOfWeekEnumeration;

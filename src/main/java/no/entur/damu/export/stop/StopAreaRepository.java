@@ -1,4 +1,4 @@
-package no.entur.damu.stop;
+package no.entur.damu.export.stop;
 
 import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.StopPlace;

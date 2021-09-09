@@ -1,9 +1,9 @@
-package no.entur.damu.producer;
+package no.entur.damu.export.producer;
 
-import no.entur.damu.model.RouteTypeEnum;
-import no.entur.damu.model.TransportModeNameEnum;
-import no.entur.damu.stop.StopAreaRepository;
-import no.entur.damu.util.NetexParserUtils;
+import no.entur.damu.export.model.RouteTypeEnum;
+import no.entur.damu.export.model.TransportModeNameEnum;
+import no.entur.damu.export.stop.StopAreaRepository;
+import no.entur.damu.export.util.NetexParserUtils;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;

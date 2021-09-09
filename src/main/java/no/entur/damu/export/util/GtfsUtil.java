@@ -1,4 +1,4 @@
-package no.entur.damu.util;
+package no.entur.damu.export.util;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;

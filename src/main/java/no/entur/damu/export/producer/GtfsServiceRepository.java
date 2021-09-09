@@ -1,6 +1,6 @@
-package no.entur.damu.producer;
+package no.entur.damu.export.producer;
 
-import no.entur.damu.model.GtfsService;
+import no.entur.damu.export.model.GtfsService;
 import org.apache.commons.lang3.StringUtils;
 import org.rutebanken.netex.model.DayType;
 import org.rutebanken.netex.model.EntityStructure;

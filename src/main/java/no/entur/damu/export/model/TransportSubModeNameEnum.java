@@ -1,4 +1,4 @@
-package no.entur.damu.model;
+package no.entur.damu.export.model;
 
 import java.util.EnumSet;
 

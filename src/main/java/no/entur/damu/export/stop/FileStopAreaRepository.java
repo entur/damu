@@ -1,7 +1,7 @@
-package no.entur.damu.stop;
+package no.entur.damu.export.stop;
 
-import no.entur.damu.exception.GtfsImportException;
-import no.entur.damu.util.NetexDatasetParserUtil;
+import no.entur.damu.export.exception.NetexParsingException;
+import no.entur.damu.export.util.NetexDatasetParserUtil;
 import org.entur.netex.NetexParser;
 import org.entur.netex.index.api.NetexEntitiesIndex;
 import org.entur.netex.index.impl.NetexEntitiesIndexImpl;
@@ -41,7 +41,7 @@ public class FileStopAreaRepository implements StopAreaRepository {
         try (ZipInputStream zipInputStream = new ZipInputStream(stopDataset)) {
             NetexDatasetParserUtil.parse(netexParser, zipInputStream, netexStopEntitiesIndex);
         } catch (IOException e) {
-            throw new GtfsImportException("Error while loading the NeTEx stop dataset", e);
+            throw new NetexParsingException("Error while parsing the NeTEx stop dataset", e);
         }
 
         stopPlaceByQuayId = netexStopEntitiesIndex.getStopPlaceIdByQuayIdIndex()

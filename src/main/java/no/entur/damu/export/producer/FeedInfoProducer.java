@@ -1,4 +1,4 @@
-package no.entur.damu.producer;
+package no.entur.damu.export.producer;
 
 import org.onebusaway.gtfs.model.FeedInfo;
 
