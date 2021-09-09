@@ -55,7 +55,7 @@ public class StopAreaRepositoryRouteBuilder extends BaseRouteBuilder {
                 .process(this::setNewCorrelationId)
                 .log(LoggingLevel.DEBUG, correlation() + "Refreshing stop areas.")
                 .to("direct:downloadNetexStopDataset")
-                .bean("stopAreaRepositoryFactory", "refreshStopAreRepository")
+                .bean("stopAreaRepositoryFactory", "refreshStopAreaRepository")
                 .log(LoggingLevel.DEBUG, correlation() + "Refreshed stop areas.")
                 .routeId("stop-area-refresh");
 
