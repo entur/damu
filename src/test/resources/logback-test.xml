@@ -17,10 +17,6 @@
         <appender-ref ref="CONSOLE" />
     </appender>    
 
-    <logger name="com" level="INFO"/>
-    <logger name="no" level="INFO"/>
-    <logger name="org" level="INFO"/>
-    <logger name="io" level="INFO"/>
     <logger name="org.apache.camel" level="INFO"/>
     <logger name="org.apache.camel.builder.AdviceWith" level="WARN"/>
 
@@ -30,7 +26,11 @@
 
     <logger name="com.google.cloud.spring.core.DefaultCredentialsProvider" level="ERROR"/>
 
-    <root level="DEBUG">
+    <logger name="no.entur.damu" level="DEBUG" />
+    <logger name="no.entur.damu.routes.blobstore" level="INFO" />
+
+
+    <root level="INFO">
         <appender-ref ref="CONSOLE-ASYNC" />
     </root>
 

@@ -4,10 +4,14 @@ import no.entur.damu.export.exception.GtfsWritingException;
 import no.entur.damu.export.exception.NetexParsingException;
 import no.entur.damu.export.exception.QuayNotFoundException;
 import no.entur.damu.export.exception.StopPlaceNotFoundException;
+import no.entur.damu.export.model.GtfsService;
+import no.entur.damu.export.model.ServiceCalendarPeriod;
 import no.entur.damu.export.producer.AgencyProducer;
 import no.entur.damu.export.producer.FeedInfoProducer;
 import no.entur.damu.export.producer.GtfsServiceRepository;
 import no.entur.damu.export.producer.RouteProducer;
+import no.entur.damu.export.producer.ServiceCalendarDateProducer;
+import no.entur.damu.export.producer.ServiceCalendarProducer;
 import no.entur.damu.export.producer.StopProducer;
 import no.entur.damu.export.producer.StopTimeProducer;
 import no.entur.damu.export.producer.TripProducer;
@@ -19,6 +23,7 @@ import org.entur.netex.index.impl.NetexEntitiesIndexImpl;
 import org.onebusaway.gtfs.impl.GtfsRelationalDaoImpl;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.Route;
+import org.onebusaway.gtfs.model.ServiceCalendar;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.serialization.GtfsWriter;
@@ -37,6 +42,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -61,7 +67,7 @@ public class GtfsExport {
         this.netexParser = new NetexParser();
         this.netexTimetableEntitiesIndex = new NetexEntitiesIndexImpl();
         this.gtfsDao = new GtfsRelationalDaoImpl();
-        this.gtfsServiceRepository = new GtfsServiceRepository();
+        this.gtfsServiceRepository = new GtfsServiceRepository(netexTimetableEntitiesIndex);
     }
 
     public InputStream exportGtfs() {
@@ -94,6 +100,7 @@ public class GtfsExport {
         Agency agency = gtfsDao.getAllAgencies().stream().findFirst().orElseThrow();
         convertStops();
         convertRoutes(agency);
+        convertServices(agency);
         addFeedInfo();
 
     }
@@ -123,6 +130,26 @@ public class GtfsExport {
                 }
             }
         }
+    }
+
+    private void convertServices(Agency agency) {
+        ServiceCalendarDateProducer serviceCalendarDateProducer = new ServiceCalendarDateProducer(agency);
+        ServiceCalendarProducer serviceCalendarProducer = new ServiceCalendarProducer(agency);
+        for (GtfsService gtfsService : gtfsServiceRepository.getAllServices()) {
+            ServiceCalendarPeriod serviceCalendarPeriod = gtfsService.getServiceCalendarPeriod();
+            if (serviceCalendarPeriod != null) {
+                ServiceCalendar serviceCalendar = serviceCalendarProducer.produce(gtfsService.getId(), serviceCalendarPeriod.getStartDate(), serviceCalendarPeriod.getEndDate(), gtfsService.getDaysOfWeek());
+                gtfsDao.saveEntity(serviceCalendar);
+            }
+            for (LocalDateTime includedDate : gtfsService.getIncludedDates()) {
+                gtfsDao.saveEntity(serviceCalendarDateProducer.produce(gtfsService.getId(), includedDate, true));
+            }
+            for (LocalDateTime excludedDate : gtfsService.getExcludedDates()) {
+                gtfsDao.saveEntity(serviceCalendarDateProducer.produce(gtfsService.getId(), excludedDate, false));
+            }
+
+        }
+
     }
 
     private Collection<ServiceJourney> getServiceJourneyForJourneyPattern(JourneyPattern journeyPattern) {
