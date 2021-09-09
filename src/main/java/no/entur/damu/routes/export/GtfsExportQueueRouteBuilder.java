@@ -91,6 +91,7 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
                 .log(LoggingLevel.INFO, correlation() + "Dataset processing complete")
                 .doCatch(GtfsExportException.class)
                 .log(LoggingLevel.ERROR, correlation() + "Dataset processing failed: ${exception.message} stacktrace: ${exception.stacktrace}")
+                .stop()
                 .end()
                 .routeId("convert-to-gtfs");
 
