@@ -1,4 +1,4 @@
-package no.entur.damu.producer;
+package no.entur.damu.export.producer;
 
 import org.entur.netex.index.api.NetexEntitiesIndex;
 import org.onebusaway.gtfs.model.Agency;
@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static no.entur.damu.util.GtfsUtil.toGtfsId;
+import static no.entur.damu.export.util.GtfsUtil.toGtfsId;
 
 public class TripProducer {
 

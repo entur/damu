@@ -1,4 +1,4 @@
-package no.entur.damu.producer;
+package no.entur.damu.export.producer;
 
 import org.entur.netex.index.api.NetexEntitiesIndex;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -10,7 +10,7 @@ import org.rutebanken.netex.model.JourneyPattern;
 import org.rutebanken.netex.model.StopPointInJourneyPattern;
 import org.rutebanken.netex.model.TimetabledPassingTime;
 
-import static no.entur.damu.util.GtfsUtil.toGtfsTime;
+import static no.entur.damu.export.util.GtfsUtil.toGtfsTime;
 
 public class StopTimeProducer {
 

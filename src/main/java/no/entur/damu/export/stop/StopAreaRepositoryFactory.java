@@ -1,4 +1,4 @@
-package no.entur.damu.stop;
+package no.entur.damu.export.stop;
 
 /**
  * Factory for creating a stop area repository

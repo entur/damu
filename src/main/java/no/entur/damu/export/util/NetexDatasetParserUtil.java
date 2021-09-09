@@ -1,4 +1,4 @@
-package no.entur.damu.util;
+package no.entur.damu.export.util;
 
 import org.entur.netex.NetexParser;
 import org.entur.netex.index.api.NetexEntitiesIndex;

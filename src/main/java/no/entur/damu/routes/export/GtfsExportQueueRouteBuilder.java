@@ -17,9 +17,10 @@
 package no.entur.damu.routes.export;
 
 import no.entur.damu.Constants;
+import no.entur.damu.export.exception.GtfsExportException;
 import no.entur.damu.routes.BaseRouteBuilder;
-import no.entur.damu.service.GtfsExport;
-import no.entur.damu.stop.StopAreaRepositoryFactory;
+import no.entur.damu.export.GtfsExport;
+import no.entur.damu.export.stop.StopAreaRepositoryFactory;
 import org.apache.camel.LoggingLevel;
 import org.springframework.stereotype.Component;
 
@@ -81,12 +82,16 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
 
         from("direct:convertToGtfs")
                 .log(LoggingLevel.INFO, correlation() + "Converting to GTFS")
+                .doTry()
                 .process(exchange -> {
                     InputStream timetableDataset = exchange.getIn().getHeader(TIMETABLE_DATASET_FILE, InputStream.class);
                     GtfsExport gtfsExport = new GtfsExport(timetableDataset, stopAreaRepositoryFactory.getStopAreaRepository());
                     exchange.getIn().setBody(gtfsExport.exportGtfs());
                 })
                 .log(LoggingLevel.INFO, correlation() + "Dataset processing complete")
+                .doCatch(GtfsExportException.class)
+                .log(LoggingLevel.ERROR, correlation() + "Dataset processing failed: ${exception.message} stacktrace: ${exception.stacktrace}")
+                .end()
                 .routeId("convert-to-gtfs");
 
         from("direct:uploadGtfsDataset")

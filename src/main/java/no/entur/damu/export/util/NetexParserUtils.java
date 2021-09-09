@@ -1,7 +1,7 @@
-package no.entur.damu.util;
+package no.entur.damu.export.util;
 
-import no.entur.damu.model.TransportModeNameEnum;
-import no.entur.damu.model.TransportSubModeNameEnum;
+import no.entur.damu.export.model.TransportModeNameEnum;
+import no.entur.damu.export.model.TransportSubModeNameEnum;
 import org.rutebanken.netex.model.AirSubmodeEnumeration;
 import org.rutebanken.netex.model.BusSubmodeEnumeration;
 import org.rutebanken.netex.model.CoachSubmodeEnumeration;

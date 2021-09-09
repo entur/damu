@@ -1,16 +1,18 @@
-package no.entur.damu.service;
+package no.entur.damu.export;
 
-import no.entur.damu.exception.DamuException;
-import no.entur.damu.exception.GtfsImportException;
-import no.entur.damu.producer.AgencyProducer;
-import no.entur.damu.producer.FeedInfoProducer;
-import no.entur.damu.producer.GtfsServiceRepository;
-import no.entur.damu.producer.RouteProducer;
-import no.entur.damu.producer.StopProducer;
-import no.entur.damu.producer.StopTimeProducer;
-import no.entur.damu.producer.TripProducer;
-import no.entur.damu.stop.StopAreaRepository;
-import no.entur.damu.util.NetexDatasetParserUtil;
+import no.entur.damu.export.exception.GtfsWritingException;
+import no.entur.damu.export.exception.NetexParsingException;
+import no.entur.damu.export.exception.QuayNotFoundException;
+import no.entur.damu.export.exception.StopPlaceNotFoundException;
+import no.entur.damu.export.producer.AgencyProducer;
+import no.entur.damu.export.producer.FeedInfoProducer;
+import no.entur.damu.export.producer.GtfsServiceRepository;
+import no.entur.damu.export.producer.RouteProducer;
+import no.entur.damu.export.producer.StopProducer;
+import no.entur.damu.export.producer.StopTimeProducer;
+import no.entur.damu.export.producer.TripProducer;
+import no.entur.damu.export.stop.StopAreaRepository;
+import no.entur.damu.export.util.NetexDatasetParserUtil;
 import org.entur.netex.NetexParser;
 import org.entur.netex.index.api.NetexEntitiesIndex;
 import org.entur.netex.index.impl.NetexEntitiesIndexImpl;
@@ -25,6 +27,7 @@ import org.rutebanken.netex.model.JourneyPattern;
 import org.rutebanken.netex.model.Line;
 import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.ServiceJourney;
+import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.TimetabledPassingTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +75,7 @@ public class GtfsExport {
         try (ZipInputStream zipInputStream = new ZipInputStream(timetableDataset)) {
             NetexDatasetParserUtil.parse(netexParser, zipInputStream, netexTimetableEntitiesIndex);
         } catch (IOException e) {
-            throw new GtfsImportException("Error while loading the NeTEx timetable dataset", e);
+            throw new NetexParsingException("Error while parsing the NeTEx timetable dataset", e);
         }
     }
 
@@ -161,7 +164,7 @@ public class GtfsExport {
 
         // Retrieve and persist all the stop places that contain the quays
         allQuaysId.stream()
-                .map(stopAreaRepository::getStopPlaceByQuayId)
+                .map(this::findStopPlaceByQuayId)
                 .distinct()
                 .map(stopProducer::produceStopFromStopPlace)
                 .forEach(gtfsDao::saveEntity);
@@ -170,9 +173,17 @@ public class GtfsExport {
     private Quay findQuayById(String quayId) {
         Quay quay = stopAreaRepository.getQuayById(quayId);
         if (quay == null) {
-            throw new DamuException("Could not find Quay for id " + quayId);
+            throw new QuayNotFoundException("Could not find Quay for id " + quayId);
         }
         return quay;
+    }
+
+    private StopPlace findStopPlaceByQuayId(String quayId) {
+        StopPlace stopPlace = stopAreaRepository.getStopPlaceByQuayId(quayId);
+        if (stopPlace == null) {
+            throw new StopPlaceNotFoundException("Could not find Quay for id " + quayId);
+        }
+        return stopPlace;
     }
 
     private InputStream writeGtfs() {
@@ -187,7 +198,7 @@ public class GtfsExport {
             return createDeleteOnCloseInputStream(outputFile);
 
         } catch (IOException e) {
-            throw new GtfsImportException("Error while saving the GTFS dataset", e);
+            throw new GtfsWritingException("Error while saving the GTFS dataset", e);
         } finally {
             if (writer != null) {
                 try {

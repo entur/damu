@@ -1,6 +1,4 @@
-package no.entur.damu.stop;
-
-import no.entur.damu.exception.DamuException;
+package no.entur.damu.export.stop;
 
 import java.io.InputStream;
 
@@ -13,14 +11,15 @@ public class FileStopAreaRepositoryFactory implements StopAreaRepositoryFactory 
 
     @Override
     public synchronized StopAreaRepository getStopAreaRepository() {
-        if(stopAreaRepository == null) {
-            throw new DamuException("The stop area repository is not loaded");
+        if (stopAreaRepository == null) {
+            throw new IllegalStateException("The stop area repository is not loaded");
         }
         return stopAreaRepository;
     }
 
     /**
      * Refresh the cached stop area.
+     *
      * @param stopDataset an input stream on a NeTEX dataset archive.
      */
     public synchronized void refreshStopAreRepository(InputStream stopDataset) {
