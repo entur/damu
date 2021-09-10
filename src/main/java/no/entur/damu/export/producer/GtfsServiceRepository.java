@@ -20,6 +20,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Create and store the GTFS services for the current dataset.
+ * GTFS services are created while iterating through ServiceJourneys and DatedServiceJourneys.
+ * The GTFS services are de-duplicated by creating a unique ID per set of DayTypes (trips based on ServiceJourneys) or set of OperatingDays (trips based on DatedServiceJourneys)
+ */
 public class GtfsServiceRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GtfsServiceRepository.class);
@@ -38,17 +43,36 @@ public class GtfsServiceRepository {
         this.codespace = codespace;
     }
 
-    public GtfsService getService(Set<DayType> dayTypeSet) {
-        String serviceId = getServiceId(dayTypeSet);
-        return gtfsServices.computeIfAbsent(serviceId, s -> createGtfsService(dayTypeSet, serviceId));
-    }
-
     public Collection<GtfsService> getAllServices() {
         return gtfsServices.values();
     }
 
-    private String getServiceId(Set<DayType> dayTypeSet) {
-        String key = codespace + ":DayType:" + dayTypeSet.stream().map(EntityStructure::getId).map(this::splitId).sorted().collect(Collectors.joining("-"));
+    /**
+     * Create a service for a set of DayTypes.
+     * This is used for creating trips based on ServiceJourneys (not DatedServiceJourneys.
+     *
+     * @param dayTypes dayTypes for the service.
+     * @return a service running on the days specified by the provided DayTypes.
+     */
+    public GtfsService getServiceForDayTypes(Set<DayType> dayTypes) {
+        String serviceId = getServiceIdForDayTypes(dayTypes);
+        return gtfsServices.computeIfAbsent(serviceId, s -> createGtfsServiceForDayTypes(dayTypes, serviceId));
+    }
+
+    /**
+     * Create a service for a set of operating days.
+     * This is used for creating trips based on DatedServiceJourneys.
+     *
+     * @param operatingDays operating days for the service.
+     * @return a service running on the given operating days.
+     */
+    public GtfsService getServiceForOperatingDays(Set<OperatingDay> operatingDays) {
+        String serviceId = getServiceIdForOperatingDays(operatingDays);
+        return gtfsServices.computeIfAbsent(serviceId, s -> createGtfsServiceForOperatingDays(operatingDays, serviceId));
+    }
+
+    private String getServiceIdForDayTypes(Set<DayType> dayTypes) {
+        String key = codespace + ":DayType:" + dayTypes.stream().map(EntityStructure::getId).map(this::splitId).sorted().collect(Collectors.joining("-"));
         // Avoid too long strings. Replace truncated part by its hash to preserve a (best effort) semi uniqueness
         if (key.length() > MAX_SERVICE_ID_CHARS) {
             String tooLongPart = key.substring(MAX_SERVICE_ID_CHARS - 10);
@@ -57,12 +81,23 @@ public class GtfsServiceRepository {
         return key;
     }
 
+    private String getServiceIdForOperatingDays(Set<OperatingDay> operatingDays) {
+        String key = codespace + ":OperatingDay:" + operatingDays.stream().map(EntityStructure::getId).map(this::splitId).sorted().collect(Collectors.joining("-"));
+        // Avoid too long strings. Replace truncated part by its hash to preserve a (best effort) semi uniqueness
+        if (key.length() > MAX_SERVICE_ID_CHARS) {
+            String tooLongPart = key.substring(MAX_SERVICE_ID_CHARS - 10);
+            key = key.replace(tooLongPart, StringUtils.truncate("" + tooLongPart.hashCode(), 10));
+        }
+        return key;
+    }
+
+
     private String splitId(String id) {
         return id.split(":")[2];
     }
 
 
-    private GtfsService createGtfsService(Set<DayType> dayTypes, String serviceId) {
+    private GtfsService createGtfsServiceForDayTypes(Set<DayType> dayTypes, String serviceId) {
         int nbPeriods = countPeriods(dayTypes);
         if (nbPeriods == 0) {
             return createGtfsServiceForIndividualDates(dayTypes, serviceId);
@@ -71,6 +106,13 @@ public class GtfsServiceRepository {
         } else {
             return createGtfsServiceForMultiplePeriodsAndIndividualDates(dayTypes, serviceId);
         }
+    }
+
+    private GtfsService createGtfsServiceForOperatingDays(Set<OperatingDay> operatingDays, String serviceId) {
+        LOGGER.debug("Creating GTFS Service for operating days for serviceId {}", serviceId);
+        GtfsService gtfsService = new GtfsService(serviceId);
+        operatingDays.forEach(operatingDay -> gtfsService.addIncludedDate(operatingDay.getCalendarDate()));
+        return gtfsService;
     }
 
     private GtfsService createGtfsServiceForIndividualDates(Set<DayType> dayTypes, String serviceId) {
@@ -111,7 +153,6 @@ public class GtfsServiceRepository {
                 .orElseThrow();
 
         DayType dayTypeWithAPeriod = netexTimetableEntitiesIndex.getDayTypeIndex().get(dayTypeAssignmentWithPeriod.getDayTypeRef().getValue().getRef());
-
 
 
         OperatingPeriod operatingPeriod = netexTimetableEntitiesIndex.getOperatingPeriodIndex().get(dayTypeAssignmentWithPeriod.getOperatingPeriodRef().getRef());
