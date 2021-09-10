@@ -22,7 +22,7 @@ public class FileStopAreaRepositoryFactory implements StopAreaRepositoryFactory 
      *
      * @param stopDataset an input stream on a NeTEX dataset archive.
      */
-    public synchronized void refreshStopAreRepository(InputStream stopDataset) {
+    public synchronized void refreshStopAreaRepository(InputStream stopDataset) {
         FileStopAreaRepository fileStopAreaRepository = new FileStopAreaRepository();
         fileStopAreaRepository.loadStopAreas(stopDataset);
         this.stopAreaRepository = fileStopAreaRepository;
