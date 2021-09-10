@@ -112,16 +112,18 @@ public class GtfsServiceRepository {
 
         DayType dayTypeWithAPeriod = netexTimetableEntitiesIndex.getDayTypeIndex().get(dayTypeAssignmentWithPeriod.getDayTypeRef().getValue().getRef());
 
+
+
+        OperatingPeriod operatingPeriod = netexTimetableEntitiesIndex.getOperatingPeriodIndex().get(dayTypeAssignmentWithPeriod.getOperatingPeriodRef().getRef());
+        ServiceCalendarPeriod serviceCalendarPeriod = new ServiceCalendarPeriod(operatingPeriod.getFromDate(), operatingPeriod.getToDate());
         if (dayTypeWithAPeriod.getProperties() != null && dayTypeWithAPeriod.getProperties().getPropertyOfDay() != null) {
             for (PropertyOfDay propertyOfDay : dayTypeWithAPeriod.getProperties().getPropertyOfDay()) {
                 if (propertyOfDay.getDaysOfWeek() != null && !propertyOfDay.getDaysOfWeek().isEmpty()) {
-                    gtfsService.setDaysOfWeek(propertyOfDay.getDaysOfWeek());
+                    serviceCalendarPeriod.setDaysOfWeek(propertyOfDay.getDaysOfWeek());
                 }
             }
         }
 
-        OperatingPeriod operatingPeriod = netexTimetableEntitiesIndex.getOperatingPeriodIndex().get(dayTypeAssignmentWithPeriod.getOperatingPeriodRef().getRef());
-        ServiceCalendarPeriod serviceCalendarPeriod = new ServiceCalendarPeriod(operatingPeriod.getFromDate(), operatingPeriod.getToDate());
         gtfsService.setServiceCalendarPeriod(serviceCalendarPeriod);
 
         dayTypes.stream()

@@ -138,7 +138,7 @@ public class GtfsExport {
         for (GtfsService gtfsService : gtfsServiceRepository.getAllServices()) {
             ServiceCalendarPeriod serviceCalendarPeriod = gtfsService.getServiceCalendarPeriod();
             if (serviceCalendarPeriod != null) {
-                ServiceCalendar serviceCalendar = serviceCalendarProducer.produce(gtfsService.getId(), serviceCalendarPeriod.getStartDate(), serviceCalendarPeriod.getEndDate(), gtfsService.getDaysOfWeek());
+                ServiceCalendar serviceCalendar = serviceCalendarProducer.produce(gtfsService.getId(), serviceCalendarPeriod.getStartDate(), serviceCalendarPeriod.getEndDate(), serviceCalendarPeriod.getDaysOfWeek());
                 gtfsDao.saveEntity(serviceCalendar);
             }
             for (LocalDateTime includedDate : gtfsService.getIncludedDates()) {
