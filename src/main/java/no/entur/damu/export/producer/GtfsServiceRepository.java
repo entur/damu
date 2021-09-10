@@ -28,12 +28,14 @@ public class GtfsServiceRepository {
     // No restrictions in GTFS spec, but restricted to suit clients
     private static final int MAX_SERVICE_ID_CHARS = 256;
 
+    private final String codespace;
     private final NetexEntitiesIndex netexTimetableEntitiesIndex;
     private final Map<String, GtfsService> gtfsServices;
 
-    public GtfsServiceRepository(NetexEntitiesIndex netexTimetableEntitiesIndex) {
+    public GtfsServiceRepository(String codespace, NetexEntitiesIndex netexTimetableEntitiesIndex) {
         this.netexTimetableEntitiesIndex = netexTimetableEntitiesIndex;
         this.gtfsServices = new HashMap<>();
+        this.codespace = codespace;
     }
 
     public GtfsService getService(Set<DayType> dayTypeSet) {
@@ -46,9 +48,8 @@ public class GtfsServiceRepository {
     }
 
     private String getServiceId(Set<DayType> dayTypeSet) {
-
-        String key = "DayType:" + dayTypeSet.stream().map(EntityStructure::getId).map(this::splitId).sorted().collect(Collectors.joining("-"));
-        // Avoid to long strings. Replace truncated part by its hash to preserve a (best effort) semi uniqueness
+        String key = codespace + ":DayType:" + dayTypeSet.stream().map(EntityStructure::getId).map(this::splitId).sorted().collect(Collectors.joining("-"));
+        // Avoid too long strings. Replace truncated part by its hash to preserve a (best effort) semi uniqueness
         if (key.length() > MAX_SERVICE_ID_CHARS) {
             String tooLongPart = key.substring(MAX_SERVICE_ID_CHARS - 10);
             key = key.replace(tooLongPart, StringUtils.truncate("" + tooLongPart.hashCode(), 10));
@@ -73,7 +74,7 @@ public class GtfsServiceRepository {
     }
 
     private GtfsService createGtfsServiceForIndividualDates(Set<DayType> dayTypes, String serviceId) {
-        LOGGER.debug("Creating GTFS Service for individual dates");
+        LOGGER.debug("Creating GTFS Service for individual dates for serviceId {}", serviceId);
         GtfsService gtfsService = new GtfsService(serviceId);
         dayTypes.stream()
                 .map(dayType -> netexTimetableEntitiesIndex.getDayTypeAssignmentsByDayTypeIdIndex().get(dayType.getId()))
@@ -100,7 +101,7 @@ public class GtfsServiceRepository {
     }
 
     private GtfsService createGtfsServiceForOnePeriodAndIndividualDates(Set<DayType> dayTypes, String serviceId) {
-        LOGGER.debug("Creating GTFS Service for one period and individual dates");
+        LOGGER.debug("Creating GTFS Service for one period and individual dates for serviceId {}", serviceId);
         GtfsService gtfsService = new GtfsService(serviceId);
         DayTypeAssignment dayTypeAssignmentWithPeriod = dayTypes.stream()
                 .map(dayType -> netexTimetableEntitiesIndex.getDayTypeAssignmentsByDayTypeIdIndex().get(dayType.getId()))
@@ -133,7 +134,7 @@ public class GtfsServiceRepository {
     }
 
     private GtfsService createGtfsServiceForMultiplePeriodsAndIndividualDates(Set<DayType> dayTypes, String serviceId) {
-        LOGGER.debug("Creating GTFS Service for multiple periods and individual dates");
+        LOGGER.debug("Creating GTFS Service for multiple periods and individual dates  for serviceId {}", serviceId);
         return new GtfsService(serviceId);
     }
 

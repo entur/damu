@@ -61,13 +61,13 @@ public class GtfsExport {
     private final InputStream timetableDataset;
     private final StopAreaRepository stopAreaRepository;
 
-    public GtfsExport(InputStream timetableDataset, StopAreaRepository stopAreaRepository) {
+    public GtfsExport(String codespace, InputStream timetableDataset, StopAreaRepository stopAreaRepository) {
         this.timetableDataset = timetableDataset;
         this.stopAreaRepository = stopAreaRepository;
         this.netexParser = new NetexParser();
         this.netexTimetableEntitiesIndex = new NetexEntitiesIndexImpl();
         this.gtfsDao = new GtfsRelationalDaoImpl();
-        this.gtfsServiceRepository = new GtfsServiceRepository(netexTimetableEntitiesIndex);
+        this.gtfsServiceRepository = new GtfsServiceRepository(codespace, netexTimetableEntitiesIndex);
     }
 
     public InputStream exportGtfs() {

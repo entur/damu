@@ -85,7 +85,8 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
                 .doTry()
                 .process(exchange -> {
                     InputStream timetableDataset = exchange.getIn().getHeader(TIMETABLE_DATASET_FILE, InputStream.class);
-                    GtfsExport gtfsExport = new GtfsExport(timetableDataset, stopAreaRepositoryFactory.getStopAreaRepository());
+                    String codespace = exchange.getIn().getHeader(DATASET_CODESPACE, String.class).replace("rb_", "").toUpperCase();
+                    GtfsExport gtfsExport = new GtfsExport(codespace, timetableDataset, stopAreaRepositoryFactory.getStopAreaRepository());
                     exchange.getIn().setBody(gtfsExport.exportGtfs());
                 })
                 .log(LoggingLevel.INFO, correlation() + "Dataset processing complete")
