@@ -1,7 +1,6 @@
 package no.entur.damu.export.model;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -10,7 +9,7 @@ public class GtfsService {
     private final String id;
 
 
-    private ServiceCalendarPeriod  serviceCalendarPeriod;
+    private ServiceCalendarPeriod serviceCalendarPeriod;
     private final Set<LocalDateTime> includedDates = new HashSet<>();
     private final Set<LocalDateTime> excludedDates = new HashSet<>();
 
@@ -30,18 +29,17 @@ public class GtfsService {
         includedDates.add(date);
     }
 
-    public Collection<LocalDateTime> getIncludedDates() {
+    public Set<LocalDateTime> getIncludedDates() {
         return new HashSet<>(includedDates);
     }
 
-    public Collection<LocalDateTime> getExcludedDates() {
+    public Set<LocalDateTime> getExcludedDates() {
         return new HashSet<>(excludedDates);
     }
 
     public ServiceCalendarPeriod getServiceCalendarPeriod() {
         return serviceCalendarPeriod;
     }
-
 
 
     public void setServiceCalendarPeriod(ServiceCalendarPeriod serviceCalendarPeriod) {

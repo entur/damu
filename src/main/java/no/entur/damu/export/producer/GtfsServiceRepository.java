@@ -4,6 +4,7 @@ import no.entur.damu.export.model.GtfsService;
 import no.entur.damu.export.model.ServiceCalendarPeriod;
 import org.apache.commons.lang3.StringUtils;
 import org.entur.netex.index.api.NetexEntitiesIndex;
+import org.rutebanken.netex.model.DayOfWeekEnumeration;
 import org.rutebanken.netex.model.DayType;
 import org.rutebanken.netex.model.DayTypeAssignment;
 import org.rutebanken.netex.model.EntityStructure;
@@ -13,9 +14,11 @@ import org.rutebanken.netex.model.PropertyOfDay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -49,7 +52,7 @@ public class GtfsServiceRepository {
 
     /**
      * Create a service for a set of DayTypes.
-     * This is used for creating trips based on ServiceJourneys (not DatedServiceJourneys.
+     * This is used for creating trips based on ServiceJourneys (not DatedServiceJourneys).
      *
      * @param dayTypes dayTypes for the service.
      * @return a service running on the days specified by the provided DayTypes.
@@ -157,14 +160,7 @@ public class GtfsServiceRepository {
 
         OperatingPeriod operatingPeriod = netexTimetableEntitiesIndex.getOperatingPeriodIndex().get(dayTypeAssignmentWithPeriod.getOperatingPeriodRef().getRef());
         ServiceCalendarPeriod serviceCalendarPeriod = new ServiceCalendarPeriod(operatingPeriod.getFromDate(), operatingPeriod.getToDate());
-        if (dayTypeWithAPeriod.getProperties() != null && dayTypeWithAPeriod.getProperties().getPropertyOfDay() != null) {
-            for (PropertyOfDay propertyOfDay : dayTypeWithAPeriod.getProperties().getPropertyOfDay()) {
-                if (propertyOfDay.getDaysOfWeek() != null && !propertyOfDay.getDaysOfWeek().isEmpty()) {
-                    serviceCalendarPeriod.setDaysOfWeek(propertyOfDay.getDaysOfWeek());
-                }
-            }
-        }
-
+        serviceCalendarPeriod.setDaysOfWeek(getNetexDaysOfWeek(dayTypeWithAPeriod));
         gtfsService.setServiceCalendarPeriod(serviceCalendarPeriod);
 
         dayTypes.stream()
@@ -176,9 +172,78 @@ public class GtfsServiceRepository {
         return gtfsService;
     }
 
+    private List<DayOfWeekEnumeration> getNetexDaysOfWeek(DayType dayType) {
+        if (dayType.getProperties() != null && dayType.getProperties().getPropertyOfDay() != null) {
+            for (PropertyOfDay propertyOfDay : dayType.getProperties().getPropertyOfDay()) {
+                if (propertyOfDay.getDaysOfWeek() != null && !propertyOfDay.getDaysOfWeek().isEmpty()) {
+                    return propertyOfDay.getDaysOfWeek();
+                }
+            }
+        }
+        return null;
+    }
+
     private GtfsService createGtfsServiceForMultiplePeriodsAndIndividualDates(Set<DayType> dayTypes, String serviceId) {
         LOGGER.debug("Creating GTFS Service for multiple periods and individual dates  for serviceId {}", serviceId);
-        return new GtfsService(serviceId);
+        GtfsService gtfsService = new GtfsService(serviceId);
+        for (DayType dayType : dayTypes) {
+            Set<DayOfWeek> daysOfWeek = getDaysOfWeek(dayType);
+            for (DayTypeAssignment dayTypeAssignment : netexTimetableEntitiesIndex.getDayTypeAssignmentsByDayTypeIdIndex().get(dayType.getId())) {
+                if (dayTypeAssignment.getOperatingPeriodRef() != null) {
+                    OperatingPeriod operatingPeriod = netexTimetableEntitiesIndex.getOperatingPeriodIndex().get(dayTypeAssignment.getOperatingPeriodRef().getRef());
+                    for (LocalDateTime date = operatingPeriod.getFromDate(); date.isBefore(operatingPeriod.getToDate()) || date.equals(operatingPeriod.getToDate()); date = date.plusDays(1)) {
+                        if (isActiveDate(date, daysOfWeek)) {
+                            gtfsService.addIncludedDate(date);
+                        }
+                    }
+                }
+            }
+        }
+
+        dayTypes.stream()
+                .map(dayType -> netexTimetableEntitiesIndex.getDayTypeAssignmentsByDayTypeIdIndex().get(dayType.getId()))
+                .flatMap(Collection::stream)
+                .filter(dta -> dta.getOperatingPeriodRef() == null)
+                .forEach(dayTypeAssignment -> addIndividualDate(gtfsService, dayTypeAssignment));
+
+        return gtfsService;
+    }
+
+    private Set<DayOfWeek> getDaysOfWeek(DayType dayType) {
+        List<DayOfWeekEnumeration> netexDaysOfWeek = getNetexDaysOfWeek(dayType);
+        if (netexDaysOfWeek == null) {
+            return null;
+        }
+        return netexDaysOfWeek.stream().map(dayOfWeekEnumeration -> {
+            if (DayOfWeekEnumeration.MONDAY == dayOfWeekEnumeration) {
+                return List.of(DayOfWeek.MONDAY);
+            } else if (DayOfWeekEnumeration.TUESDAY == dayOfWeekEnumeration) {
+                return List.of(DayOfWeek.TUESDAY);
+            } else if (DayOfWeekEnumeration.WEDNESDAY == dayOfWeekEnumeration) {
+                return List.of(DayOfWeek.WEDNESDAY);
+            } else if (DayOfWeekEnumeration.THURSDAY == dayOfWeekEnumeration) {
+                return List.of(DayOfWeek.THURSDAY);
+            } else if (DayOfWeekEnumeration.FRIDAY == dayOfWeekEnumeration) {
+                return List.of(DayOfWeek.FRIDAY);
+            } else if (DayOfWeekEnumeration.SATURDAY == dayOfWeekEnumeration) {
+                return List.of(DayOfWeek.SATURDAY);
+            } else if (DayOfWeekEnumeration.SUNDAY == dayOfWeekEnumeration) {
+                return List.of(DayOfWeek.SUNDAY);
+            } else if (DayOfWeekEnumeration.WEEKDAYS == dayOfWeekEnumeration) {
+                return List.of(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY);
+            } else {
+                throw new IllegalArgumentException("Unsupported day of week: " + dayOfWeekEnumeration);
+            }
+
+        }).flatMap(Collection::stream).collect(Collectors.toSet());
+    }
+
+
+    private boolean isActiveDate(LocalDateTime date, Set<DayOfWeek> daysOfWeek) {
+        if (daysOfWeek == null) {
+            return true;
+        }
+        return daysOfWeek.contains(date.getDayOfWeek());
     }
 
 
