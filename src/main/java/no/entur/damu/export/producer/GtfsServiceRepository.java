@@ -231,6 +231,8 @@ public class GtfsServiceRepository {
                 return List.of(DayOfWeek.SUNDAY);
             } else if (DayOfWeekEnumeration.WEEKDAYS == dayOfWeekEnumeration) {
                 return List.of(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY);
+            } else if (DayOfWeekEnumeration.WEEKEND == dayOfWeekEnumeration) {
+                return List.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
             } else {
                 throw new IllegalArgumentException("Unsupported day of week: " + dayOfWeekEnumeration);
             }
