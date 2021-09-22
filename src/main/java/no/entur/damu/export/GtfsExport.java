@@ -12,6 +12,7 @@ import no.entur.damu.export.producer.GtfsServiceRepository;
 import no.entur.damu.export.producer.RouteProducer;
 import no.entur.damu.export.producer.ServiceCalendarDateProducer;
 import no.entur.damu.export.producer.ServiceCalendarProducer;
+import no.entur.damu.export.producer.ShapeProducer;
 import no.entur.damu.export.producer.StopProducer;
 import no.entur.damu.export.producer.StopTimeProducer;
 import no.entur.damu.export.producer.TripProducer;
@@ -22,8 +23,10 @@ import org.entur.netex.index.api.NetexEntitiesIndex;
 import org.entur.netex.index.impl.NetexEntitiesIndexImpl;
 import org.onebusaway.gtfs.impl.GtfsRelationalDaoImpl;
 import org.onebusaway.gtfs.model.Agency;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.ServiceCalendar;
+import org.onebusaway.gtfs.model.ShapePoint;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.serialization.GtfsWriter;
@@ -45,6 +48,7 @@ import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.ZipInputStream;
@@ -112,14 +116,19 @@ public class GtfsExport {
 
     private void convertRoutes(Agency agency) {
         RouteProducer routeProducer = new RouteProducer(agency);
+        ShapeProducer shapeProducer = new ShapeProducer(agency, netexTimetableEntitiesIndex);
+        TripProducer tripProducer = new TripProducer(agency, gtfsServiceRepository, netexTimetableEntitiesIndex);
         for (Line netexLine : netexTimetableEntitiesIndex.getLineIndex().getAll()) {
             Route gtfsRoute = routeProducer.produce(netexLine);
             gtfsDao.saveEntity(gtfsRoute);
             for (org.rutebanken.netex.model.Route netexRoute : getNetexRouteForNetexLine(netexLine)) {
                 for (JourneyPattern journeyPattern : getJourneyPatternForNetexRoute(netexRoute)) {
+                    shapeProducer.produce(journeyPattern).forEach(gtfsDao::saveEntity);
+                    AgencyAndId shapeId = new AgencyAndId();
+                    shapeId.setAgencyId(agency.getId());
+                    shapeId.setId(journeyPattern.getId());
                     for (ServiceJourney serviceJourney : getServiceJourneyForJourneyPattern(journeyPattern)) {
-                        TripProducer tripProducer = new TripProducer(agency, gtfsRoute, gtfsServiceRepository, netexTimetableEntitiesIndex);
-                        Trip trip = tripProducer.produce(serviceJourney);
+                        Trip trip = tripProducer.produce(serviceJourney, gtfsRoute, shapeId);
                         gtfsDao.saveEntity(trip);
                         for (TimetabledPassingTime timetabledPassingTime : serviceJourney.getPassingTimes().getTimetabledPassingTime()) {
                             StopTimeProducer stopTimeProducer = new StopTimeProducer(netexTimetableEntitiesIndex, gtfsDao);

@@ -6,6 +6,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.Trip;
 import org.rutebanken.netex.model.DayType;
+import org.rutebanken.netex.model.JourneyPattern;
 import org.rutebanken.netex.model.OperatingDay;
 import org.rutebanken.netex.model.ServiceAlterationEnumeration;
 import org.rutebanken.netex.model.ServiceJourney;
@@ -23,19 +24,17 @@ public class TripProducer {
 
 
     private final Agency agency;
-    private final Route route;
     private final GtfsServiceRepository gtfsServiceRepository;
     private final NetexEntitiesIndex netexTimetableEntitiesIndex;
 
-    public TripProducer(Agency agency, Route route, GtfsServiceRepository gtfsServiceRepository, NetexEntitiesIndex netexTimetableEntitiesIndex) {
+    public TripProducer(Agency agency, GtfsServiceRepository gtfsServiceRepository, NetexEntitiesIndex netexTimetableEntitiesIndex) {
         this.agency = agency;
-        this.route = route;
         this.gtfsServiceRepository = gtfsServiceRepository;
         this.netexTimetableEntitiesIndex = netexTimetableEntitiesIndex;
     }
 
 
-    public Trip produce(ServiceJourney serviceJourney) {
+    public Trip produce(ServiceJourney serviceJourney, Route gtfsRoute, AgencyAndId shapeId) {
         String tripId = toGtfsId(serviceJourney.getId(), null, true);
 
         AgencyAndId tripAgencyAndId = new AgencyAndId();
@@ -70,10 +69,8 @@ public class TripProducer {
         }
         serviceAgencyAndId.setAgencyId(agency.getId());
         trip.setServiceId(serviceAgencyAndId);
-
-        trip.setRoute(route);
-
-
+        trip.setRoute(gtfsRoute);
+        trip.setShapeId(shapeId);
         return trip;
 
     }
