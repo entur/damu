@@ -123,10 +123,14 @@ public class GtfsExport {
             gtfsDao.saveEntity(gtfsRoute);
             for (org.rutebanken.netex.model.Route netexRoute : getNetexRouteForNetexLine(netexLine)) {
                 for (JourneyPattern journeyPattern : getJourneyPatternForNetexRoute(netexRoute)) {
-                    shapeProducer.produce(journeyPattern).forEach(gtfsDao::saveEntity);
-                    AgencyAndId shapeId = new AgencyAndId();
-                    shapeId.setAgencyId(agency.getId());
-                    shapeId.setId(journeyPattern.getId());
+                    List<ShapePoint> shapePoints = shapeProducer.produce(journeyPattern);
+                    AgencyAndId shapeId = null;
+                    if (!shapePoints.isEmpty()) {
+                        shapePoints.forEach(gtfsDao::saveEntity);
+                        shapeId = new AgencyAndId();
+                        shapeId.setAgencyId(agency.getId());
+                        shapeId.setId(journeyPattern.getId());
+                    }
                     for (ServiceJourney serviceJourney : getServiceJourneyForJourneyPattern(journeyPattern)) {
                         Trip trip = tripProducer.produce(serviceJourney, gtfsRoute, shapeId);
                         gtfsDao.saveEntity(trip);
