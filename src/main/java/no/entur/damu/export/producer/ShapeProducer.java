@@ -37,7 +37,6 @@ public class ShapeProducer {
         this.agency = agency;
         this.netexTimetableEntitiesIndex = netexTimetableEntitiesIndex;
         this.factory = new GeometryFactory(new PrecisionModel(10), 4326);
-        ;
     }
 
 

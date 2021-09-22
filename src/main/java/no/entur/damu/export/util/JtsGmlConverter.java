@@ -17,7 +17,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JtsGmlConverter {
+public final class JtsGmlConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JtsGmlConverter.class);
 
@@ -26,7 +26,10 @@ public class JtsGmlConverter {
     private static final int DEFAULT_SRID_AS_INT = 4326;
 
 
-    private static GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), DEFAULT_SRID_AS_INT);
+    private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory(new PrecisionModel(), DEFAULT_SRID_AS_INT);
+
+    private JtsGmlConverter() {
+    }
 
     public static LineString fromGmlToJts(LineStringType gml) {
         List<Double> coordinateList;
@@ -41,24 +44,23 @@ public class JtsGmlConverter {
                         DirectPositionType directPositionType = (DirectPositionType) o;
                         coordinateList.addAll(directPositionType.getValue());
                     } else {
-                        // what else could this be?
-                        LOGGER.warn("Got unrecognized class (" + o.getClass() + ") for PosOrPointProperty for gmlString: " + gml.getId());
+                        LOGGER.warn("Got unrecognized class ({}) for PosOrPointProperty for gmlString {}", o.getClass(), gml.getId());
                     }
                 }
                 if (coordinateList.isEmpty()) {
-                    LOGGER.warn("No recognized class in PosOrPointProperty for gmlString: " + gml.getId());
+                    LOGGER.warn("No recognized class in PosOrPointProperty for gmlString {}", gml.getId());
                     return null;
                 }
 
             } else {
-                LOGGER.warn("Got LineStringType without posList or PosOrPointProperty: " + gml.getId());
+                LOGGER.warn("Got LineStringType without posList or PosOrPointProperty {}", gml.getId());
                 return null;
             }
         }
 
 
         CoordinateSequence coordinateSequence = convert(coordinateList);
-        LineString jts = new LineString(coordinateSequence, geometryFactory);
+        LineString jts = new LineString(coordinateSequence, GEOMETRY_FACTORY);
         assignSRID(gml, jts);
 
         return jts;
@@ -75,11 +77,11 @@ public class JtsGmlConverter {
     private static void assignSRID(LineStringType gml, LineString jts) {
         String srsName = gml.getSrsName();
         if (!StringUtils.isEmpty(srsName) && !DEFAULT_SRID_NAME.equals(srsName) && !DEFAULT_SRID_AS_STRING.equals(srsName)) {
-            LOGGER.warn("The LineString " + gml.getId() + " is not based on the WGS84 Spatial Reference System. SRID in use: " + srsName);
+            LOGGER.warn("The LineString {} is not based on the WGS84 Spatial Reference System. SRID in use: {}", gml.getId(), srsName);
             try {
                 jts.setSRID(Integer.parseInt(srsName));
             } catch (NumberFormatException nfe) {
-                LOGGER.warn("Ignoring SRID on linestring" + gml.getId() + " for illegal value: " + srsName);
+                LOGGER.warn("Ignoring SRID on linestring {} for illegal value: {}", gml.getId(), srsName);
             }
         }
     }
