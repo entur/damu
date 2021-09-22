@@ -13,6 +13,7 @@ import org.onebusaway.gtfs.model.ShapePoint;
 import org.rutebanken.netex.model.JourneyPattern;
 import org.rutebanken.netex.model.LinkInLinkSequence_VersionedChildStructure;
 import org.rutebanken.netex.model.LinkSequenceProjection;
+import org.rutebanken.netex.model.Projections_RelStructure;
 import org.rutebanken.netex.model.ServiceLink;
 import org.rutebanken.netex.model.ServiceLinkInJourneyPattern_VersionedChildStructure;
 import org.slf4j.Logger;
@@ -46,7 +47,7 @@ public class ShapeProducer {
                 || journeyPattern.getLinksInSequence().getServiceLinkInJourneyPatternOrTimingLinkInJourneyPattern() == null
                 || journeyPattern.getLinksInSequence().getServiceLinkInJourneyPatternOrTimingLinkInJourneyPattern().size() != (nbStopPoints - 1)) {
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Skipping GTFS shape export for JourneyPattern with incomplete service links: {} ", journeyPattern.getId());
+                LOGGER.debug("Skipping GTFS shape export for JourneyPattern {} with incomplete list of service links", journeyPattern.getId());
             }
             return Collections.emptyList();
         }
@@ -59,7 +60,14 @@ public class ShapeProducer {
         for (LinkInLinkSequence_VersionedChildStructure link : journeyPattern.getLinksInSequence().getServiceLinkInJourneyPatternOrTimingLinkInJourneyPattern()) {
             ServiceLinkInJourneyPattern_VersionedChildStructure serviceLinkInJourneyPattern = (ServiceLinkInJourneyPattern_VersionedChildStructure) link;
             ServiceLink serviceLink = netexTimetableEntitiesIndex.getServiceLinkIndex().get(serviceLinkInJourneyPattern.getServiceLinkRef().getRef());
-            for (JAXBElement<?> jaxbElement : serviceLink.getProjections().getProjectionRefOrProjection()) {
+            Projections_RelStructure projections = serviceLink.getProjections();
+            if (projections == null) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Skipping GTFS shape export for JourneyPattern {} with service link {} without LineString", journeyPattern.getId(), serviceLink.getId());
+                }
+                return Collections.emptyList();
+            }
+            for (JAXBElement<?> jaxbElement : projections.getProjectionRefOrProjection()) {
                 LinkSequenceProjection linkSequenceProjection = (LinkSequenceProjection) jaxbElement.getValue();
                 LineString lineString = JtsGmlConverter.fromGmlToJts(linkSequenceProjection.getLineString());
                 for (Coordinate currentPoint : lineString.getCoordinates()) {
@@ -76,7 +84,7 @@ public class ShapeProducer {
                     shapePoint.setSequence(sequence);
                     shapePoint.setLon(currentPoint.getX());
                     shapePoint.setLat(currentPoint.getY());
-                    shapePoint.setDistTraveled(distanceFromStart);
+                    shapePoint.setDistTraveled(Math.round(distanceFromStart));
                     shapePoints.add(shapePoint);
                     sequence++;
                     previousPoint = currentPoint;
