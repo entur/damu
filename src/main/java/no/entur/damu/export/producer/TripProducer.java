@@ -1,11 +1,14 @@
 package no.entur.damu.export.producer;
 
+import no.entur.damu.export.util.DestinationDisplayUtil;
 import org.entur.netex.index.api.NetexEntitiesIndex;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.Trip;
 import org.rutebanken.netex.model.DayType;
+import org.rutebanken.netex.model.DestinationDisplay;
+import org.rutebanken.netex.model.JourneyPattern;
 import org.rutebanken.netex.model.OperatingDay;
 import org.rutebanken.netex.model.ServiceAlterationEnumeration;
 import org.rutebanken.netex.model.ServiceJourney;
@@ -33,7 +36,7 @@ public class TripProducer {
     }
 
 
-    public Trip produce(ServiceJourney serviceJourney, Route gtfsRoute, AgencyAndId shapeId) {
+    public Trip produce(ServiceJourney serviceJourney, JourneyPattern journeyPattern, Route gtfsRoute, AgencyAndId shapeId, DestinationDisplay startDestinationDisplay) {
         String tripId = toGtfsId(serviceJourney.getId(), null, true);
 
         AgencyAndId tripAgencyAndId = new AgencyAndId();
@@ -65,6 +68,16 @@ public class TripProducer {
                     .map(datedServiceJourney -> netexTimetableEntitiesIndex.getOperatingDayIndex().get(datedServiceJourney.getOperatingDayRef().getRef()))
                     .collect(Collectors.toSet());
             serviceAgencyAndId.setId(gtfsServiceRepository.getServiceForOperatingDays(operatingDays).getId());
+        }
+
+        if (startDestinationDisplay != null) {
+            trip.setTripHeadsign(DestinationDisplayUtil.getFrontTextWithComputedVias(startDestinationDisplay, netexTimetableEntitiesIndex));
+        } else if (serviceJourney.getName() != null) {
+            trip.setTripHeadsign(serviceJourney.getName().getValue());
+        } else if (journeyPattern.getName() != null) {
+            trip.setTripHeadsign(journeyPattern.getName().getValue());
+        } else {
+            LOGGER.warn("Missing trip head sign for ServiceJourney {}", serviceJourney.getId());
         }
         serviceAgencyAndId.setAgencyId(agency.getId());
         trip.setServiceId(serviceAgencyAndId);

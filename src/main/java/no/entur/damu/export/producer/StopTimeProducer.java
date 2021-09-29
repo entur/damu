@@ -1,11 +1,13 @@
 package no.entur.damu.export.producer;
 
+import no.entur.damu.export.util.DestinationDisplayUtil;
 import org.entur.netex.index.api.NetexEntitiesIndex;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.services.GtfsMutableDao;
+import org.rutebanken.netex.model.DestinationDisplay;
 import org.rutebanken.netex.model.JourneyPattern;
 import org.rutebanken.netex.model.StopPointInJourneyPattern;
 import org.rutebanken.netex.model.TimetabledPassingTime;
@@ -25,7 +27,7 @@ public class StopTimeProducer {
     }
 
 
-    public StopTime produce(TimetabledPassingTime timetabledPassingTime, JourneyPattern journeyPattern, Trip trip) {
+    public StopTime produce(TimetabledPassingTime timetabledPassingTime, JourneyPattern journeyPattern, Trip trip, boolean multipleDestinationDisplays) {
         StopTime stopTime = new StopTime();
         stopTime.setTrip(trip);
 
@@ -59,6 +61,18 @@ public class StopTimeProducer {
             int departureTime = toGtfsTime(timetabledPassingTime.getDepartureTime());
             int offSetDay = timetabledPassingTime.getDepartureDayOffset() == null ? 0 : timetabledPassingTime.getDepartureDayOffset().intValueExact();
             stopTime.setDepartureTime(departureTime + offSetDay * 60 * 60 * 24);
+        }
+
+        if(multipleDestinationDisplays && stopPointInSequence.getDestinationDisplayRef() != null) {
+            DestinationDisplay destinationDisplay = netexTimetableEntitiesIndex.getDestinationDisplayIndex().get(stopPointInSequence.getDestinationDisplayRef().getRef());
+            String stopHeadSign = DestinationDisplayUtil.getFrontTextWithComputedVias(destinationDisplay,netexTimetableEntitiesIndex);
+            if(trip.getTripHeadsign() != null) {
+                if(!trip.getTripHeadsign().equals(stopHeadSign)) {
+                    stopTime.setStopHeadsign(stopHeadSign);
+                }
+            } else {
+                stopTime.setStopHeadsign(stopHeadSign);
+            }
         }
 
         return stopTime;
