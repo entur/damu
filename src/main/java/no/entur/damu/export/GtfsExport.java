@@ -31,11 +31,14 @@ import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.serialization.GtfsWriter;
 import org.onebusaway.gtfs.services.GtfsMutableDao;
+import org.rutebanken.netex.model.DestinationDisplay;
+import org.rutebanken.netex.model.DestinationDisplayRefStructure;
 import org.rutebanken.netex.model.JourneyPattern;
 import org.rutebanken.netex.model.Line;
 import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.ServiceJourney;
 import org.rutebanken.netex.model.StopPlace;
+import org.rutebanken.netex.model.StopPointInJourneyPattern;
 import org.rutebanken.netex.model.TimetabledPassingTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +52,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.ZipInputStream;
@@ -131,12 +135,24 @@ public class GtfsExport {
                         shapeId.setAgencyId(agency.getId());
                         shapeId.setId(journeyPattern.getId());
                     }
+
+                    List<DestinationDisplayRefStructure> allDestinationDisplays = journeyPattern.getPointsInSequence()
+                            .getPointInJourneyPatternOrStopPointInJourneyPatternOrTimingPointInJourneyPattern()
+                            .stream()
+                            .map(sp -> ((StopPointInJourneyPattern) sp).getDestinationDisplayRef()).collect(Collectors.toList());
+
+                    boolean multipleDestinationDisplays = allDestinationDisplays.stream()
+                            .filter(Objects::nonNull)
+                            .count() > 1;
+
+                    DestinationDisplay startDestinationDisplay = netexTimetableEntitiesIndex.getDestinationDisplayIndex().get(allDestinationDisplays.get(0).getRef());
+
                     for (ServiceJourney serviceJourney : getServiceJourneyForJourneyPattern(journeyPattern)) {
-                        Trip trip = tripProducer.produce(serviceJourney, gtfsRoute, shapeId);
+                        Trip trip = tripProducer.produce(serviceJourney, journeyPattern, gtfsRoute, shapeId, startDestinationDisplay);
                         gtfsDao.saveEntity(trip);
                         for (TimetabledPassingTime timetabledPassingTime : serviceJourney.getPassingTimes().getTimetabledPassingTime()) {
                             StopTimeProducer stopTimeProducer = new StopTimeProducer(netexTimetableEntitiesIndex, gtfsDao);
-                            StopTime stopTime = stopTimeProducer.produce(timetabledPassingTime, journeyPattern, trip);
+                            StopTime stopTime = stopTimeProducer.produce(timetabledPassingTime, journeyPattern, trip, multipleDestinationDisplays);
                             gtfsDao.saveEntity(stopTime);
                         }
                     }
@@ -253,7 +269,7 @@ public class GtfsExport {
 
 
     /**
-     * Open an input stream on a temporary file with the guarantee that the file will be delete when the stream is closed.
+     * Open an input stream on a temporary file with the guarantee that the file will be deleted when the stream is closed.
      *
      * @param tmpFile
      * @return
