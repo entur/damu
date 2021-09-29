@@ -4,12 +4,13 @@ import no.entur.damu.export.util.DestinationDisplayUtil;
 import org.entur.netex.index.api.NetexEntitiesIndex;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.Trip;
 import org.rutebanken.netex.model.DayType;
 import org.rutebanken.netex.model.DestinationDisplay;
+import org.rutebanken.netex.model.DirectionTypeEnumeration;
 import org.rutebanken.netex.model.JourneyPattern;
 import org.rutebanken.netex.model.OperatingDay;
+import org.rutebanken.netex.model.Route;
 import org.rutebanken.netex.model.ServiceAlterationEnumeration;
 import org.rutebanken.netex.model.ServiceJourney;
 import org.slf4j.Logger;
@@ -23,6 +24,8 @@ import static no.entur.damu.export.util.GtfsUtil.toGtfsId;
 public class TripProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TripProducer.class);
+    private static final String GTFS_DIRECTION_OUTBOUND = "0";
+    private static final String GTFS_DIRECTION_INBOUND = "1";
 
 
     private final Agency agency;
@@ -36,7 +39,7 @@ public class TripProducer {
     }
 
 
-    public Trip produce(ServiceJourney serviceJourney, JourneyPattern journeyPattern, Route gtfsRoute, AgencyAndId shapeId, DestinationDisplay startDestinationDisplay) {
+    public Trip produce(ServiceJourney serviceJourney, JourneyPattern journeyPattern, Route netexRoute, org.onebusaway.gtfs.model.Route gtfsRoute, AgencyAndId shapeId, DestinationDisplay startDestinationDisplay) {
         String tripId = toGtfsId(serviceJourney.getId(), null, true);
 
         AgencyAndId tripAgencyAndId = new AgencyAndId();
@@ -69,6 +72,8 @@ public class TripProducer {
                     .collect(Collectors.toSet());
             serviceAgencyAndId.setId(gtfsServiceRepository.getServiceForOperatingDays(operatingDays).getId());
         }
+        serviceAgencyAndId.setAgencyId(agency.getId());
+        trip.setServiceId(serviceAgencyAndId);
 
         if (startDestinationDisplay != null) {
             trip.setTripHeadsign(DestinationDisplayUtil.getFrontTextWithComputedVias(startDestinationDisplay, netexTimetableEntitiesIndex));
@@ -79,9 +84,15 @@ public class TripProducer {
         } else {
             LOGGER.warn("Missing trip head sign for ServiceJourney {}", serviceJourney.getId());
         }
-        serviceAgencyAndId.setAgencyId(agency.getId());
-        trip.setServiceId(serviceAgencyAndId);
+
         trip.setRoute(gtfsRoute);
+        DirectionTypeEnumeration directionType = netexRoute.getDirectionType();
+        if (DirectionTypeEnumeration.INBOUND == directionType) {
+            trip.setDirectionId(GTFS_DIRECTION_INBOUND);
+        } else {
+            trip.setDirectionId(GTFS_DIRECTION_OUTBOUND);
+        }
+
         trip.setShapeId(shapeId);
         return trip;
 
