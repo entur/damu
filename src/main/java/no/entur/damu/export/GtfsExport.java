@@ -148,7 +148,7 @@ public class GtfsExport {
                     DestinationDisplay startDestinationDisplay = netexTimetableEntitiesIndex.getDestinationDisplayIndex().get(allDestinationDisplays.get(0).getRef());
 
                     for (ServiceJourney serviceJourney : getServiceJourneyForJourneyPattern(journeyPattern)) {
-                        Trip trip = tripProducer.produce(serviceJourney, journeyPattern, gtfsRoute, shapeId, startDestinationDisplay);
+                        Trip trip = tripProducer.produce(serviceJourney, journeyPattern, netexRoute, gtfsRoute, shapeId, startDestinationDisplay);
                         gtfsDao.saveEntity(trip);
                         for (TimetabledPassingTime timetabledPassingTime : serviceJourney.getPassingTimes().getTimetabledPassingTime()) {
                             StopTimeProducer stopTimeProducer = new StopTimeProducer(netexTimetableEntitiesIndex, gtfsDao);
