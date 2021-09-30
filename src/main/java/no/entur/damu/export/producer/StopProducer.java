@@ -18,6 +18,7 @@ public class StopProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StopProducer.class);
     private static final int WHEELCHAIR_BOARDING_TRUE = 1;
+    private static final int WHEELCHAIR_BOARDING_FALSE = 2;
 
 
     private final Agency agency;
@@ -57,9 +58,14 @@ public class StopProducer {
         stop.setLat(stopPlace.getCentroid().getLocation().getLatitude().doubleValue());
 
 
-        if (stopPlace.getAccessibilityAssessment() != null
-                && "true".equals(stopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation().getWheelchairAccess().value())) {
-            stop.setWheelchairBoarding(WHEELCHAIR_BOARDING_TRUE);
+        if (stopPlace.getAccessibilityAssessment() != null) {
+            String wheelchairAccess = stopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation().getWheelchairAccess().value();
+            if ("true".equals(wheelchairAccess)) {
+                stop.setWheelchairBoarding(WHEELCHAIR_BOARDING_TRUE);
+
+            } else if ("false".equals(wheelchairAccess)) {
+                stop.setWheelchairBoarding(WHEELCHAIR_BOARDING_FALSE);
+            }
         }
 
         VehicleModeEnumeration netexTransportMode = stopPlace.getTransportMode();
@@ -105,12 +111,15 @@ public class StopProducer {
         stop.setLon(quay.getCentroid().getLocation().getLongitude().doubleValue());
         stop.setLat(quay.getCentroid().getLocation().getLatitude().doubleValue());
 
+        if (quay.getAccessibilityAssessment() != null) {
+            String wheelchairAccess = quay.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation().getWheelchairAccess().value();
+            if ("true".equals(wheelchairAccess)) {
+                stop.setWheelchairBoarding(WHEELCHAIR_BOARDING_TRUE);
 
-        if (quay.getAccessibilityAssessment() != null
-                && "true".equals(quay.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation().getWheelchairAccess().value())) {
-            stop.setWheelchairBoarding(WHEELCHAIR_BOARDING_TRUE);
+            } else if ("false".equals(wheelchairAccess)) {
+                stop.setWheelchairBoarding(WHEELCHAIR_BOARDING_FALSE);
+            }
         }
-
 
         return stop;
     }

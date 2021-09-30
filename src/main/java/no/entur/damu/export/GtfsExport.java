@@ -19,6 +19,7 @@ import no.entur.damu.export.producer.TransferProducer;
 import no.entur.damu.export.producer.TripProducer;
 import no.entur.damu.export.stop.StopAreaRepository;
 import no.entur.damu.export.util.NetexDatasetParserUtil;
+import no.entur.damu.export.util.StopUtil;
 import org.entur.netex.NetexParser;
 import org.entur.netex.index.api.NetexEntitiesIndex;
 import org.entur.netex.index.impl.NetexEntitiesIndexImpl;
@@ -106,7 +107,7 @@ public class GtfsExport {
         AgencyProducer agencyProducer = new AgencyProducer(timeZone);
         netexTimetableEntitiesIndex.getAuthorityIndex().getAll().stream().map(agencyProducer::produce).forEach(gtfsDao::saveEntity);
 
-        Agency agency = gtfsDao.getAllAgencies().stream().findFirst().orElseThrow();
+        Agency agency = StopUtil.createEnturAgency();
         convertStops();
         convertRoutes(agency);
         convertServices(agency);
@@ -122,7 +123,7 @@ public class GtfsExport {
     }
 
     private void convertRoutes(Agency agency) {
-        RouteProducer routeProducer = new RouteProducer(agency);
+        RouteProducer routeProducer = new RouteProducer(netexTimetableEntitiesIndex, gtfsDao);
         ShapeProducer shapeProducer = new ShapeProducer(agency, netexTimetableEntitiesIndex);
         TripProducer tripProducer = new TripProducer(agency, gtfsServiceRepository, netexTimetableEntitiesIndex);
         for (Line netexLine : netexTimetableEntitiesIndex.getLineIndex().getAll()) {
@@ -278,7 +279,6 @@ public class GtfsExport {
         }
 
     }
-
 
     /**
      * Open an input stream on a temporary file with the guarantee that the file will be deleted when the stream is closed.
