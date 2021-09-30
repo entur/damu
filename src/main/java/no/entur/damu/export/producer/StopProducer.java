@@ -4,6 +4,7 @@ import no.entur.damu.export.model.RouteTypeEnum;
 import no.entur.damu.export.model.TransportModeNameEnum;
 import no.entur.damu.export.stop.StopAreaRepository;
 import no.entur.damu.export.util.NetexParserUtils;
+import no.entur.damu.export.util.StopUtil;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
@@ -23,22 +24,8 @@ public class StopProducer {
     private final StopAreaRepository stopAreaRepository;
 
     public StopProducer(StopAreaRepository stopAreaRepository) {
-        this.agency = createEnturAgency();
+        this.agency = StopUtil.createEnturAgency();
         this.stopAreaRepository = stopAreaRepository;
-    }
-
-    /**
-     * Return an agency representing Entur.
-     * The OneBusAway API requires an agency linked to stops, even if it does not appear in the GTFS export
-     *
-     * @return an agency representing Entur.
-     */
-    private static Agency createEnturAgency() {
-        Agency enturAgency = new Agency();
-        enturAgency.setId("ENT");
-        enturAgency.setUrl("https://www.entur.org");
-        enturAgency.setName("Entur");
-        return enturAgency;
     }
 
 

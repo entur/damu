@@ -1,8 +1,8 @@
 package no.entur.damu.export.producer;
 
 import no.entur.damu.export.util.DestinationDisplayUtil;
+import no.entur.damu.export.util.StopUtil;
 import org.entur.netex.index.api.NetexEntitiesIndex;
-import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
@@ -16,7 +16,6 @@ import static no.entur.damu.export.util.GtfsUtil.toGtfsTime;
 
 public class StopTimeProducer {
 
-    private static final String ENTUR_AGENCY_ID = "ENT";
     private final NetexEntitiesIndex netexTimetableEntitiesIndex;
     private final GtfsMutableDao gtfsDao;
 
@@ -25,7 +24,6 @@ public class StopTimeProducer {
         this.netexTimetableEntitiesIndex = netexTimetableEntitiesIndex;
         this.gtfsDao = gtfsDao;
     }
-
 
     public StopTime produce(TimetabledPassingTime timetabledPassingTime, JourneyPattern journeyPattern, Trip trip, boolean multipleDestinationDisplays) {
         StopTime stopTime = new StopTime();
@@ -42,13 +40,8 @@ public class StopTimeProducer {
 
         int stopSequence = stopPointInSequence.getOrder().intValueExact();
         stopTime.setStopSequence(stopSequence);
-
-        String stopId = netexTimetableEntitiesIndex.getQuayIdByStopPointRefIndex().get(stopPointInSequence.getScheduledStopPointRef().getValue().getRef());
-
-        AgencyAndId agencyAndId = new AgencyAndId();
-        agencyAndId.setId(stopId);
-        agencyAndId.setAgencyId(ENTUR_AGENCY_ID);
-        Stop stop = gtfsDao.getStopForId(agencyAndId);
+        String scheduledStopPointId = stopPointInSequence.getScheduledStopPointRef().getValue().getRef();
+        Stop stop = StopUtil.getGtfsStopFromScheduledStopPointId(scheduledStopPointId, netexTimetableEntitiesIndex, gtfsDao);
         stopTime.setStop(stop);
 
         if (timetabledPassingTime.getArrivalTime() != null) {
@@ -63,11 +56,11 @@ public class StopTimeProducer {
             stopTime.setDepartureTime(departureTime + offSetDay * 60 * 60 * 24);
         }
 
-        if(multipleDestinationDisplays && stopPointInSequence.getDestinationDisplayRef() != null) {
+        if (multipleDestinationDisplays && stopPointInSequence.getDestinationDisplayRef() != null) {
             DestinationDisplay destinationDisplay = netexTimetableEntitiesIndex.getDestinationDisplayIndex().get(stopPointInSequence.getDestinationDisplayRef().getRef());
-            String stopHeadSign = DestinationDisplayUtil.getFrontTextWithComputedVias(destinationDisplay,netexTimetableEntitiesIndex);
-            if(trip.getTripHeadsign() != null) {
-                if(!trip.getTripHeadsign().equals(stopHeadSign)) {
+            String stopHeadSign = DestinationDisplayUtil.getFrontTextWithComputedVias(destinationDisplay, netexTimetableEntitiesIndex);
+            if (trip.getTripHeadsign() != null) {
+                if (!trip.getTripHeadsign().equals(stopHeadSign)) {
                     stopTime.setStopHeadsign(stopHeadSign);
                 }
             } else {

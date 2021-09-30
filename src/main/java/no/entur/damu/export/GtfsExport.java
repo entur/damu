@@ -15,6 +15,7 @@ import no.entur.damu.export.producer.ServiceCalendarProducer;
 import no.entur.damu.export.producer.ShapeProducer;
 import no.entur.damu.export.producer.StopProducer;
 import no.entur.damu.export.producer.StopTimeProducer;
+import no.entur.damu.export.producer.TransferProducer;
 import no.entur.damu.export.producer.TripProducer;
 import no.entur.damu.export.stop.StopAreaRepository;
 import no.entur.damu.export.util.NetexDatasetParserUtil;
@@ -109,9 +110,11 @@ public class GtfsExport {
         convertStops();
         convertRoutes(agency);
         convertServices(agency);
+        convertTransfers(agency);
         addFeedInfo();
 
     }
+
 
     private void addFeedInfo() {
         FeedInfoProducer feedInfoProducer = new FeedInfoProducer();
@@ -179,6 +182,15 @@ public class GtfsExport {
 
         }
 
+    }
+
+    private void convertTransfers(Agency agency) {
+        TransferProducer transferProducer = new TransferProducer(agency, netexTimetableEntitiesIndex, gtfsDao);
+        netexTimetableEntitiesIndex.getServiceJourneyInterchangeIndex()
+                .getAll()
+                .stream()
+                .map(transferProducer::produce)
+                .forEach(gtfsDao::saveEntity);
     }
 
     private Collection<ServiceJourney> getServiceJourneyForJourneyPattern(JourneyPattern journeyPattern) {
