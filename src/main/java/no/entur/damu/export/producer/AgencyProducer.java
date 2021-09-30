@@ -3,6 +3,7 @@ package no.entur.damu.export.producer;
 import no.entur.damu.export.util.GtfsUtil;
 import org.onebusaway.gtfs.model.Agency;
 import org.rutebanken.netex.model.Authority;
+import org.rutebanken.netex.model.ContactStructure;
 import org.rutebanken.netex.model.Operator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,14 +22,15 @@ public class AgencyProducer {
         Agency agency = new Agency();
         agency.setId(GtfsUtil.toGtfsId(authority.getId(), null, true));
         agency.setName(authority.getName().getValue());
-        if (authority.getContactDetails() != null) {
-            if (authority.getContactDetails().getUrl() != null) {
-                agency.setUrl(authority.getContactDetails().getUrl());
+        ContactStructure contactDetails = authority.getContactDetails();
+        if (contactDetails != null) {
+            if (contactDetails.getUrl() != null && !contactDetails.getUrl().isBlank()) {
+                agency.setUrl(contactDetails.getUrl());
             } else {
                 LOGGER.warn("Missing URL for authority {}", authority.getId());
                 agency.setUrl("-");
             }
-            agency.setPhone(authority.getContactDetails().getPhone());
+            agency.setPhone(contactDetails.getPhone());
         } else {
             LOGGER.warn("Missing Contact details for authority {}", authority.getId());
             agency.setUrl("-");
