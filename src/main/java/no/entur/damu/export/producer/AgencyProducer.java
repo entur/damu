@@ -21,7 +21,11 @@ public class AgencyProducer {
     public Agency produce(Authority authority) {
         Agency agency = new Agency();
         agency.setId(GtfsUtil.toGtfsId(authority.getId(), null, true));
+
+        // agency name
         agency.setName(authority.getName().getValue());
+
+        // agency URL and phone
         ContactStructure contactDetails = authority.getContactDetails();
         if (contactDetails != null) {
             if (contactDetails.getUrl() != null && !contactDetails.getUrl().isBlank()) {
@@ -35,29 +39,10 @@ public class AgencyProducer {
             LOGGER.warn("Missing Contact details for authority {}", authority.getId());
             agency.setUrl("-");
         }
+
+        // agency timezone
         agency.setTimezone(timeZone);
+
         return agency;
-    }
-
-    public Agency produce(Operator operator) {
-        Agency agency = new Agency();
-        agency.setId(GtfsUtil.toGtfsId(operator.getId(), null, true));
-        agency.setName(operator.getName().getValue());
-
-        if (operator.getContactDetails() != null) {
-            if (operator.getContactDetails().getUrl() != null) {
-                agency.setUrl(operator.getContactDetails().getUrl());
-            } else {
-                LOGGER.warn("Missing URL for operator {}", operator.getId());
-                agency.setUrl("-");
-            }
-            agency.setPhone(operator.getContactDetails().getPhone());
-        } else {
-            LOGGER.warn("Missing Contact details for operator {}", operator.getId());
-            agency.setUrl("-");
-        }
-        agency.setTimezone(timeZone);
-        return agency;
-
     }
 }
