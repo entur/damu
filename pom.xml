@@ -28,7 +28,7 @@
         <entur.helpers.version>1.0.60</entur.helpers.version>
         <commons-io.version>2.11.0</commons-io.version>
         <google.cloud.bom-version>20.4.0</google.cloud.bom-version>
-        <netex-parser-java.version>1.0.14</netex-parser-java.version>
+        <netex-parser-java.version>1.0.15</netex-parser-java.version>
         <netex-java-model.version>1.0.12</netex-java-model.version>
         <onebusaway.version>1.3.88</onebusaway.version>
         <jts.version>1.18.1</jts.version>
