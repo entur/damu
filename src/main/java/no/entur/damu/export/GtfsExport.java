@@ -5,6 +5,7 @@ import no.entur.damu.export.exception.NetexParsingException;
 import no.entur.damu.export.exception.QuayNotFoundException;
 import no.entur.damu.export.exception.StopPlaceNotFoundException;
 import no.entur.damu.export.model.GtfsService;
+import no.entur.damu.export.model.GtfsShape;
 import no.entur.damu.export.model.ServiceCalendarPeriod;
 import no.entur.damu.export.producer.AgencyProducer;
 import no.entur.damu.export.producer.FeedInfoProducer;
@@ -28,7 +29,6 @@ import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.ServiceCalendar;
-import org.onebusaway.gtfs.model.ShapePoint;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.serialization.GtfsWriter;
@@ -131,13 +131,13 @@ public class GtfsExport {
             gtfsDao.saveEntity(gtfsRoute);
             for (org.rutebanken.netex.model.Route netexRoute : getNetexRouteForNetexLine(netexLine)) {
                 for (JourneyPattern journeyPattern : getJourneyPatternForNetexRoute(netexRoute)) {
-                    List<ShapePoint> shapePoints = shapeProducer.produce(journeyPattern);
+                    GtfsShape gtfsShape = shapeProducer.produce(journeyPattern);
                     AgencyAndId shapeId = null;
-                    if (!shapePoints.isEmpty()) {
-                        shapePoints.forEach(gtfsDao::saveEntity);
+                    if (gtfsShape != null && !gtfsShape.getAllShapePoints().isEmpty()) {
+                        gtfsShape.getAllShapePoints().forEach(gtfsDao::saveEntity);
                         shapeId = new AgencyAndId();
                         shapeId.setAgencyId(agency.getId());
-                        shapeId.setId(journeyPattern.getId());
+                        shapeId.setId(gtfsShape.getId());
                     }
 
                     List<DestinationDisplayRefStructure> allDestinationDisplays = journeyPattern.getPointsInSequence()
@@ -156,7 +156,7 @@ public class GtfsExport {
                         gtfsDao.saveEntity(trip);
                         for (TimetabledPassingTime timetabledPassingTime : serviceJourney.getPassingTimes().getTimetabledPassingTime()) {
                             StopTimeProducer stopTimeProducer = new StopTimeProducer(netexTimetableEntitiesIndex, gtfsDao);
-                            StopTime stopTime = stopTimeProducer.produce(timetabledPassingTime, journeyPattern, trip, multipleDestinationDisplays);
+                            StopTime stopTime = stopTimeProducer.produce(timetabledPassingTime, journeyPattern, trip, gtfsShape, multipleDestinationDisplays);
                             gtfsDao.saveEntity(stopTime);
                         }
                     }

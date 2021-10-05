@@ -20,6 +20,16 @@ public final class GtfsUtil {
         return netexTime.toSecondOfDay();
     }
 
+    /**
+     * Return the number of seconds since midnight for this local time plus the number of seconds (positive or negative) corresponding to the day offset.
+     * @param netexTime
+     * @param dayOffset
+     * @return
+     */
+    public static int toGtfsTimeWithDayOffset(LocalTime netexTime, int dayOffset) {
+        return toGtfsTime(netexTime) + dayOffset * 60 * 60 * 24;
+    }
+
 
     public static Date toGtfsDate(LocalDateTime netexDate) {
         return Date.from(netexDate.atZone(ZoneId.systemDefault()).toInstant());

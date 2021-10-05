@@ -50,6 +50,18 @@ public class TripProducer {
 
         AgencyAndId serviceAgencyAndId = new AgencyAndId();
 
+        // route
+        trip.setRoute(gtfsRoute);
+
+        // direction
+        DirectionTypeEnumeration directionType = netexRoute.getDirectionType();
+        if (DirectionTypeEnumeration.INBOUND == directionType) {
+            trip.setDirectionId(GTFS_DIRECTION_INBOUND);
+        } else {
+            trip.setDirectionId(GTFS_DIRECTION_OUTBOUND);
+        }
+
+        // service
         if (serviceJourney.getDayTypes() != null) {
             Set<DayType> dayTypes = serviceJourney.getDayTypes()
                     .getDayTypeRef()
@@ -75,6 +87,7 @@ public class TripProducer {
         serviceAgencyAndId.setAgencyId(agency.getId());
         trip.setServiceId(serviceAgencyAndId);
 
+        // destination display = head sign
         if (startDestinationDisplay != null) {
             trip.setTripHeadsign(DestinationDisplayUtil.getFrontTextWithComputedVias(startDestinationDisplay, netexTimetableEntitiesIndex));
         } else if (serviceJourney.getName() != null) {
@@ -85,15 +98,9 @@ public class TripProducer {
             LOGGER.warn("Missing trip head sign for ServiceJourney {}", serviceJourney.getId());
         }
 
-        trip.setRoute(gtfsRoute);
-        DirectionTypeEnumeration directionType = netexRoute.getDirectionType();
-        if (DirectionTypeEnumeration.INBOUND == directionType) {
-            trip.setDirectionId(GTFS_DIRECTION_INBOUND);
-        } else {
-            trip.setDirectionId(GTFS_DIRECTION_OUTBOUND);
-        }
-
+        // shape
         trip.setShapeId(shapeId);
+
         return trip;
 
     }
