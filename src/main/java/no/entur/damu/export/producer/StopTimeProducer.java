@@ -16,6 +16,8 @@ import static no.entur.damu.export.util.GtfsUtil.toGtfsTime;
 
 public class StopTimeProducer {
 
+    private static final int PICKUP_AND_DROP_OFF_TYPE_NOT_AVAILABLE = 1;
+
     private final NetexEntitiesIndex netexTimetableEntitiesIndex;
     private final GtfsMutableDao gtfsDao;
 
@@ -27,8 +29,11 @@ public class StopTimeProducer {
 
     public StopTime produce(TimetabledPassingTime timetabledPassingTime, JourneyPattern journeyPattern, Trip trip, boolean multipleDestinationDisplays) {
         StopTime stopTime = new StopTime();
+
+        // trip
         stopTime.setTrip(trip);
 
+        // stop
         String pointInJourneyPatternRef = timetabledPassingTime.getPointInJourneyPatternRef().getValue().getRef();
         StopPointInJourneyPattern stopPointInSequence = (StopPointInJourneyPattern) journeyPattern.getPointsInSequence()
                 .getPointInJourneyPatternOrStopPointInJourneyPatternOrTimingPointInJourneyPattern()
@@ -36,26 +41,36 @@ public class StopTimeProducer {
                 .filter(stopPointInJourneyPattern -> stopPointInJourneyPattern.getId().equals(pointInJourneyPatternRef))
                 .findFirst()
                 .orElseThrow();
-
-
         int stopSequence = stopPointInSequence.getOrder().intValueExact();
         stopTime.setStopSequence(stopSequence);
         String scheduledStopPointId = stopPointInSequence.getScheduledStopPointRef().getValue().getRef();
         Stop stop = StopUtil.getGtfsStopFromScheduledStopPointId(scheduledStopPointId, netexTimetableEntitiesIndex, gtfsDao);
         stopTime.setStop(stop);
 
+        // arrival time
         if (timetabledPassingTime.getArrivalTime() != null) {
             int arrivalTime = toGtfsTime(timetabledPassingTime.getArrivalTime());
             int offSetDay = timetabledPassingTime.getArrivalDayOffset() == null ? 0 : timetabledPassingTime.getArrivalDayOffset().intValueExact();
             stopTime.setArrivalTime(arrivalTime + offSetDay * 60 * 60 * 24);
+
+            if(timetabledPassingTime.getDepartureTime() == null) {
+                stopTime.setDepartureTime(stopTime.getArrivalTime());
+            }
         }
 
+        // departure time
         if (timetabledPassingTime.getDepartureTime() != null) {
             int departureTime = toGtfsTime(timetabledPassingTime.getDepartureTime());
             int offSetDay = timetabledPassingTime.getDepartureDayOffset() == null ? 0 : timetabledPassingTime.getDepartureDayOffset().intValueExact();
             stopTime.setDepartureTime(departureTime + offSetDay * 60 * 60 * 24);
+
+            if(timetabledPassingTime.getArrivalTime() == null) {
+                stopTime.setArrivalTime(stopTime.getDepartureTime());
+            }
+
         }
 
+        // destination display = stop head sign
         if (multipleDestinationDisplays && stopPointInSequence.getDestinationDisplayRef() != null) {
             DestinationDisplay destinationDisplay = netexTimetableEntitiesIndex.getDestinationDisplayIndex().get(stopPointInSequence.getDestinationDisplayRef().getRef());
             String stopHeadSign = DestinationDisplayUtil.getFrontTextWithComputedVias(destinationDisplay, netexTimetableEntitiesIndex);
@@ -66,6 +81,16 @@ public class StopTimeProducer {
             } else {
                 stopTime.setStopHeadsign(stopHeadSign);
             }
+        }
+
+        // boarding = pickup
+        if(Boolean.FALSE.equals(stopPointInSequence.isForBoarding())) {
+            stopTime.setPickupType(PICKUP_AND_DROP_OFF_TYPE_NOT_AVAILABLE);
+        }
+
+        // alighting = drop off
+        if(Boolean.FALSE.equals(stopPointInSequence.isForAlighting())) {
+            stopTime.setDropOffType(PICKUP_AND_DROP_OFF_TYPE_NOT_AVAILABLE);
         }
 
         return stopTime;

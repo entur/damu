@@ -4,7 +4,6 @@ import no.entur.damu.export.util.GtfsUtil;
 import org.onebusaway.gtfs.model.Agency;
 import org.rutebanken.netex.model.Authority;
 import org.rutebanken.netex.model.ContactStructure;
-import org.rutebanken.netex.model.Operator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
