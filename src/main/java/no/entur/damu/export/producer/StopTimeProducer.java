@@ -99,8 +99,8 @@ public class StopTimeProducer {
         // distance travelled
         if (trip.getShapeId() == null) {
             LOGGER.debug("skipping distance travelled for trip {}", trip.getId());
-        } else if (stopSequence >= 2) {
-            stopTime.setShapeDistTraveled(gtfsShape.getDistanceTravelledToServiceLink(stopSequence - 2));
+        } else  {
+            stopTime.setShapeDistTraveled(gtfsShape.getDistanceTravelledToStop(stopSequence));
         }
 
 

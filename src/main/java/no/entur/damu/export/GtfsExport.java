@@ -133,8 +133,8 @@ public class GtfsExport {
                 for (JourneyPattern journeyPattern : getJourneyPatternForNetexRoute(netexRoute)) {
                     GtfsShape gtfsShape = shapeProducer.produce(journeyPattern);
                     AgencyAndId shapeId = null;
-                    if (gtfsShape != null && !gtfsShape.getAllShapePoints().isEmpty()) {
-                        gtfsShape.getAllShapePoints().forEach(gtfsDao::saveEntity);
+                    if (gtfsShape != null && !gtfsShape.getShapePoints().isEmpty()) {
+                        gtfsShape.getShapePoints().forEach(gtfsDao::saveEntity);
                         shapeId = new AgencyAndId();
                         shapeId.setAgencyId(agency.getId());
                         shapeId.setId(gtfsShape.getId());
