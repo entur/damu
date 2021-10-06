@@ -22,6 +22,7 @@ public class StopTimeProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(StopTimeProducer.class);
 
     private static final int PICKUP_AND_DROP_OFF_TYPE_NOT_AVAILABLE = 1;
+    private static final int PICKUP_AND_DROP_OFF_TYPE_MUST_COORDINATE_WITH_DRIVER = 3;
 
     private final NetexEntitiesIndex netexTimetableEntitiesIndex;
     private final GtfsMutableDao gtfsDao;
@@ -94,6 +95,12 @@ public class StopTimeProducer {
         // alighting = drop off
         if (Boolean.FALSE.equals(stopPointInSequence.isForAlighting())) {
             stopTime.setDropOffType(PICKUP_AND_DROP_OFF_TYPE_NOT_AVAILABLE);
+        }
+
+        // pickup and stop on request overrides the values set in isForBoarding and isForAlighting
+        if (Boolean.TRUE.equals(stopPointInSequence.isRequestStop())) {
+            stopTime.setPickupType(PICKUP_AND_DROP_OFF_TYPE_MUST_COORDINATE_WITH_DRIVER);
+            stopTime.setDropOffType(PICKUP_AND_DROP_OFF_TYPE_MUST_COORDINATE_WITH_DRIVER);
         }
 
         // distance travelled
