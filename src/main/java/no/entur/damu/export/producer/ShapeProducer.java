@@ -1,5 +1,6 @@
 package no.entur.damu.export.producer;
 
+import no.entur.damu.export.model.GtfsShape;
 import no.entur.damu.export.util.GtfsUtil;
 import no.entur.damu.export.util.JtsGmlConverter;
 import org.entur.netex.index.api.NetexEntitiesIndex;
@@ -21,7 +22,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.JAXBElement;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class ShapeProducer {
@@ -41,7 +41,7 @@ public class ShapeProducer {
     }
 
 
-    public List<ShapePoint> produce(JourneyPattern journeyPattern) {
+    public GtfsShape produce(JourneyPattern journeyPattern) {
         int nbStopPoints = journeyPattern.getPointsInSequence().getPointInJourneyPatternOrStopPointInJourneyPatternOrTimingPointInJourneyPattern().size();
         if (journeyPattern.getLinksInSequence() == null
                 || journeyPattern.getLinksInSequence().getServiceLinkInJourneyPatternOrTimingLinkInJourneyPattern() == null
@@ -49,10 +49,10 @@ public class ShapeProducer {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Skipping GTFS shape export for JourneyPattern {} with incomplete list of service links", journeyPattern.getId());
             }
-            return Collections.emptyList();
+            return null;
         }
-
         List<ShapePoint> shapePoints = new ArrayList<>();
+        List<ShapePoint> lastShapePointsInServiceLink = new ArrayList<>();
         String shapeId = GtfsUtil.toGtfsId(journeyPattern.getId(), null, true);
         int sequence = 0;
         double distanceFromStart = 0;
@@ -65,7 +65,7 @@ public class ShapeProducer {
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("Skipping GTFS shape export for JourneyPattern {} with service link {} without LineString", journeyPattern.getId(), serviceLink.getId());
                 }
-                return Collections.emptyList();
+                return null;
             }
             for (JAXBElement<?> jaxbElement : projections.getProjectionRefOrProjection()) {
                 LinkSequenceProjection linkSequenceProjection = (LinkSequenceProjection) jaxbElement.getValue();
@@ -89,9 +89,10 @@ public class ShapeProducer {
                     sequence++;
                     previousPoint = currentPoint;
                 }
+                lastShapePointsInServiceLink.add(shapePoints.get(shapePoints.size()- 1));
             }
         }
-        return shapePoints;
+        return new GtfsShape(shapeId, shapePoints, lastShapePointsInServiceLink);
     }
 
     private double computeDistance(Coordinate from, Coordinate to) {
