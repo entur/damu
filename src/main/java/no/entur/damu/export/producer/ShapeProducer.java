@@ -52,7 +52,9 @@ public class ShapeProducer {
             return null;
         }
         List<ShapePoint> shapePoints = new ArrayList<>();
-        List<ShapePoint> lastShapePointsInServiceLink = new ArrayList<>();
+        List<Double> travelledDistanceToStop = new ArrayList<>(nbStopPoints);
+        // distance travelled to first stop is 0.
+        travelledDistanceToStop.add(0.0);
         String shapeId = GtfsUtil.toGtfsId(journeyPattern.getId(), null, true);
         int sequence = 0;
         double distanceFromStart = 0;
@@ -89,10 +91,10 @@ public class ShapeProducer {
                     sequence++;
                     previousPoint = currentPoint;
                 }
-                lastShapePointsInServiceLink.add(shapePoints.get(shapePoints.size()- 1));
             }
+            travelledDistanceToStop.add((double) Math.round(distanceFromStart));
         }
-        return new GtfsShape(shapeId, shapePoints, lastShapePointsInServiceLink);
+        return new GtfsShape(shapeId, shapePoints, travelledDistanceToStop);
     }
 
     private double computeDistance(Coordinate from, Coordinate to) {
