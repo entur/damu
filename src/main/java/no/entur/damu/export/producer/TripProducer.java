@@ -21,6 +21,10 @@ import java.util.stream.Collectors;
 
 import static no.entur.damu.export.util.GtfsUtil.toGtfsId;
 
+/**
+ * Produce a GTFS Trip or null if the service journey does not correspond to a valid TFS Trip
+ * In particular ServiceJourney having a ServiceAlteration=cancelled or ServiceAlteration=replaced are not valid GTFS Trip.
+ */
 public class TripProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TripProducer.class);
@@ -39,7 +43,24 @@ public class TripProducer {
     }
 
 
+    /**
+     * Return a GTFS Trip corresponding to the ServiceJourney or null if the ServiceJourney cannot be converted into a valid GTFS trip.
+     * @param serviceJourney
+     * @param journeyPattern
+     * @param netexRoute
+     * @param gtfsRoute
+     * @param shapeId
+     * @param startDestinationDisplay
+     * @return a GTFS Trip corresponding to the ServiceJourney or null if the ServiceJourney cannot be converted into a valid GTFS trip.
+     */
     public Trip produce(ServiceJourney serviceJourney, JourneyPattern journeyPattern, Route netexRoute, org.onebusaway.gtfs.model.Route gtfsRoute, AgencyAndId shapeId, DestinationDisplay startDestinationDisplay) {
+
+        // Cancelled or replaced service journeys are not valid GTFS trips.
+        if(ServiceAlterationEnumeration.CANCELLATION == serviceJourney.getServiceAlteration() || ServiceAlterationEnumeration.REPLACED == serviceJourney.getServiceAlteration()) {
+            return null;
+        }
+
+
         String tripId = toGtfsId(serviceJourney.getId(), null, true);
 
         AgencyAndId tripAgencyAndId = new AgencyAndId();

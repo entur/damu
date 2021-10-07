@@ -149,11 +149,13 @@ public class GtfsExport {
 
                     for (ServiceJourney serviceJourney : getServiceJourneyForJourneyPattern(journeyPattern)) {
                         Trip trip = tripProducer.produce(serviceJourney, journeyPattern, netexRoute, gtfsRoute, shapeId, startDestinationDisplay);
-                        gtfsDao.saveEntity(trip);
-                        for (TimetabledPassingTime timetabledPassingTime : serviceJourney.getPassingTimes().getTimetabledPassingTime()) {
-                            StopTimeProducer stopTimeProducer = new StopTimeProducer(netexTimetableEntitiesIndex, gtfsDao);
-                            StopTime stopTime = stopTimeProducer.produce(timetabledPassingTime, journeyPattern, trip, gtfsShape, multipleDestinationDisplays);
-                            gtfsDao.saveEntity(stopTime);
+                        if (trip != null) {
+                            gtfsDao.saveEntity(trip);
+                            for (TimetabledPassingTime timetabledPassingTime : serviceJourney.getPassingTimes().getTimetabledPassingTime()) {
+                                StopTimeProducer stopTimeProducer = new StopTimeProducer(netexTimetableEntitiesIndex, gtfsDao);
+                                StopTime stopTime = stopTimeProducer.produce(timetabledPassingTime, journeyPattern, trip, gtfsShape, multipleDestinationDisplays);
+                                gtfsDao.saveEntity(stopTime);
+                            }
                         }
                     }
                 }

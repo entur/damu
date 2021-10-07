@@ -74,6 +74,7 @@ public class ShapeProducer {
                 LineString lineString = JtsGmlConverter.fromGmlToJts(linkSequenceProjection.getLineString());
                 for (Coordinate currentPoint : lineString.getCoordinates()) {
                     // the first point of the current link is the last point of the previous link, it can be skipped.
+                    // as a side effect, duplicate points that follow one another are also filtered out
                     if (currentPoint.equals(previousPoint)) {
                         continue;
                     }
