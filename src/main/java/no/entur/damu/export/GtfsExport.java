@@ -1,6 +1,5 @@
 package no.entur.damu.export;
 
-import no.entur.damu.export.exception.GtfsWritingException;
 import no.entur.damu.export.exception.NetexParsingException;
 import no.entur.damu.export.exception.QuayNotFoundException;
 import no.entur.damu.export.exception.StopPlaceNotFoundException;
@@ -18,6 +17,7 @@ import no.entur.damu.export.producer.StopProducer;
 import no.entur.damu.export.producer.StopTimeProducer;
 import no.entur.damu.export.producer.TransferProducer;
 import no.entur.damu.export.producer.TripProducer;
+import no.entur.damu.export.serializer.GtfsSerializer;
 import no.entur.damu.export.stop.StopAreaRepository;
 import no.entur.damu.export.util.NetexDatasetParserUtil;
 import no.entur.damu.export.util.StopUtil;
@@ -31,7 +31,6 @@ import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.ServiceCalendar;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
-import org.onebusaway.gtfs.serialization.GtfsWriter;
 import org.onebusaway.gtfs.services.GtfsMutableDao;
 import org.rutebanken.netex.model.DestinationDisplay;
 import org.rutebanken.netex.model.DestinationDisplayRefStructure;
@@ -45,11 +44,8 @@ import org.rutebanken.netex.model.TimetabledPassingTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
@@ -83,7 +79,7 @@ public class GtfsExport {
     public InputStream exportGtfs() {
         importNetex();
         convertNetexToGtfs();
-        return writeGtfs();
+        return new GtfsSerializer(gtfsDao).writeGtfs();
     }
 
     private void importNetex() {
@@ -255,39 +251,5 @@ public class GtfsExport {
         return stopPlace;
     }
 
-    private InputStream writeGtfs() {
-        LOGGER.info("Exporting GTFS archive");
-        GtfsWriter writer = null;
-        try {
-            File outputFile = File.createTempFile("damu-export-gtfs-", ".zip");
-            writer = new GtfsWriter();
-            writer.setOutputLocation(outputFile);
-            writer.run(gtfsDao);
 
-            return createDeleteOnCloseInputStream(outputFile);
-
-        } catch (IOException e) {
-            throw new GtfsWritingException("Error while saving the GTFS dataset", e);
-        } finally {
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (IOException e) {
-                    LOGGER.warn("Error while closing the GTFS writer", e);
-                }
-            }
-        }
-
-    }
-
-    /**
-     * Open an input stream on a temporary file with the guarantee that the file will be deleted when the stream is closed.
-     *
-     * @param tmpFile
-     * @return
-     * @throws IOException
-     */
-    public static InputStream createDeleteOnCloseInputStream(File tmpFile) throws IOException {
-        return Files.newInputStream(tmpFile.toPath(), StandardOpenOption.DELETE_ON_CLOSE);
-    }
 }
