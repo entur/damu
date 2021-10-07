@@ -49,7 +49,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -229,7 +228,7 @@ public class GtfsExport {
                 .getAll()
                 .stream()
                 .filter(serviceJourney -> ServiceAlterationEnumeration.CANCELLATION != serviceJourney.getServiceAlteration()
-                && ServiceAlterationEnumeration.REPLACED != serviceJourney.getServiceAlteration())
+                        && ServiceAlterationEnumeration.REPLACED != serviceJourney.getServiceAlteration())
                 .map(serviceJourney -> serviceJourney.getJourneyPatternRef().getValue().getRef())
                 .distinct()
                 .map(journeyPatternRef -> netexTimetableEntitiesIndex.getJourneyPatternIndex().get(journeyPatternRef))
@@ -237,7 +236,7 @@ public class GtfsExport {
                 .flatMap(Collection::stream)
                 .map(stopPointInJourneyPattern -> ((StopPointInJourneyPattern) stopPointInJourneyPattern).getScheduledStopPointRef().getValue().getRef())
                 .distinct()
-                .map(scheduledStopPointRef ->netexTimetableEntitiesIndex.getQuayIdByStopPointRefIndex().get(scheduledStopPointRef))
+                .map(this::findQuayIdByScheduledStopPointId)
                 .collect(Collectors.toSet());
 
         // Persist the quays
@@ -251,6 +250,14 @@ public class GtfsExport {
                 .distinct()
                 .map(stopProducer::produceStopFromStopPlace)
                 .forEach(gtfsDao::saveEntity);
+    }
+
+    private String findQuayIdByScheduledStopPointId(String scheduledStopPointRef) {
+        String quayId = netexTimetableEntitiesIndex.getQuayIdByStopPointRefIndex().get(scheduledStopPointRef);
+        if (quayId == null) {
+            throw new QuayNotFoundException("Could not find Quay id for scheduled stop point id " + scheduledStopPointRef);
+        }
+        return quayId;
     }
 
     private Quay findQuayById(String quayId) {
