@@ -37,6 +37,7 @@ import org.rutebanken.netex.model.DestinationDisplayRefStructure;
 import org.rutebanken.netex.model.JourneyPattern;
 import org.rutebanken.netex.model.Line;
 import org.rutebanken.netex.model.Quay;
+import org.rutebanken.netex.model.ServiceAlterationEnumeration;
 import org.rutebanken.netex.model.ServiceJourney;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.StopPointInJourneyPattern;
@@ -221,8 +222,23 @@ public class GtfsExport {
 
         StopProducer stopProducer = new StopProducer(stopAreaRepository);
 
-        // Retrieve all quay IDs in use in the timetable dataset
-        Set<String> allQuaysId = new HashSet<>(netexTimetableEntitiesIndex.getQuayIdByStopPointRefIndex().values());
+        // Retrieve all quays referenced by valid ServiceJourneys
+        // This excludes quays referenced by cancelled or replaced service journeys
+        // and quays referenced only as route points or in dead runs
+        Set<String> allQuaysId = netexTimetableEntitiesIndex.getServiceJourneyIndex()
+                .getAll()
+                .stream()
+                .filter(serviceJourney -> ServiceAlterationEnumeration.CANCELLATION != serviceJourney.getServiceAlteration()
+                && ServiceAlterationEnumeration.REPLACED != serviceJourney.getServiceAlteration())
+                .map(serviceJourney -> serviceJourney.getJourneyPatternRef().getValue().getRef())
+                .distinct()
+                .map(journeyPatternRef -> netexTimetableEntitiesIndex.getJourneyPatternIndex().get(journeyPatternRef))
+                .map(journeyPattern -> journeyPattern.getPointsInSequence().getPointInJourneyPatternOrStopPointInJourneyPatternOrTimingPointInJourneyPattern())
+                .flatMap(Collection::stream)
+                .map(stopPointInJourneyPattern -> ((StopPointInJourneyPattern) stopPointInJourneyPattern).getScheduledStopPointRef().getValue().getRef())
+                .distinct()
+                .map(scheduledStopPointRef ->netexTimetableEntitiesIndex.getQuayIdByStopPointRefIndex().get(scheduledStopPointRef))
+                .collect(Collectors.toSet());
 
         // Persist the quays
         allQuaysId.stream().map(this::findQuayById)
