@@ -33,7 +33,7 @@ public class StopTimeProducer {
         this.gtfsDao = gtfsDao;
     }
 
-    public StopTime produce(TimetabledPassingTime timetabledPassingTime, JourneyPattern journeyPattern, Trip trip, GtfsShape gtfsShape, boolean multipleDestinationDisplays) {
+    public StopTime produce(TimetabledPassingTime timetabledPassingTime, JourneyPattern journeyPattern, Trip trip, GtfsShape gtfsShape, String currentHeadSign) {
         StopTime stopTime = new StopTime();
 
         // trip
@@ -75,17 +75,22 @@ public class StopTimeProducer {
         }
 
         // destination display = stop head sign
-        if (multipleDestinationDisplays && stopPointInSequence.getDestinationDisplayRef() != null) {
+        // the head sign is by default the destination display set on the current stop
+        // it can be ignored if it is the same as the trip head sign
+        String stopHeadSignOnCurrentStop = null;
+        if (stopPointInSequence.getDestinationDisplayRef() != null) {
             DestinationDisplay destinationDisplay = netexTimetableEntitiesIndex.getDestinationDisplayIndex().get(stopPointInSequence.getDestinationDisplayRef().getRef());
-            String stopHeadSign = DestinationDisplayUtil.getFrontTextWithComputedVias(destinationDisplay, netexTimetableEntitiesIndex);
-            if (trip.getTripHeadsign() != null) {
-                if (!trip.getTripHeadsign().equals(stopHeadSign)) {
-                    stopTime.setStopHeadsign(stopHeadSign);
-                }
-            } else {
-                stopTime.setStopHeadsign(stopHeadSign);
+            stopHeadSignOnCurrentStop = DestinationDisplayUtil.getFrontTextWithComputedVias(destinationDisplay, netexTimetableEntitiesIndex);
+            if(stopHeadSignOnCurrentStop != null && stopHeadSignOnCurrentStop.equals(trip.getTripHeadsign())) {
+                stopHeadSignOnCurrentStop = null;
             }
         }
+        // otherwise the head sign from the previous stop is used
+        // in GTFS the head sign must be explicitly set from the first stop where the head sign has changed to the last stop the change applies.
+        if (stopHeadSignOnCurrentStop == null) {
+            stopHeadSignOnCurrentStop = currentHeadSign;
+        }
+        stopTime.setStopHeadsign(stopHeadSignOnCurrentStop);
 
         // boarding = pickup
         if (Boolean.FALSE.equals(stopPointInSequence.isForBoarding())) {
@@ -106,7 +111,7 @@ public class StopTimeProducer {
         // distance travelled
         if (trip.getShapeId() == null) {
             LOGGER.debug("skipping distance travelled for trip {}", trip.getId());
-        } else  {
+        } else {
             stopTime.setShapeDistTraveled(gtfsShape.getDistanceTravelledToStop(stopSequence));
         }
 
