@@ -35,9 +35,8 @@ class GtfsExportTest {
 
         FileStopAreaRepository fileStopAreaRepository = new FileStopAreaRepository();
 
-        //fileStopAreaRepository.loadStopAreas(getClass().getResourceAsStream("/RailStations_latest.zip"));
-        //GtfsExport gtfsExport = new GtfsExport("FLB", getClass().getResourceAsStream("/rb_flb-aggregated-netex.zip"), fileStopAreaRepository);
-        //GtfsExport gtfsExport = new GtfsExport("NSB", getClass().getResourceAsStream("/rb_nsb-aggregated-netex.zip"), fileStopAreaRepository);
+        fileStopAreaRepository.loadStopAreas(getClass().getResourceAsStream("/RailStations_latest.zip"));
+        GtfsExport gtfsExport = new GtfsExport("FLB", getClass().getResourceAsStream("/rb_flb-aggregated-netex.zip"), fileStopAreaRepository);
 
         InputStream exportedGtfs = gtfsExport.exportGtfs();
 
