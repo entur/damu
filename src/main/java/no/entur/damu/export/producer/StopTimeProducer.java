@@ -97,7 +97,7 @@ public class StopTimeProducer {
             stopTime.setDropOffType(PICKUP_AND_DROP_OFF_TYPE_NOT_AVAILABLE);
         }
 
-        // pickup and stop on request overrides the values set in isForBoarding and isForAlighting
+        // pickup and stop on request override the values set in isForBoarding and isForAlighting
         if (Boolean.TRUE.equals(stopPointInSequence.isRequestStop())) {
             stopTime.setPickupType(PICKUP_AND_DROP_OFF_TYPE_MUST_COORDINATE_WITH_DRIVER);
             stopTime.setDropOffType(PICKUP_AND_DROP_OFF_TYPE_MUST_COORDINATE_WITH_DRIVER);

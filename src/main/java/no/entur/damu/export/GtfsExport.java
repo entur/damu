@@ -52,6 +52,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.zip.ZipInputStream;
 
@@ -236,6 +237,7 @@ public class GtfsExport {
                 .flatMap(Collection::stream)
                 .map(stopPointInJourneyPattern -> ((StopPointInJourneyPattern) stopPointInJourneyPattern).getScheduledStopPointRef().getValue().getRef())
                 .distinct()
+                .filter(Predicate.not(this::isFlexibleScheduledStopPoint))
                 .map(this::findQuayIdByScheduledStopPointId)
                 .collect(Collectors.toSet());
 
@@ -250,6 +252,15 @@ public class GtfsExport {
                 .distinct()
                 .map(stopProducer::produceStopFromStopPlace)
                 .forEach(gtfsDao::saveEntity);
+    }
+
+    private boolean isFlexibleScheduledStopPoint(String scheduledStopPointId) {
+        String flexibleStopPlaceId = netexTimetableEntitiesIndex.getFlexibleStopPlaceIdByStopPointRefIndex().get(scheduledStopPointId);
+        if (flexibleStopPlaceId != null) {
+            LOGGER.warn("Ignoring scheduled stop point {} referring to flexible stop place {}", scheduledStopPointId, flexibleStopPlaceId);
+            return true;
+        }
+        return false;
     }
 
     private String findQuayIdByScheduledStopPointId(String scheduledStopPointRef) {
