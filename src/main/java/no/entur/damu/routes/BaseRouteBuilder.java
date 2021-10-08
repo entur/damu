@@ -64,28 +64,37 @@ public abstract class BaseRouteBuilder extends RouteBuilder {
 
 
         // Copy all PubSub headers except the internal Camel PubSub headers from the PubSub message into the Camel message headers.
-        interceptFrom("google-no.entur.damu.pubsub:*")
+
+        interceptFrom("*")
+                .filter(exchange -> exchange.getFromEndpoint() instanceof GooglePubsubEndpoint)
                 .process(exchange ->
                 {
                     Map<String, String> pubSubAttributes = exchange.getIn().getHeader(GooglePubsubConstants.ATTRIBUTES, Map.class);
                     pubSubAttributes.entrySet().stream().filter(entry -> !entry.getKey().startsWith("CamelGooglePubsub")).forEach(entry -> exchange.getIn().setHeader(entry.getKey(), entry.getValue()));
                 });
 
-        // Copy only the import key, correlationId and codespace headers from the Camel message into the PubSub message by default.
-        interceptSendToEndpoint("google-no.entur.damu.pubsub:*").process(
+        // Copy only the correlationId and codespace headers from the Camel message into the PubSub message by default.
+        interceptSendToEndpoint("google-pubsub:*").process(
                 exchange -> {
                     Map<String, String> pubSubAttributes = new HashMap<>(exchange.getIn().getHeader(GooglePubsubConstants.ATTRIBUTES, new HashMap<>(), Map.class));
-                    /*if (exchange.getIn().getHeader(Constants.DATASET_IMPORT_KEY) != null) {
-                        pubSubAttributes.put(Constants.DATASET_IMPORT_KEY, exchange.getIn().getHeader(Constants.DATASET_IMPORT_KEY, String.class));
-                    }
+
                     if (exchange.getIn().getHeader(Constants.CORRELATION_ID) != null) {
                         pubSubAttributes.put(Constants.CORRELATION_ID, exchange.getIn().getHeader(Constants.CORRELATION_ID, String.class));
                     }
                     if (exchange.getIn().getHeader(Constants.DATASET_CODESPACE) != null) {
                         pubSubAttributes.put(Constants.DATASET_CODESPACE, exchange.getIn().getHeader(Constants.DATASET_CODESPACE, String.class));
-                    }*/
-                    exchange.getIn().setHeader(GooglePubsubConstants.ATTRIBUTES, pubSubAttributes);
+                    }
 
+                    if (exchange.getIn().getHeader(Constants.PROVIDER_ID) != null) {
+                        pubSubAttributes.put(Constants.PROVIDER_ID, exchange.getIn().getHeader(Constants.PROVIDER_ID, String.class));
+                    }
+
+                    if (exchange.getIn().getHeader(Constants.ORIGINAL_PROVIDER_ID) != null) {
+                        pubSubAttributes.put(Constants.ORIGINAL_PROVIDER_ID, exchange.getIn().getHeader(Constants.ORIGINAL_PROVIDER_ID, String.class));
+                    }
+
+
+                    exchange.getIn().setHeader(GooglePubsubConstants.ATTRIBUTES, pubSubAttributes);
                 });
 
     }

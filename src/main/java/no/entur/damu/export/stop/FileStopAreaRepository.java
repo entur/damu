@@ -54,6 +54,8 @@ public class FileStopAreaRepository implements StopAreaRepository {
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> netexStopEntitiesIndex.getQuayIndex().getLatestVersion(entry.getKey())));
 
+        LOGGER.info("Imported NeTEx Stop dataset");
+
     }
 
     @Override
