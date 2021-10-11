@@ -31,7 +31,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.InputStream;
 
-import static no.entur.damu.Constants.BLOBSTORE_PATH_DAMU;
 import static no.entur.damu.Constants.BLOBSTORE_PATH_OUTBOUND;
 
 
@@ -67,7 +66,7 @@ class GtfsExportQueueRouteBuilderTest extends DamuRouteBuilderIntegrationTestBas
         gtfsExportQueueProducerTemplate.sendBody(CODESPACE);
         checkUploadedDataset.assertIsSatisfied();
 
-        InputStream gtfsExport = mardukInMemoryBlobStoreRepository.getBlob(BLOBSTORE_PATH_DAMU + Constants.GTFS_FILENAME_PREFIX + CODESPACE + Constants.GTFS_FILENAME_SUFFIX);
+        InputStream gtfsExport = mardukInMemoryBlobStoreRepository.getBlob("damu/" + Constants.GTFS_FILENAME_PREFIX + CODESPACE + Constants.GTFS_FILENAME_SUFFIX);
         Assertions.assertNotNull(gtfsExport);
         byte[] content = gtfsExport.readAllBytes();
         Assertions.assertTrue(content.length > 0);

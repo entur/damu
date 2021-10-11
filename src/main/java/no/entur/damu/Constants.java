@@ -18,11 +18,17 @@ package no.entur.damu;
 
 public final class Constants {
     public static final String FILE_HANDLE = "RutebankenFileHandle";
-    public static final String CORRELATION_ID = "RutebankenCorrelationId";
     public static final String BLOBSTORE_PATH_OUTBOUND = "outbound/";
-    public static final String BLOBSTORE_PATH_DAMU = "damu/";
 
     public static final String DATASET_CODESPACE = "EnturDatasetCodespace";
+
+    /**
+     * Headers originating from Marduk that must be sent back when notifying Marduk
+     */
+    public static final String CORRELATION_ID = "RutebankenCorrelationId";
+    public static final String PROVIDER_ID = "RutebankenProviderId";
+    public static final String ORIGINAL_PROVIDER_ID = "RutebankenOriginalProviderId";
+
 
     public static final String NETEX_FILENAME_PREFIX = "netex/";
     public static final String GTFS_FILENAME_PREFIX = "gtfs/";

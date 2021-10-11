@@ -87,6 +87,7 @@ public class GtfsExport {
         } catch (IOException e) {
             throw new NetexParsingException("Error while parsing the NeTEx timetable dataset", e);
         }
+        LOGGER.info("Imported NeTEx Timetable dataset");
     }
 
     private void convertNetexToGtfs() {
