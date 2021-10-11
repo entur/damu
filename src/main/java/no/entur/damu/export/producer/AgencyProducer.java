@@ -27,21 +27,39 @@ public class AgencyProducer {
         // agency URL and phone
         ContactStructure contactDetails = authority.getContactDetails();
         if (contactDetails != null) {
-            if (contactDetails.getUrl() != null && !contactDetails.getUrl().isBlank()) {
-                agency.setUrl(contactDetails.getUrl());
+            String url = contactDetails.getUrl();
+            if (url != null && !url.isBlank()) {
+                if (isValidGtfsUrl(url)) {
+                    agency.setUrl(url);
+                } else {
+                    LOGGER.warn("Invalid URL format for authority {}", authority.getId());
+                }
             } else {
                 LOGGER.warn("Missing URL for authority {}", authority.getId());
-                agency.setUrl("-");
             }
             agency.setPhone(contactDetails.getPhone());
         } else {
             LOGGER.warn("Missing Contact details for authority {}", authority.getId());
-            agency.setUrl("-");
+        }
+        // TODO temporarily setting the URL to pass validation
+        if(agency.getUrl() == null) {
+            agency.setUrl("https://");
         }
 
         // agency timezone
         agency.setTimezone(timeZone);
 
         return agency;
+    }
+
+    /**
+     * Return true if the url is a valid GTFS URL, starting with either http:// or https://
+     * See https://developers.google.com/transit/gtfs/reference#field_types
+     *
+     * @param url the agency URL to check
+     * @return true if the url is a valid GTFS URL, starting with either http:// or https://
+     */
+    private static boolean isValidGtfsUrl(String url) {
+        return url.startsWith("http://") || url.startsWith("https://");
     }
 }
