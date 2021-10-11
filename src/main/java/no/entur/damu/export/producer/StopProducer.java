@@ -36,7 +36,7 @@ public class StopProducer {
         agencyAndId.setAgencyId(agency.getId());
         agencyAndId.setId(stopPlace.getId());
         stop.setId(agencyAndId);
-        stop.setLocationType(Stop.LOCATION_TYPE_STOP);
+        stop.setLocationType(Stop.LOCATION_TYPE_STATION);
 
         if (stopPlace.getPrivateCode() != null) {
             stop.setPlatformCode(stopPlace.getPrivateCode().getValue());
