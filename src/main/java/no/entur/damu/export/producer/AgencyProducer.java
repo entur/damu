@@ -32,7 +32,7 @@ public class AgencyProducer {
                 if (isValidGtfsUrl(url)) {
                     agency.setUrl(url);
                 } else {
-                    LOGGER.warn("Invalid URL format for authority {}", authority.getId());
+                    LOGGER.warn("Invalid URL format {} for authority {}", url, authority.getId());
                 }
             } else {
                 LOGGER.warn("Missing URL for authority {}", authority.getId());
