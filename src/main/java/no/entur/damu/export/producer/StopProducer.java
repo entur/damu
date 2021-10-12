@@ -15,14 +15,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Produce a GTFS stop from a NeTEX StopPlace or a NeTEx Quay
+ * Produce a GTFS stop from a NeTEX StopPlace or a NeTEx Quay.
+ * Supported GTFS extension: vehicle_type (see https://developers.google.com/transit/gtfs/reference/gtfs-extensions/#stops.txt)
  */
 public class StopProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StopProducer.class);
     private static final int WHEELCHAIR_BOARDING_TRUE = 1;
     private static final int WHEELCHAIR_BOARDING_FALSE = 2;
-
 
     private final Agency agency;
     private final StopAreaRepository stopAreaRepository;
@@ -37,7 +37,7 @@ public class StopProducer {
      * Produce a GTFS stop from a NeTEx StopPlace
      * The GTFS parent station is not set and the NeTEX parent stop place is ignored.
      * The GTFS location type is set to Station.
-     * The NeTEx description is used to set the GTFS description only if it is different from the NeTEx name.
+     * The GTFS description is based on the NeTEx description only if it is different from the NeTEx name, it is ignored otherwise.
      *
      * @param stopPlace a NeTEx stop place
      * @return a GTFS stop.
@@ -71,14 +71,11 @@ public class StopProducer {
         stop.setLat(stopPlace.getCentroid().getLocation().getLatitude().doubleValue());
 
         // transport mode
-        VehicleModeEnumeration netexTransportMode = stopPlace.getTransportMode();
-        if (netexTransportMode != null) {
-            TransportModeNameEnum transportMode = NetexParserUtils.toTransportModeNameEnum(netexTransportMode.value());
-            stop.setVehicleType(RouteTypeEnum.from(transportMode, null).getValue());
+        if (stopPlace.getTransportMode() != null) {
+            stop.setVehicleType(getGtfsVehicleTypeFromNeTexTransportMode(stopPlace.getTransportMode()));
         } else {
             LOGGER.warn("Missing transport mode for stop place {}", stop.getId());
         }
-
         // accessibility
         if (stopPlace.getAccessibilityAssessment() != null) {
             String wheelchairAccess = stopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation().getWheelchairAccess().value();
@@ -95,11 +92,12 @@ public class StopProducer {
 
 
     /**
-     * Produce a GTFS stop from a NeTEx quay
-     * The GTFS name is copied from the parent StopPlace name if the Quay does not have a name.
+     * Produce a GTFS stop from a NeTEx quay.
+     * The GTFS name is copied from the parent StopPlace name since NeTEx Quays do not have a name (Nordic NeTEx profile requirement).
+     * The GTFS vehicle type (GTFS extension) is inherited from the parent StopPlace since NeTEx Quays inherit transport mode from their parent StopPlace (Nordic NeTEx profile requirement).
      * The GTFS parent station is set as the NeTEx parent stop place
      * The GTFS location type is set to STOP
-     * The NeTEx description is used to set the GTFS description only if it is different from the NeTEx name.
+     * The GTFS description is based on the NeTEx description only if it is different from the NeTEx name, it is ignored otherwise.*
      *
      * @param quay the NeTEX Quay
      * @return the GTFS stop
@@ -119,9 +117,8 @@ public class StopProducer {
         stop.setParentStation(parentStopPlace.getId());
 
         // name, description and platform code
-        if (quay.getName() != null) {
-            stop.setName(quay.getName().getValue());
-        } else if (parentStopPlace.getName() != null) {
+        // the name of the quay is inherited from the parent stop place
+        if (parentStopPlace.getName() != null) {
             stop.setName(parentStopPlace.getName().getValue());
         }
         // the description is set only if it is different from the name
@@ -138,11 +135,9 @@ public class StopProducer {
         stop.setLon(quay.getCentroid().getLocation().getLongitude().doubleValue());
         stop.setLat(quay.getCentroid().getLocation().getLatitude().doubleValue());
 
-        // transport mode
-        VehicleModeEnumeration netexTransportMode = quay.getTransportMode();
-        if (netexTransportMode != null) {
-            TransportModeNameEnum transportMode = NetexParserUtils.toTransportModeNameEnum(netexTransportMode.value());
-            stop.setVehicleType(RouteTypeEnum.from(transportMode, null).getValue());
+        // transport mode is inherited from the parent stop place
+        if (parentStopPlace.getTransportMode() != null) {
+            stop.setVehicleType(getGtfsVehicleTypeFromNeTexTransportMode(parentStopPlace.getTransportMode()));
         } else {
             LOGGER.warn("Missing transport mode for quay {}", stop.getId());
         }
@@ -159,6 +154,11 @@ public class StopProducer {
         }
 
         return stop;
+    }
+
+    private int getGtfsVehicleTypeFromNeTexTransportMode(VehicleModeEnumeration netexTransportMode) {
+        TransportModeNameEnum transportMode = NetexParserUtils.toTransportModeNameEnum(netexTransportMode.value());
+        return RouteTypeEnum.from(transportMode, null).getValue();
     }
 
 }
