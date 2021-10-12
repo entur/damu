@@ -19,6 +19,7 @@ import no.entur.damu.export.producer.TransferProducer;
 import no.entur.damu.export.producer.TripProducer;
 import no.entur.damu.export.serializer.GtfsSerializer;
 import no.entur.damu.export.stop.StopAreaRepository;
+import no.entur.damu.export.util.AuthorityUtil;
 import no.entur.damu.export.util.NetexDatasetParserUtil;
 import no.entur.damu.export.util.StopUtil;
 import org.entur.netex.NetexParser;
@@ -100,7 +101,14 @@ public class GtfsExport {
                 .getFrameDefaults().getDefaultLocale().getTimeZone();
 
         AgencyProducer agencyProducer = new AgencyProducer(timeZone);
-        netexTimetableEntitiesIndex.getAuthorityIndex().getAll().stream().map(agencyProducer::produce).forEach(gtfsDao::saveEntity);
+        // create agencies only for authorities that are effectively referenced from a NeTex line
+        netexTimetableEntitiesIndex.getLineIndex()
+                .getAll()
+                .stream()
+                .map(line -> AuthorityUtil.getAuthorityIdForLine(line, netexTimetableEntitiesIndex))
+                .distinct()
+                .map(authorityId -> netexTimetableEntitiesIndex.getAuthorityIndex().get(authorityId))
+                .map(agencyProducer::produce).forEach(gtfsDao::saveEntity);
 
         Agency agency = StopUtil.createEnturAgency();
         convertStops();

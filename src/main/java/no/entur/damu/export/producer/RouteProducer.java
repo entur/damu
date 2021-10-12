@@ -5,14 +5,13 @@ import no.entur.damu.export.model.TransportModeNameEnum;
 import no.entur.damu.export.model.TransportSubModeNameEnum;
 import no.entur.damu.export.util.GtfsUtil;
 import no.entur.damu.export.util.NetexParserUtils;
-import no.entur.damu.export.util.NetworkUtil;
+import no.entur.damu.export.util.AuthorityUtil;
 import org.entur.netex.index.api.NetexEntitiesIndex;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.services.GtfsDao;
 import org.rutebanken.netex.model.Line;
-import org.rutebanken.netex.model.Network;
 import org.rutebanken.netex.model.PresentationStructure;
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
@@ -35,8 +34,7 @@ public class RouteProducer {
         Route route = new Route();
 
         // route agency
-        Network network = NetworkUtil.findNetwork(line.getRepresentedByGroupRef().getRef(), netexEntitiesIndex);
-        String authorityId = network.getTransportOrganisationRef().getValue().getRef();
+        String authorityId = AuthorityUtil.getAuthorityIdForLine(line, netexEntitiesIndex);
         Agency agency = gtfsDao.getAgencyForId(authorityId);
         route.setAgency(agency);
 
