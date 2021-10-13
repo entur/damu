@@ -10,7 +10,7 @@ public interface GtfsDatasetRepository {
 
     Agency getAgencyById(String agencyId);
     Trip getTripById(String tripId);
-    Stop getStopById(String quayId);
+    Stop getStopById(String stopId);
 
     void saveEntity(Object entity);
     InputStream writeGtfs();
