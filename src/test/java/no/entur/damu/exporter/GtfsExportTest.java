@@ -38,10 +38,6 @@ class GtfsExportTest {
         fileStopAreaRepository.loadStopAreas(getClass().getResourceAsStream("/RailStations_latest.zip"));
         GtfsExport gtfsExport = new GtfsExport("FLB", getClass().getResourceAsStream("/rb_flb-aggregated-netex.zip"), fileStopAreaRepository);
 
-        /*fileStopAreaRepository.loadStopAreas(getClass().getResourceAsStream("/Full_latest.zip"));
-        GtfsExport gtfsExport = new GtfsExport("ATB", getClass().getResourceAsStream("/rb_atb-aggregated-netex.zip"), fileStopAreaRepository);*/
-
-
         InputStream exportedGtfs = gtfsExport.exportGtfs();
 
         java.nio.file.Files.copy(
