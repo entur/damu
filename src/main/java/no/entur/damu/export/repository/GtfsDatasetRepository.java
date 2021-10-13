@@ -7,14 +7,12 @@ import org.onebusaway.gtfs.model.Trip;
 import java.io.InputStream;
 
 public interface GtfsDatasetRepository {
-    Agency getAgencyById(String authorityId);
 
-    void saveEntity(Object entity);
-
+    Agency getAgencyById(String agencyId);
     Trip getTripById(String tripId);
-
     Stop getStopById(String quayId);
 
+    void saveEntity(Object entity);
     InputStream writeGtfs();
 
     Agency getDefaultAgency();

@@ -26,13 +26,8 @@ public class DefaultGtfsRepository implements GtfsDatasetRepository {
     }
 
     @Override
-    public Agency getAgencyById(String authorityId) {
-        return gtfsDao.getAgencyForId(authorityId);
-    }
-
-    @Override
-    public void saveEntity(Object entity) {
-        gtfsDao.saveEntity(entity);
+    public Agency getAgencyById(String agencyId) {
+        return gtfsDao.getAgencyForId(agencyId);
     }
 
     @Override
@@ -50,6 +45,11 @@ public class DefaultGtfsRepository implements GtfsDatasetRepository {
         agencyAndId.setId(stopId);
         agencyAndId.setAgencyId(defaultAgency.getId());
         return gtfsDao.getStopForId(agencyAndId);
+    }
+
+    @Override
+    public void saveEntity(Object entity) {
+        gtfsDao.saveEntity(entity);
     }
 
     @Override
