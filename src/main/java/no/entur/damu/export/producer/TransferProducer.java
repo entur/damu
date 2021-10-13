@@ -1,21 +1,15 @@
 package no.entur.damu.export.producer;
 
+import no.entur.damu.export.repository.GtfsDatasetRepository;
+import no.entur.damu.export.repository.NetexDatasetRepository;
 import no.entur.damu.export.util.StopUtil;
-import org.entur.netex.index.api.NetexEntitiesIndex;
 import org.onebusaway.gtfs.model.Agency;
-import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.Transfer;
 import org.onebusaway.gtfs.model.Trip;
-import org.onebusaway.gtfs.services.GtfsDao;
-import org.rutebanken.netex.model.ServiceJourney;
 import org.rutebanken.netex.model.ServiceJourneyInterchange;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TransferProducer {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransferProducer.class);
 
     private static final int TRANSFER_RECOMMENDED = 0;
     private static final int TRANSFER_TIMED = 1;
@@ -23,13 +17,13 @@ public class TransferProducer {
     private static final int TRANSFER_NOT_ALLOWED = 3;
 
     private final Agency agency;
-    private final NetexEntitiesIndex netexTimetableEntitiesIndex;
-    private final GtfsDao gtfsDao;
+    private final NetexDatasetRepository netexDatasetRepository;
+    private final GtfsDatasetRepository gtfsDatasetRepository;
 
-    public TransferProducer(Agency agency, NetexEntitiesIndex netexTimetableEntitiesIndex, GtfsDao gtfsDao) {
-        this.agency = agency;
-        this.netexTimetableEntitiesIndex = netexTimetableEntitiesIndex;
-        this.gtfsDao = gtfsDao;
+    public TransferProducer(NetexDatasetRepository netexDatasetRepository, GtfsDatasetRepository gtfsDatasetRepository) {
+        this.agency = gtfsDatasetRepository.getDefaultAgency();
+        this.netexDatasetRepository = netexDatasetRepository;
+        this.gtfsDatasetRepository = gtfsDatasetRepository;
     }
 
 
@@ -37,19 +31,19 @@ public class TransferProducer {
         Transfer transfer = new Transfer();
 
         String fromServiceJourneyId = serviceJourneyInterchange.getFromJourneyRef().getRef();
-        Trip fromTrip = getGtfsTripFromServiceJourneyId(fromServiceJourneyId);
+        Trip fromTrip = gtfsDatasetRepository.getTripById(fromServiceJourneyId);
         transfer.setFromTrip(fromTrip);
 
         String toServiceJourneyId = serviceJourneyInterchange.getToJourneyRef().getRef();
-        Trip toTrip = getGtfsTripFromServiceJourneyId(toServiceJourneyId);
+        Trip toTrip = gtfsDatasetRepository.getTripById(toServiceJourneyId);
         transfer.setToTrip(toTrip);
 
         String fromScheduledStopPointId = serviceJourneyInterchange.getFromPointRef().getRef();
-        Stop fromStop = StopUtil.getGtfsStopFromScheduledStopPointId(fromScheduledStopPointId, netexTimetableEntitiesIndex, gtfsDao);
+        Stop fromStop = StopUtil.getGtfsStopFromScheduledStopPointId(fromScheduledStopPointId, netexDatasetRepository, gtfsDatasetRepository);
         transfer.setFromStop(fromStop);
 
         String toScheduledStopPointId = serviceJourneyInterchange.getFromPointRef().getRef();
-        Stop toStop = StopUtil.getGtfsStopFromScheduledStopPointId(toScheduledStopPointId, netexTimetableEntitiesIndex, gtfsDao);
+        Stop toStop = StopUtil.getGtfsStopFromScheduledStopPointId(toScheduledStopPointId, netexDatasetRepository, gtfsDatasetRepository);
         transfer.setToStop(toStop);
 
         if (Boolean.TRUE.equals(serviceJourneyInterchange.isGuaranteed())) {
@@ -68,12 +62,5 @@ public class TransferProducer {
 
     }
 
-    private Trip getGtfsTripFromServiceJourneyId(String serviceJourneyId) {
-        ServiceJourney fromServiceJourney = netexTimetableEntitiesIndex.getServiceJourneyIndex().get(serviceJourneyId);
-        AgencyAndId agencyAndId = new AgencyAndId();
-        agencyAndId.setId(fromServiceJourney.getId());
-        agencyAndId.setAgencyId(agency.getId());
-        return gtfsDao.getTripForId(agencyAndId);
-    }
 
 }

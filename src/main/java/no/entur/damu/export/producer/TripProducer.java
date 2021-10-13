@@ -1,7 +1,8 @@
 package no.entur.damu.export.producer;
 
+import no.entur.damu.export.repository.GtfsDatasetRepository;
+import no.entur.damu.export.repository.NetexDatasetRepository;
 import no.entur.damu.export.util.DestinationDisplayUtil;
-import org.entur.netex.index.api.NetexEntitiesIndex;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Trip;
@@ -34,12 +35,12 @@ public class TripProducer {
 
     private final Agency agency;
     private final GtfsServiceRepository gtfsServiceRepository;
-    private final NetexEntitiesIndex netexTimetableEntitiesIndex;
+    private final NetexDatasetRepository netexDatasetRepository;
 
-    public TripProducer(Agency agency, GtfsServiceRepository gtfsServiceRepository, NetexEntitiesIndex netexTimetableEntitiesIndex) {
-        this.agency = agency;
+    public TripProducer(NetexDatasetRepository netexDatasetRepository, GtfsDatasetRepository gtfsDatasetRepository, GtfsServiceRepository gtfsServiceRepository) {
+        this.agency = gtfsDatasetRepository.getDefaultAgency();
         this.gtfsServiceRepository = gtfsServiceRepository;
-        this.netexTimetableEntitiesIndex = netexTimetableEntitiesIndex;
+        this.netexDatasetRepository = netexDatasetRepository;
     }
 
 
@@ -88,20 +89,19 @@ public class TripProducer {
                     .getDayTypeRef()
                     .stream()
                     .map(jaxbElement -> jaxbElement.getValue().getRef())
-                    .map(netexTimetableEntitiesIndex.getDayTypeIndex()::get)
+                    .map(netexDatasetRepository::getDayTypeById)
                     .collect(Collectors.toSet());
             serviceAgencyAndId.setId(gtfsServiceRepository.getServiceForDayTypes(dayTypes).getId());
         } else {
             LOGGER.debug("Producing trip based on DatedServiceJourneys for ServiceJourney {}", serviceJourney.getId());
             // DatedServiceJourneys for cancelled and replaced trips are filtered out
-            Set<OperatingDay> operatingDays = netexTimetableEntitiesIndex.getDatedServiceJourneyByServiceJourneyRefIndex()
-                    .get(serviceJourney.getId())
+            Set<OperatingDay> operatingDays = netexDatasetRepository.getDatedServiceJourneysByServiceJourneyId(serviceJourney.getId())
                     .stream()
                     .filter(datedServiceJourney -> {
                         ServiceAlterationEnumeration serviceAlteration = datedServiceJourney.getServiceAlteration();
                         return ServiceAlterationEnumeration.CANCELLATION != serviceAlteration && ServiceAlterationEnumeration.REPLACED != serviceAlteration;
                     })
-                    .map(datedServiceJourney -> netexTimetableEntitiesIndex.getOperatingDayIndex().get(datedServiceJourney.getOperatingDayRef().getRef()))
+                    .map(datedServiceJourney -> netexDatasetRepository.getOperatingDayById(datedServiceJourney.getOperatingDayRef().getRef()))
                     .collect(Collectors.toSet());
             serviceAgencyAndId.setId(gtfsServiceRepository.getServiceForOperatingDays(operatingDays).getId());
         }
@@ -110,7 +110,7 @@ public class TripProducer {
 
         // destination display = head sign
         if (startDestinationDisplay != null) {
-            trip.setTripHeadsign(DestinationDisplayUtil.getFrontTextWithComputedVias(startDestinationDisplay, netexTimetableEntitiesIndex));
+            trip.setTripHeadsign(DestinationDisplayUtil.getFrontTextWithComputedVias(startDestinationDisplay, netexDatasetRepository));
         } else if (serviceJourney.getName() != null) {
             trip.setTripHeadsign(serviceJourney.getName().getValue());
         } else if (journeyPattern.getName() != null) {

@@ -1,13 +1,13 @@
 package no.entur.damu.export.producer;
 
 import no.entur.damu.export.model.GtfsShape;
+import no.entur.damu.export.repository.GtfsDatasetRepository;
+import no.entur.damu.export.repository.NetexDatasetRepository;
 import no.entur.damu.export.util.DestinationDisplayUtil;
 import no.entur.damu.export.util.StopUtil;
-import org.entur.netex.index.api.NetexEntitiesIndex;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
-import org.onebusaway.gtfs.services.GtfsMutableDao;
 import org.rutebanken.netex.model.DestinationDisplay;
 import org.rutebanken.netex.model.JourneyPattern;
 import org.rutebanken.netex.model.StopPointInJourneyPattern;
@@ -24,13 +24,13 @@ public class StopTimeProducer {
     private static final int PICKUP_AND_DROP_OFF_TYPE_NOT_AVAILABLE = 1;
     private static final int PICKUP_AND_DROP_OFF_TYPE_MUST_COORDINATE_WITH_DRIVER = 3;
 
-    private final NetexEntitiesIndex netexTimetableEntitiesIndex;
-    private final GtfsMutableDao gtfsDao;
+    private final NetexDatasetRepository netexDatasetRepository;
+    private final GtfsDatasetRepository gtfsDatasetRepository;
 
 
-    public StopTimeProducer(NetexEntitiesIndex netexTimetableEntitiesIndex, GtfsMutableDao gtfsDao) {
-        this.netexTimetableEntitiesIndex = netexTimetableEntitiesIndex;
-        this.gtfsDao = gtfsDao;
+    public StopTimeProducer(NetexDatasetRepository netexDatasetRepository, GtfsDatasetRepository gtfsDatasetRepository) {
+        this.netexDatasetRepository = netexDatasetRepository;
+        this.gtfsDatasetRepository = gtfsDatasetRepository;
     }
 
     public StopTime produce(TimetabledPassingTime timetabledPassingTime, JourneyPattern journeyPattern, Trip trip, GtfsShape gtfsShape, String currentHeadSign) {
@@ -50,7 +50,7 @@ public class StopTimeProducer {
         int stopSequence = stopPointInSequence.getOrder().intValueExact();
         stopTime.setStopSequence(stopSequence);
         String scheduledStopPointId = stopPointInSequence.getScheduledStopPointRef().getValue().getRef();
-        Stop stop = StopUtil.getGtfsStopFromScheduledStopPointId(scheduledStopPointId, netexTimetableEntitiesIndex, gtfsDao);
+        Stop stop = StopUtil.getGtfsStopFromScheduledStopPointId(scheduledStopPointId, netexDatasetRepository, gtfsDatasetRepository);
         stopTime.setStop(stop);
 
         // arrival time
@@ -79,8 +79,8 @@ public class StopTimeProducer {
         // it can be ignored if it is the same as the trip head sign
         String stopHeadSignOnCurrentStop = null;
         if (stopPointInSequence.getDestinationDisplayRef() != null) {
-            DestinationDisplay destinationDisplay = netexTimetableEntitiesIndex.getDestinationDisplayIndex().get(stopPointInSequence.getDestinationDisplayRef().getRef());
-            stopHeadSignOnCurrentStop = DestinationDisplayUtil.getFrontTextWithComputedVias(destinationDisplay, netexTimetableEntitiesIndex);
+            DestinationDisplay destinationDisplay = netexDatasetRepository.getDestinationDisplayById(stopPointInSequence.getDestinationDisplayRef().getRef());
+            stopHeadSignOnCurrentStop = DestinationDisplayUtil.getFrontTextWithComputedVias(destinationDisplay, netexDatasetRepository);
             if(stopHeadSignOnCurrentStop != null && stopHeadSignOnCurrentStop.equals(trip.getTripHeadsign())) {
                 stopHeadSignOnCurrentStop = null;
             }

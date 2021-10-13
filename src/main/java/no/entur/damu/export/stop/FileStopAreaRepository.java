@@ -1,10 +1,11 @@
 package no.entur.damu.export.stop;
 
 import no.entur.damu.export.exception.NetexParsingException;
+import no.entur.damu.export.repository.DefaultNetexDatasetRepository;
+import no.entur.damu.export.repository.NetexDatasetRepository;
 import no.entur.damu.export.util.NetexDatasetParserUtil;
 import org.entur.netex.NetexParser;
 import org.entur.netex.index.api.NetexEntitiesIndex;
-import org.entur.netex.index.impl.NetexEntitiesIndexImpl;
 import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.StopPlace;
 import org.slf4j.Logger;
@@ -36,13 +37,16 @@ public class FileStopAreaRepository implements StopAreaRepository {
 
         LOGGER.info("Importing NeTEx Stop dataset");
 
-        NetexEntitiesIndex netexStopEntitiesIndex = new NetexEntitiesIndexImpl();
+        NetexDatasetRepository netexStopRepository = new DefaultNetexDatasetRepository();
+
 
         try (ZipInputStream zipInputStream = new ZipInputStream(stopDataset)) {
-            NetexDatasetParserUtil.parse(netexParser, zipInputStream, netexStopEntitiesIndex);
+            NetexDatasetParserUtil.parse(netexParser, zipInputStream, netexStopRepository);
         } catch (IOException e) {
             throw new NetexParsingException("Error while parsing the NeTEx stop dataset", e);
         }
+
+        NetexEntitiesIndex netexStopEntitiesIndex = netexStopRepository.getIndex();
 
         stopPlaceByQuayId = netexStopEntitiesIndex.getStopPlaceIdByQuayIdIndex()
                 .entrySet()

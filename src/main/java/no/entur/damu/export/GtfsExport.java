@@ -17,22 +17,18 @@ import no.entur.damu.export.producer.StopProducer;
 import no.entur.damu.export.producer.StopTimeProducer;
 import no.entur.damu.export.producer.TransferProducer;
 import no.entur.damu.export.producer.TripProducer;
-import no.entur.damu.export.serializer.GtfsSerializer;
+import no.entur.damu.export.repository.DefaultGtfsRepository;
+import no.entur.damu.export.repository.DefaultNetexDatasetRepository;
+import no.entur.damu.export.repository.GtfsDatasetRepository;
+import no.entur.damu.export.repository.NetexDatasetRepository;
 import no.entur.damu.export.stop.StopAreaRepository;
-import no.entur.damu.export.util.AuthorityUtil;
 import no.entur.damu.export.util.NetexDatasetParserUtil;
-import no.entur.damu.export.util.StopUtil;
 import org.entur.netex.NetexParser;
-import org.entur.netex.index.api.NetexEntitiesIndex;
-import org.entur.netex.index.impl.NetexEntitiesIndexImpl;
-import org.onebusaway.gtfs.impl.GtfsRelationalDaoImpl;
-import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.ServiceCalendar;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
-import org.onebusaway.gtfs.services.GtfsMutableDao;
 import org.rutebanken.netex.model.DestinationDisplay;
 import org.rutebanken.netex.model.JourneyPattern;
 import org.rutebanken.netex.model.Line;
@@ -59,8 +55,8 @@ public class GtfsExport {
     private static final Logger LOGGER = LoggerFactory.getLogger(GtfsExport.class);
 
     private final NetexParser netexParser;
-    private final NetexEntitiesIndex netexTimetableEntitiesIndex;
-    private final GtfsMutableDao gtfsDao;
+    private final NetexDatasetRepository netexDatasetRepository;
+    private final GtfsDatasetRepository gtfsDatasetRepository;
     private final GtfsServiceRepository gtfsServiceRepository;
 
     private final InputStream timetableDataset;
@@ -70,21 +66,23 @@ public class GtfsExport {
         this.timetableDataset = timetableDataset;
         this.stopAreaRepository = stopAreaRepository;
         this.netexParser = new NetexParser();
-        this.netexTimetableEntitiesIndex = new NetexEntitiesIndexImpl();
-        this.gtfsDao = new GtfsRelationalDaoImpl();
-        this.gtfsServiceRepository = new GtfsServiceRepository(codespace, netexTimetableEntitiesIndex);
+        this.gtfsDatasetRepository = new DefaultGtfsRepository();
+        this.netexDatasetRepository = new DefaultNetexDatasetRepository();
+        this.gtfsServiceRepository = new GtfsServiceRepository(codespace, netexDatasetRepository);
+
     }
 
     public InputStream exportGtfs() {
         importNetex();
         convertNetexToGtfs();
-        return new GtfsSerializer(gtfsDao).writeGtfs();
+        return gtfsDatasetRepository.writeGtfs();
+
     }
 
     private void importNetex() {
         LOGGER.info("Importing NeTEx Timetable dataset");
         try (ZipInputStream zipInputStream = new ZipInputStream(timetableDataset)) {
-            NetexDatasetParserUtil.parse(netexParser, zipInputStream, netexTimetableEntitiesIndex);
+            NetexDatasetParserUtil.parse(netexParser, zipInputStream, netexDatasetRepository);
         } catch (IOException e) {
             throw new NetexParsingException("Error while parsing the NeTEx timetable dataset", e);
         }
@@ -94,27 +92,21 @@ public class GtfsExport {
     private void convertNetexToGtfs() {
         LOGGER.info("Converting NeTEx to GTFS");
 
-        String timeZone = netexTimetableEntitiesIndex.getCompositeFrames()
-                .stream()
-                .findFirst()
-                .orElseThrow()
-                .getFrameDefaults().getDefaultLocale().getTimeZone();
+        String timeZone = netexDatasetRepository.getTimeZone();
 
         AgencyProducer agencyProducer = new AgencyProducer(timeZone);
         // create agencies only for authorities that are effectively referenced from a NeTex line
-        netexTimetableEntitiesIndex.getLineIndex()
-                .getAll()
+        netexDatasetRepository.getLines()
                 .stream()
-                .map(line -> AuthorityUtil.getAuthorityIdForLine(line, netexTimetableEntitiesIndex))
+                .map(netexDatasetRepository::getAuthorityIdForLine)
                 .distinct()
-                .map(authorityId -> netexTimetableEntitiesIndex.getAuthorityIndex().get(authorityId))
-                .map(agencyProducer::produce).forEach(gtfsDao::saveEntity);
+                .map(netexDatasetRepository::getAuthorityById)
+                .map(agencyProducer::produce).forEach(gtfsDatasetRepository::saveEntity);
 
-        Agency agency = StopUtil.createEnturAgency();
         convertStops();
-        convertRoutes(agency);
-        convertServices(agency);
-        convertTransfers(agency);
+        convertRoutes();
+        convertServices();
+        convertTransfers();
         addFeedInfo();
 
     }
@@ -122,39 +114,39 @@ public class GtfsExport {
 
     private void addFeedInfo() {
         FeedInfoProducer feedInfoProducer = new FeedInfoProducer();
-        gtfsDao.saveEntity(feedInfoProducer.produceFeedInfo());
+        gtfsDatasetRepository.saveEntity(feedInfoProducer.produceFeedInfo());
     }
 
-    private void convertRoutes(Agency agency) {
-        RouteProducer routeProducer = new RouteProducer(netexTimetableEntitiesIndex, gtfsDao);
-        ShapeProducer shapeProducer = new ShapeProducer(agency, netexTimetableEntitiesIndex);
-        TripProducer tripProducer = new TripProducer(agency, gtfsServiceRepository, netexTimetableEntitiesIndex);
-        StopTimeProducer stopTimeProducer = new StopTimeProducer(netexTimetableEntitiesIndex, gtfsDao);
-        for (Line netexLine : netexTimetableEntitiesIndex.getLineIndex().getAll()) {
+    private void convertRoutes() {
+        RouteProducer routeProducer = new RouteProducer(netexDatasetRepository, gtfsDatasetRepository);
+        ShapeProducer shapeProducer = new ShapeProducer(netexDatasetRepository, gtfsDatasetRepository);
+        TripProducer tripProducer = new TripProducer(netexDatasetRepository, gtfsDatasetRepository, gtfsServiceRepository);
+        StopTimeProducer stopTimeProducer = new StopTimeProducer(netexDatasetRepository, gtfsDatasetRepository);
+        for (Line netexLine : netexDatasetRepository.getLines()) {
             Route gtfsRoute = routeProducer.produce(netexLine);
-            gtfsDao.saveEntity(gtfsRoute);
-            for (org.rutebanken.netex.model.Route netexRoute : getNetexRouteForNetexLine(netexLine)) {
-                for (JourneyPattern journeyPattern : getJourneyPatternForNetexRoute(netexRoute)) {
+            gtfsDatasetRepository.saveEntity(gtfsRoute);
+            for (org.rutebanken.netex.model.Route netexRoute : netexDatasetRepository.getRoutesByLine(netexLine)) {
+                for (JourneyPattern journeyPattern : netexDatasetRepository.getJourneyPatternByRoute(netexRoute)) {
                     GtfsShape gtfsShape = shapeProducer.produce(journeyPattern);
                     AgencyAndId shapeId = null;
                     if (gtfsShape != null && !gtfsShape.getShapePoints().isEmpty()) {
-                        gtfsShape.getShapePoints().forEach(gtfsDao::saveEntity);
+                        gtfsShape.getShapePoints().forEach(gtfsDatasetRepository::saveEntity);
                         shapeId = new AgencyAndId();
-                        shapeId.setAgencyId(agency.getId());
+                        shapeId.setAgencyId(gtfsDatasetRepository.getDefaultAgency().getId());
                         shapeId.setId(gtfsShape.getId());
                     }
 
                     StopPointInJourneyPattern firstStopPointInJourneyPattern = (StopPointInJourneyPattern) journeyPattern.getPointsInSequence().getPointInJourneyPatternOrStopPointInJourneyPatternOrTimingPointInJourneyPattern().get(0);
-                    DestinationDisplay startDestinationDisplay = netexTimetableEntitiesIndex.getDestinationDisplayIndex().get(firstStopPointInJourneyPattern.getDestinationDisplayRef().getRef());
+                    DestinationDisplay startDestinationDisplay = netexDatasetRepository.getDestinationDisplayById(firstStopPointInJourneyPattern.getDestinationDisplayRef().getRef());
 
-                    for (ServiceJourney serviceJourney : getServiceJourneyForJourneyPattern(journeyPattern)) {
+                    for (ServiceJourney serviceJourney : netexDatasetRepository.getServiceJourneysByJourneyPattern(journeyPattern)) {
                         Trip trip = tripProducer.produce(serviceJourney, journeyPattern, netexRoute, gtfsRoute, shapeId, startDestinationDisplay);
                         if (trip != null) {
-                            gtfsDao.saveEntity(trip);
+                            gtfsDatasetRepository.saveEntity(trip);
                             String currentHeadSign = null;
                             for (TimetabledPassingTime timetabledPassingTime : serviceJourney.getPassingTimes().getTimetabledPassingTime()) {
                                 StopTime stopTime = stopTimeProducer.produce(timetabledPassingTime, journeyPattern, trip, gtfsShape, currentHeadSign);
-                                gtfsDao.saveEntity(stopTime);
+                                gtfsDatasetRepository.saveEntity(stopTime);
                                 currentHeadSign = stopTime.getStopHeadsign();
                             }
                         }
@@ -164,75 +156,49 @@ public class GtfsExport {
         }
     }
 
-    private void convertServices(Agency agency) {
-        ServiceCalendarDateProducer serviceCalendarDateProducer = new ServiceCalendarDateProducer(agency);
-        ServiceCalendarProducer serviceCalendarProducer = new ServiceCalendarProducer(agency);
+    private void convertServices() {
+        ServiceCalendarDateProducer serviceCalendarDateProducer = new ServiceCalendarDateProducer(gtfsDatasetRepository);
+        ServiceCalendarProducer serviceCalendarProducer = new ServiceCalendarProducer(gtfsDatasetRepository);
         for (GtfsService gtfsService : gtfsServiceRepository.getAllServices()) {
             ServiceCalendarPeriod serviceCalendarPeriod = gtfsService.getServiceCalendarPeriod();
             if (serviceCalendarPeriod != null) {
                 ServiceCalendar serviceCalendar = serviceCalendarProducer.produce(gtfsService.getId(), serviceCalendarPeriod.getStartDate(), serviceCalendarPeriod.getEndDate(), serviceCalendarPeriod.getDaysOfWeek());
-                gtfsDao.saveEntity(serviceCalendar);
+                gtfsDatasetRepository.saveEntity(serviceCalendar);
             }
             for (LocalDateTime includedDate : gtfsService.getIncludedDates()) {
-                gtfsDao.saveEntity(serviceCalendarDateProducer.produce(gtfsService.getId(), includedDate, true));
+                gtfsDatasetRepository.saveEntity(serviceCalendarDateProducer.produce(gtfsService.getId(), includedDate, true));
             }
             for (LocalDateTime excludedDate : gtfsService.getExcludedDates()) {
-                gtfsDao.saveEntity(serviceCalendarDateProducer.produce(gtfsService.getId(), excludedDate, false));
+                gtfsDatasetRepository.saveEntity(serviceCalendarDateProducer.produce(gtfsService.getId(), excludedDate, false));
             }
 
         }
 
     }
 
-    private void convertTransfers(Agency agency) {
-        TransferProducer transferProducer = new TransferProducer(agency, netexTimetableEntitiesIndex, gtfsDao);
-        netexTimetableEntitiesIndex.getServiceJourneyInterchangeIndex()
-                .getAll()
+    private void convertTransfers() {
+        TransferProducer transferProducer = new TransferProducer(netexDatasetRepository, gtfsDatasetRepository);
+        netexDatasetRepository.getServiceJourneyInterchanges()
                 .stream()
                 .map(transferProducer::produce)
-                .forEach(gtfsDao::saveEntity);
-    }
-
-    private Collection<ServiceJourney> getServiceJourneyForJourneyPattern(JourneyPattern journeyPattern) {
-        return netexTimetableEntitiesIndex.getServiceJourneyIndex()
-                .getAll()
-                .stream()
-                .filter(serviceJourney -> serviceJourney.getJourneyPatternRef().getValue().getRef().equals(journeyPattern.getId()))
-                .collect(Collectors.toSet());
-    }
-
-    private Collection<org.rutebanken.netex.model.Route> getNetexRouteForNetexLine(Line netexLine) {
-        return netexTimetableEntitiesIndex.getRouteIndex()
-                .getAll()
-                .stream()
-                .filter(route -> route.getLineRef().getValue().getRef().equals(netexLine.getId()))
-                .collect(Collectors.toSet());
-    }
-
-    private Collection<JourneyPattern> getJourneyPatternForNetexRoute(org.rutebanken.netex.model.Route netexRoute) {
-        return netexTimetableEntitiesIndex.getJourneyPatternIndex()
-                .getAll()
-                .stream()
-                .filter(journeyPattern -> journeyPattern.getRouteRef().getRef().equals(netexRoute.getId()))
-                .collect(Collectors.toSet());
+                .forEach(gtfsDatasetRepository::saveEntity);
     }
 
 
     private void convertStops() {
 
-        StopProducer stopProducer = new StopProducer(stopAreaRepository);
+        StopProducer stopProducer = new StopProducer(stopAreaRepository, gtfsDatasetRepository);
 
         // Retrieve all quays referenced by valid ServiceJourneys
         // This excludes quays referenced by cancelled or replaced service journeys
         // and quays referenced only as route points or in dead runs
-        Set<String> allQuaysId = netexTimetableEntitiesIndex.getServiceJourneyIndex()
-                .getAll()
+        Set<String> allQuaysId = netexDatasetRepository.getServiceJourneys()
                 .stream()
                 .filter(serviceJourney -> ServiceAlterationEnumeration.CANCELLATION != serviceJourney.getServiceAlteration()
                         && ServiceAlterationEnumeration.REPLACED != serviceJourney.getServiceAlteration())
                 .map(serviceJourney -> serviceJourney.getJourneyPatternRef().getValue().getRef())
                 .distinct()
-                .map(journeyPatternRef -> netexTimetableEntitiesIndex.getJourneyPatternIndex().get(journeyPatternRef))
+                .map(netexDatasetRepository::getJourneyPatternById)
                 .map(journeyPattern -> journeyPattern.getPointsInSequence().getPointInJourneyPatternOrStopPointInJourneyPatternOrTimingPointInJourneyPattern())
                 .flatMap(Collection::stream)
                 .map(stopPointInJourneyPattern -> ((StopPointInJourneyPattern) stopPointInJourneyPattern).getScheduledStopPointRef().getValue().getRef())
@@ -244,18 +210,18 @@ public class GtfsExport {
         // Persist the quays
         allQuaysId.stream().map(this::findQuayById)
                 .map(stopProducer::produceStopFromQuay)
-                .forEach(gtfsDao::saveEntity);
+                .forEach(gtfsDatasetRepository::saveEntity);
 
         // Retrieve and persist all the stop places that contain the quays
         allQuaysId.stream()
                 .map(this::findStopPlaceByQuayId)
                 .distinct()
                 .map(stopProducer::produceStopFromStopPlace)
-                .forEach(gtfsDao::saveEntity);
+                .forEach(gtfsDatasetRepository::saveEntity);
     }
 
     private boolean isFlexibleScheduledStopPoint(String scheduledStopPointId) {
-        String flexibleStopPlaceId = netexTimetableEntitiesIndex.getFlexibleStopPlaceIdByStopPointRefIndex().get(scheduledStopPointId);
+        String flexibleStopPlaceId = netexDatasetRepository.getFlexibleStopPlaceIdByScheduledStopPointId(scheduledStopPointId);
         if (flexibleStopPlaceId != null) {
             LOGGER.warn("Ignoring scheduled stop point {} referring to flexible stop place {}", scheduledStopPointId, flexibleStopPlaceId);
             return true;
@@ -264,7 +230,7 @@ public class GtfsExport {
     }
 
     private String findQuayIdByScheduledStopPointId(String scheduledStopPointRef) {
-        String quayId = netexTimetableEntitiesIndex.getQuayIdByStopPointRefIndex().get(scheduledStopPointRef);
+        String quayId = netexDatasetRepository.getQuayIdByScheduledStopPointId(scheduledStopPointRef);
         if (quayId == null) {
             throw new QuayNotFoundException("Could not find Quay id for scheduled stop point id " + scheduledStopPointRef);
         }

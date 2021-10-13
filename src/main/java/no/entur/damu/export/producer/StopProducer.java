@@ -2,9 +2,9 @@ package no.entur.damu.export.producer;
 
 import no.entur.damu.export.model.RouteTypeEnum;
 import no.entur.damu.export.model.TransportModeNameEnum;
+import no.entur.damu.export.repository.GtfsDatasetRepository;
 import no.entur.damu.export.stop.StopAreaRepository;
 import no.entur.damu.export.util.NetexParserUtils;
-import no.entur.damu.export.util.StopUtil;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
@@ -24,11 +24,11 @@ public class StopProducer {
     private static final int WHEELCHAIR_BOARDING_TRUE = 1;
     private static final int WHEELCHAIR_BOARDING_FALSE = 2;
 
-    private final Agency agency;
+    private final Agency defaultAgency;
     private final StopAreaRepository stopAreaRepository;
 
-    public StopProducer(StopAreaRepository stopAreaRepository) {
-        this.agency = StopUtil.createEnturAgency();
+    public StopProducer(StopAreaRepository stopAreaRepository, GtfsDatasetRepository gtfsDatasetRepository) {
+        this.defaultAgency = gtfsDatasetRepository.getDefaultAgency();
         this.stopAreaRepository = stopAreaRepository;
     }
 
@@ -45,7 +45,7 @@ public class StopProducer {
     public Stop produceStopFromStopPlace(StopPlace stopPlace) {
         Stop stop = new Stop();
         AgencyAndId agencyAndId = new AgencyAndId();
-        agencyAndId.setAgencyId(agency.getId());
+        agencyAndId.setAgencyId(defaultAgency.getId());
         agencyAndId.setId(stopPlace.getId());
         stop.setId(agencyAndId);
 
@@ -105,7 +105,7 @@ public class StopProducer {
     public Stop produceStopFromQuay(Quay quay) {
         Stop stop = new Stop();
         AgencyAndId agencyAndId = new AgencyAndId();
-        agencyAndId.setAgencyId(agency.getId());
+        agencyAndId.setAgencyId(defaultAgency.getId());
         agencyAndId.setId(quay.getId());
         stop.setId(agencyAndId);
 
