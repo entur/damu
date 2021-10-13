@@ -17,9 +17,10 @@
 package no.entur.damu.routes.export;
 
 import no.entur.damu.Constants;
+import no.entur.damu.export.GtfsExporter;
 import no.entur.damu.export.exception.GtfsExportException;
+import no.entur.damu.netex.DamuGtfsExporter;
 import no.entur.damu.routes.BaseRouteBuilder;
-import no.entur.damu.export.GtfsExport;
 import no.entur.damu.export.stop.StopAreaRepositoryFactory;
 import org.apache.camel.LoggingLevel;
 import org.springframework.beans.factory.annotation.Value;
@@ -102,7 +103,7 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
                 .process(exchange -> {
                     InputStream timetableDataset = exchange.getIn().getHeader(TIMETABLE_DATASET_FILE, InputStream.class);
                     String codespace = exchange.getIn().getHeader(DATASET_CODESPACE, String.class).replace("rb_", "").toUpperCase();
-                    GtfsExport gtfsExport = new GtfsExport(codespace, timetableDataset, stopAreaRepositoryFactory.getStopAreaRepository());
+                    GtfsExporter gtfsExport = new DamuGtfsExporter(codespace, timetableDataset, stopAreaRepositoryFactory.getStopAreaRepository());
                     exchange.getIn().setBody(gtfsExport.exportGtfs());
                 })
                 .log(LoggingLevel.INFO, correlation() + "Dataset processing complete")

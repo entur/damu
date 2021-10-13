@@ -16,7 +16,8 @@
 
 package no.entur.damu.exporter;
 
-import no.entur.damu.export.GtfsExport;
+import no.entur.damu.export.DefaultGtfsExporter;
+import no.entur.damu.export.GtfsExporter;
 import no.entur.damu.export.stop.FileStopAreaRepository;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Disabled;
@@ -36,7 +37,11 @@ class GtfsExportTest {
         FileStopAreaRepository fileStopAreaRepository = new FileStopAreaRepository();
 
         fileStopAreaRepository.loadStopAreas(getClass().getResourceAsStream("/RailStations_latest.zip"));
-        GtfsExport gtfsExport = new GtfsExport("FLB", getClass().getResourceAsStream("/rb_flb-aggregated-netex.zip"), fileStopAreaRepository);
+        GtfsExporter gtfsExport = new DefaultGtfsExporter("FLB", getClass().getResourceAsStream("/rb_flb-aggregated-netex.zip"), fileStopAreaRepository);
+
+        /*fileStopAreaRepository.loadStopAreas(getClass().getResourceAsStream("/Full_latest.zip"));
+        DefaultGtfsExporter gtfsExport = new DefaultGtfsExporter("ATB", getClass().getResourceAsStream("/rb_atb-aggregated-netex.zip"), fileStopAreaRepository);*/
+
 
         InputStream exportedGtfs = gtfsExport.exportGtfs();
 
