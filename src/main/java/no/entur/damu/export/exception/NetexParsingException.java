@@ -9,4 +9,8 @@ public class NetexParsingException extends GtfsExportException {
     public NetexParsingException(String message, Throwable cause) {
         super(message, cause);
     }
+
+    public NetexParsingException(String message) {
+        super(message);
+    }
 }

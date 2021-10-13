@@ -1,9 +1,10 @@
 package no.entur.damu.export.producer;
 
 import no.entur.damu.export.model.GtfsShape;
+import no.entur.damu.export.repository.GtfsDatasetRepository;
+import no.entur.damu.export.repository.NetexDatasetRepository;
 import no.entur.damu.export.util.GtfsUtil;
 import no.entur.damu.export.util.JtsGmlConverter;
-import org.entur.netex.index.api.NetexEntitiesIndex;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
@@ -30,13 +31,13 @@ public class ShapeProducer {
 
 
     private final Agency agency;
-    private final NetexEntitiesIndex netexTimetableEntitiesIndex;
+    private final NetexDatasetRepository netexDatasetRepository;
     private final GeometryFactory factory;
 
 
-    public ShapeProducer(Agency agency, NetexEntitiesIndex netexTimetableEntitiesIndex) {
-        this.agency = agency;
-        this.netexTimetableEntitiesIndex = netexTimetableEntitiesIndex;
+    public ShapeProducer(NetexDatasetRepository netexDatasetRepository, GtfsDatasetRepository gtfsDatasetRepository) {
+        this.agency = gtfsDatasetRepository.getDefaultAgency();
+        this.netexDatasetRepository = netexDatasetRepository;
         this.factory = new GeometryFactory(new PrecisionModel(10), 4326);
     }
 
@@ -61,7 +62,7 @@ public class ShapeProducer {
         Coordinate previousPoint = null;
         for (LinkInLinkSequence_VersionedChildStructure link : journeyPattern.getLinksInSequence().getServiceLinkInJourneyPatternOrTimingLinkInJourneyPattern()) {
             ServiceLinkInJourneyPattern_VersionedChildStructure serviceLinkInJourneyPattern = (ServiceLinkInJourneyPattern_VersionedChildStructure) link;
-            ServiceLink serviceLink = netexTimetableEntitiesIndex.getServiceLinkIndex().get(serviceLinkInJourneyPattern.getServiceLinkRef().getRef());
+            ServiceLink serviceLink = netexDatasetRepository.getServiceLinkById(serviceLinkInJourneyPattern.getServiceLinkRef().getRef());
             Projections_RelStructure projections = serviceLink.getProjections();
             if (projections == null) {
                 if (LOGGER.isDebugEnabled()) {

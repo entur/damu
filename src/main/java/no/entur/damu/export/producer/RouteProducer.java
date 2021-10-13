@@ -3,14 +3,13 @@ package no.entur.damu.export.producer;
 import no.entur.damu.export.model.RouteTypeEnum;
 import no.entur.damu.export.model.TransportModeNameEnum;
 import no.entur.damu.export.model.TransportSubModeNameEnum;
+import no.entur.damu.export.repository.GtfsDatasetRepository;
+import no.entur.damu.export.repository.NetexDatasetRepository;
 import no.entur.damu.export.util.GtfsUtil;
 import no.entur.damu.export.util.NetexParserUtils;
-import no.entur.damu.export.util.AuthorityUtil;
-import org.entur.netex.index.api.NetexEntitiesIndex;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
-import org.onebusaway.gtfs.services.GtfsDao;
 import org.rutebanken.netex.model.Line;
 import org.rutebanken.netex.model.PresentationStructure;
 
@@ -19,12 +18,12 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 public class RouteProducer {
 
     private final HexBinaryAdapter hexBinaryAdapter;
-    private final NetexEntitiesIndex netexEntitiesIndex;
-    private final GtfsDao gtfsDao;
+    private final NetexDatasetRepository netexDatasetRepository;
+    private final GtfsDatasetRepository gtfsDatasetRepository;
 
-    public RouteProducer(NetexEntitiesIndex netexEntitiesIndex, GtfsDao gtfsDao) {
-        this.netexEntitiesIndex = netexEntitiesIndex;
-        this.gtfsDao = gtfsDao;
+    public RouteProducer(NetexDatasetRepository netexDatasetRepository, GtfsDatasetRepository gtfsDatasetRepository) {
+        this.netexDatasetRepository = netexDatasetRepository;
+        this.gtfsDatasetRepository = gtfsDatasetRepository;
         this.hexBinaryAdapter = new HexBinaryAdapter();
     }
 
@@ -34,8 +33,8 @@ public class RouteProducer {
         Route route = new Route();
 
         // route agency
-        String authorityId = AuthorityUtil.getAuthorityIdForLine(line, netexEntitiesIndex);
-        Agency agency = gtfsDao.getAgencyForId(authorityId);
+        String authorityId = netexDatasetRepository.getAuthorityIdForLine(line);
+        Agency agency = gtfsDatasetRepository.getAgencyById(authorityId);
         route.setAgency(agency);
 
         AgencyAndId agencyAndId = new AgencyAndId();

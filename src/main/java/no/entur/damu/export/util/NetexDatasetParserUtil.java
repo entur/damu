@@ -1,7 +1,7 @@
 package no.entur.damu.export.util;
 
+import no.entur.damu.export.repository.NetexDatasetRepository;
 import org.entur.netex.NetexParser;
-import org.entur.netex.index.api.NetexEntitiesIndex;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -23,11 +23,11 @@ public final class NetexDatasetParserUtil {
      * The common files for non-flexible lines have precedence over those referring to flexible lines.
      * @param parser
      * @param zipInputStream
-     * @param index
+     * @param netexDatasetRepository
      * @return
      * @throws IOException
      */
-    public static NetexEntitiesIndex parse(NetexParser parser, ZipInputStream zipInputStream, NetexEntitiesIndex index) throws IOException {
+    public static NetexDatasetRepository parse(NetexParser parser, ZipInputStream zipInputStream, NetexDatasetRepository netexDatasetRepository) throws IOException {
         List<byte[]> commonFiles = new ArrayList<>();
         ZipEntry zipEntry = zipInputStream.getNextEntry();
         while (zipEntry != null) {
@@ -36,11 +36,11 @@ public final class NetexDatasetParserUtil {
                 commonFiles.add(zipInputStream.readAllBytes());
             } else {
                 byte[] allBytes = zipInputStream.readAllBytes();
-                parser.parse(new ByteArrayInputStream(allBytes), index);
+                parser.parse(new ByteArrayInputStream(allBytes), netexDatasetRepository.getIndex());
             }
             zipEntry = zipInputStream.getNextEntry();
         }
-        commonFiles.forEach(commonFile -> parser.parse(new ByteArrayInputStream(commonFile), index));
-        return index;
+        commonFiles.forEach(commonFile -> parser.parse(new ByteArrayInputStream(commonFile), netexDatasetRepository.getIndex()));
+        return netexDatasetRepository;
     }
 }

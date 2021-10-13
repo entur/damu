@@ -1,5 +1,6 @@
 package no.entur.damu.export.producer;
 
+import no.entur.damu.export.repository.GtfsDatasetRepository;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.ServiceCalendarDate;
@@ -13,8 +14,8 @@ public class ServiceCalendarDateProducer {
 
     private final Agency agency;
 
-    public ServiceCalendarDateProducer(Agency agency) {
-        this.agency = agency;
+    public ServiceCalendarDateProducer(GtfsDatasetRepository gtfsDatasetRepository) {
+        this.agency = gtfsDatasetRepository.getDefaultAgency();
     }
 
     public ServiceCalendarDate produce(String serviceId, LocalDateTime date, boolean isAvailable) {

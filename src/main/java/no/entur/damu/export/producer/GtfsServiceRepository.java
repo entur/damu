@@ -2,8 +2,8 @@ package no.entur.damu.export.producer;
 
 import no.entur.damu.export.model.GtfsService;
 import no.entur.damu.export.model.ServiceCalendarPeriod;
+import no.entur.damu.export.repository.NetexDatasetRepository;
 import org.apache.commons.lang3.StringUtils;
-import org.entur.netex.index.api.NetexEntitiesIndex;
 import org.rutebanken.netex.model.DayOfWeekEnumeration;
 import org.rutebanken.netex.model.DayType;
 import org.rutebanken.netex.model.DayTypeAssignment;
@@ -37,11 +37,11 @@ public class GtfsServiceRepository {
     private static final int MAX_SERVICE_ID_CHARS = 256;
 
     private final String codespace;
-    private final NetexEntitiesIndex netexTimetableEntitiesIndex;
+    private final NetexDatasetRepository netexDatasetRepository;
     private final Map<String, GtfsService> gtfsServices;
 
-    public GtfsServiceRepository(String codespace, NetexEntitiesIndex netexTimetableEntitiesIndex) {
-        this.netexTimetableEntitiesIndex = netexTimetableEntitiesIndex;
+    public GtfsServiceRepository(String codespace, NetexDatasetRepository netexDatasetRepository) {
+        this.netexDatasetRepository = netexDatasetRepository;
         this.gtfsServices = new HashMap<>();
         this.codespace = codespace;
     }
@@ -122,7 +122,7 @@ public class GtfsServiceRepository {
         LOGGER.debug("Creating GTFS Service for individual dates for serviceId {}", serviceId);
         GtfsService gtfsService = new GtfsService(serviceId);
         dayTypes.stream()
-                .map(dayType -> netexTimetableEntitiesIndex.getDayTypeAssignmentsByDayTypeIdIndex().get(dayType.getId()))
+                .map(netexDatasetRepository::getDayTypeAssignmentsByDayType)
                 .flatMap(Collection::stream)
                 .forEach(dayTypeAssignment -> addIndividualDate(gtfsService, dayTypeAssignment));
         return gtfsService;
@@ -131,7 +131,7 @@ public class GtfsServiceRepository {
     private void addIndividualDate(GtfsService gtfsService, DayTypeAssignment dayTypeAssignment) {
         LocalDateTime date;
         if (dayTypeAssignment.getOperatingDayRef() != null) {
-            OperatingDay operatingDay = netexTimetableEntitiesIndex.getOperatingDayIndex().get(dayTypeAssignment.getOperatingDayRef().getRef());
+            OperatingDay operatingDay = netexDatasetRepository.getOperatingDayByDayTypeAssignment(dayTypeAssignment);
             date = operatingDay.getCalendarDate();
         } else if (dayTypeAssignment.getDate() != null) {
             date = dayTypeAssignment.getDate();
@@ -149,22 +149,20 @@ public class GtfsServiceRepository {
         LOGGER.debug("Creating GTFS Service for one period and individual dates for serviceId {}", serviceId);
         GtfsService gtfsService = new GtfsService(serviceId);
         DayTypeAssignment dayTypeAssignmentWithPeriod = dayTypes.stream()
-                .map(dayType -> netexTimetableEntitiesIndex.getDayTypeAssignmentsByDayTypeIdIndex().get(dayType.getId()))
+                .map(netexDatasetRepository::getDayTypeAssignmentsByDayType)
                 .flatMap(Collection::stream)
                 .filter(dta -> dta.getOperatingPeriodRef() != null)
                 .findFirst()
                 .orElseThrow();
 
-        DayType dayTypeWithAPeriod = netexTimetableEntitiesIndex.getDayTypeIndex().get(dayTypeAssignmentWithPeriod.getDayTypeRef().getValue().getRef());
-
-
-        OperatingPeriod operatingPeriod = netexTimetableEntitiesIndex.getOperatingPeriodIndex().get(dayTypeAssignmentWithPeriod.getOperatingPeriodRef().getRef());
+        DayType dayTypeWithAPeriod = netexDatasetRepository.getDayTypeByDayTypeAssignment(dayTypeAssignmentWithPeriod);
+        OperatingPeriod operatingPeriod = netexDatasetRepository.getOperatingPeriodByDayTypeAssignment(dayTypeAssignmentWithPeriod);
         ServiceCalendarPeriod serviceCalendarPeriod = new ServiceCalendarPeriod(operatingPeriod.getFromDate(), operatingPeriod.getToDate());
         serviceCalendarPeriod.setDaysOfWeek(getNetexDaysOfWeek(dayTypeWithAPeriod));
         gtfsService.setServiceCalendarPeriod(serviceCalendarPeriod);
 
         dayTypes.stream()
-                .map(dayType -> netexTimetableEntitiesIndex.getDayTypeAssignmentsByDayTypeIdIndex().get(dayType.getId()))
+                .map(netexDatasetRepository::getDayTypeAssignmentsByDayType)
                 .flatMap(Collection::stream)
                 .filter(dta -> dta.getOperatingPeriodRef() == null)
                 .forEach(dayTypeAssignment -> addIndividualDate(gtfsService, dayTypeAssignment));
@@ -188,9 +186,9 @@ public class GtfsServiceRepository {
         GtfsService gtfsService = new GtfsService(serviceId);
         for (DayType dayType : dayTypes) {
             Set<DayOfWeek> daysOfWeek = getDaysOfWeek(dayType);
-            for (DayTypeAssignment dayTypeAssignment : netexTimetableEntitiesIndex.getDayTypeAssignmentsByDayTypeIdIndex().get(dayType.getId())) {
+            for (DayTypeAssignment dayTypeAssignment : netexDatasetRepository.getDayTypeAssignmentsByDayType(dayType)) {
                 if (dayTypeAssignment.getOperatingPeriodRef() != null) {
-                    OperatingPeriod operatingPeriod = netexTimetableEntitiesIndex.getOperatingPeriodIndex().get(dayTypeAssignment.getOperatingPeriodRef().getRef());
+                    OperatingPeriod operatingPeriod = netexDatasetRepository.getOperatingPeriodByDayTypeAssignment(dayTypeAssignment);
                     for (LocalDateTime date = operatingPeriod.getFromDate(); date.isBefore(operatingPeriod.getToDate()) || date.equals(operatingPeriod.getToDate()); date = date.plusDays(1)) {
                         if (isActiveDate(date, daysOfWeek)) {
                             gtfsService.addIncludedDate(date);
@@ -201,7 +199,7 @@ public class GtfsServiceRepository {
         }
 
         dayTypes.stream()
-                .map(dayType -> netexTimetableEntitiesIndex.getDayTypeAssignmentsByDayTypeIdIndex().get(dayType.getId()))
+                .map(netexDatasetRepository::getDayTypeAssignmentsByDayType)
                 .flatMap(Collection::stream)
                 .filter(dta -> dta.getOperatingPeriodRef() == null)
                 .forEach(dayTypeAssignment -> addIndividualDate(gtfsService, dayTypeAssignment));
@@ -252,8 +250,7 @@ public class GtfsServiceRepository {
 
 
     private int countPeriods(Set<DayType> dayTypes) {
-        return dayTypes.stream().map(dayType -> netexTimetableEntitiesIndex.getDayTypeAssignmentsByDayTypeIdIndex()
-                .get(dayType.getId())
+        return dayTypes.stream().map(dayType -> netexDatasetRepository.getDayTypeAssignmentsByDayType(dayType)
                 .stream()
                 .filter(dayTypeAssignment -> dayTypeAssignment.getOperatingPeriodRef() != null)
                 .count()).mapToInt(Long::intValue).sum();

@@ -1,6 +1,6 @@
 package no.entur.damu.export.util;
 
-import org.entur.netex.index.api.NetexEntitiesIndex;
+import no.entur.damu.export.repository.NetexDatasetRepository;
 import org.rutebanken.netex.model.DestinationDisplay;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ public final class DestinationDisplayUtil {
     private DestinationDisplayUtil() {
     }
 
-    public static String getFrontTextWithComputedVias(DestinationDisplay destinationDisplay, NetexEntitiesIndex netexEntitiesIndex) {
+    public static String getFrontTextWithComputedVias(DestinationDisplay destinationDisplay, NetexDatasetRepository netexDatasetRepository) {
 
         List<DestinationDisplay> vias;
         if (destinationDisplay.getVias() != null) {
@@ -21,7 +21,7 @@ public final class DestinationDisplayUtil {
                     .getVia()
                     .stream()
                     .map(via -> via.getDestinationDisplayRef().getRef())
-                    .map(netexEntitiesIndex.getDestinationDisplayIndex()::get)
+                    .map(netexDatasetRepository::getDestinationDisplayById)
                     .collect(Collectors.toList());
         } else {
             vias = Collections.emptyList();
