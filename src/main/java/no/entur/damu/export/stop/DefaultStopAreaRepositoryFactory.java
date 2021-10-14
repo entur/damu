@@ -3,9 +3,10 @@ package no.entur.damu.export.stop;
 import java.io.InputStream;
 
 /**
- * A stop area repository that builds stop area repositories from a NeTEx dataset archive.
+ * A stop area repository factory that builds stop area repositories from a NeTEx dataset archive.
+ * The dataset can be refreshed at runtime by calling {@link #refreshStopAreaRepository(InputStream)}
  */
-public class FileStopAreaRepositoryFactory implements StopAreaRepositoryFactory {
+public class DefaultStopAreaRepositoryFactory implements StopAreaRepositoryFactory {
 
     private StopAreaRepository stopAreaRepository;
 
@@ -23,8 +24,8 @@ public class FileStopAreaRepositoryFactory implements StopAreaRepositoryFactory 
      * @param stopDataset an input stream on a NeTEX dataset archive.
      */
     public synchronized void refreshStopAreaRepository(InputStream stopDataset) {
-        FileStopAreaRepository fileStopAreaRepository = new FileStopAreaRepository();
-        fileStopAreaRepository.loadStopAreas(stopDataset);
-        this.stopAreaRepository = fileStopAreaRepository;
+        DefaultStopAreaRepository defaultStopAreaRepository = new DefaultStopAreaRepository();
+        defaultStopAreaRepository.loadStopAreas(stopDataset);
+        this.stopAreaRepository = defaultStopAreaRepository;
     }
 }

@@ -14,10 +14,11 @@
  *
  */
 
-package no.entur.damu.exporter;
+package no.entur.damu.netex;
 
-import no.entur.damu.export.GtfsExport;
-import no.entur.damu.export.stop.FileStopAreaRepository;
+import no.entur.damu.export.GtfsExporter;
+import no.entur.damu.export.stop.DefaultStopAreaRepository;
+import no.entur.damu.netex.EnturGtfsExporter;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -27,22 +28,25 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-class GtfsExportTest {
+class EnturGtfsExportTest {
 
     @Test
     @Disabled
-    void testExport() throws IOException {
+    void testEnturExport() throws IOException {
 
-        FileStopAreaRepository fileStopAreaRepository = new FileStopAreaRepository();
+        DefaultStopAreaRepository defaultStopAreaRepository = new DefaultStopAreaRepository();
+        defaultStopAreaRepository.loadStopAreas(getClass().getResourceAsStream("/RailStations_latest.zip"));
 
-        fileStopAreaRepository.loadStopAreas(getClass().getResourceAsStream("/RailStations_latest.zip"));
-        GtfsExport gtfsExport = new GtfsExport("FLB", getClass().getResourceAsStream("/rb_flb-aggregated-netex.zip"), fileStopAreaRepository);
+        InputStream netexTimetableDataset = getClass().getResourceAsStream("/rb_flb-aggregated-netex.zip");
 
-        InputStream exportedGtfs = gtfsExport.exportGtfs();
+        GtfsExporter gtfsExport = new EnturGtfsExporter("FLB", defaultStopAreaRepository);
+
+
+        InputStream exportedGtfs = gtfsExport.convertNetexToGtfs(netexTimetableDataset);
 
         java.nio.file.Files.copy(
                 exportedGtfs,
-                Path.of("export-gtfs.zip"),
+                Path.of("export-gtfs-entur.zip"),
                 StandardCopyOption.REPLACE_EXISTING);
 
         IOUtils.closeQuietly(exportedGtfs);
