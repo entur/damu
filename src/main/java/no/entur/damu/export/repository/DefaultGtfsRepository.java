@@ -13,7 +13,7 @@ import java.io.InputStream;
 
 public class DefaultGtfsRepository implements GtfsDatasetRepository {
 
-    private static final String ENTUR_AGENCY_ID = "ENT";
+    private static final String ENTUR_AGENCY_ID = "XXX";
 
     private final GtfsMutableDao gtfsDao;
     private final GtfsSerializer gtfsSerializer;
@@ -63,16 +63,16 @@ public class DefaultGtfsRepository implements GtfsDatasetRepository {
     }
 
     /**
-     * Return an agency representing Entur.
+     * Return a default agency.
      * The OneBusAway API requires an agency linked to stops, even if it does not appear in the GTFS export
      *
-     * @return an agency representing Entur.
+     * @return a default agency.
      */
-    private Agency createDefaultAgency() {
+    private static Agency createDefaultAgency() {
         Agency enturAgency = new Agency();
         enturAgency.setId(ENTUR_AGENCY_ID);
-        enturAgency.setUrl("https://www.entur.org");
-        enturAgency.setName("Entur");
+        enturAgency.setUrl("https://notinuse");
+        enturAgency.setName("Default agency");
         return enturAgency;
     }
 

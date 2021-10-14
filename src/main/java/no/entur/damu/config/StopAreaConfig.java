@@ -16,7 +16,7 @@
 
 package no.entur.damu.config;
 
-import no.entur.damu.export.stop.FileStopAreaRepositoryFactory;
+import no.entur.damu.export.stop.DefaultStopAreaRepositoryFactory;
 import no.entur.damu.export.stop.StopAreaRepositoryFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +26,7 @@ public class StopAreaConfig {
 
     @Bean
     public StopAreaRepositoryFactory stopAreaRepositoryFactory() {
-        return new FileStopAreaRepositoryFactory();
+        return new DefaultStopAreaRepositoryFactory();
     }
 
 }

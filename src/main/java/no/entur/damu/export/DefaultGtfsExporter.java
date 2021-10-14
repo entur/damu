@@ -1,29 +1,30 @@
 package no.entur.damu.export;
 
-import no.entur.damu.export.exception.NetexParsingException;
 import no.entur.damu.export.exception.QuayNotFoundException;
 import no.entur.damu.export.exception.StopPlaceNotFoundException;
+import no.entur.damu.export.loader.DefaultNetexDatasetLoader;
+import no.entur.damu.export.loader.NetexDatasetLoader;
 import no.entur.damu.export.model.GtfsService;
 import no.entur.damu.export.model.GtfsShape;
 import no.entur.damu.export.model.ServiceCalendarPeriod;
 import no.entur.damu.export.producer.AgencyProducer;
 import no.entur.damu.export.producer.DefaultAgencyProducer;
 import no.entur.damu.export.producer.DefaultFeedInfoProducer;
+import no.entur.damu.export.producer.DefaultGtfsServiceRepository;
 import no.entur.damu.export.producer.DefaultRouteProducer;
+import no.entur.damu.export.producer.DefaultServiceCalendarDateProducer;
+import no.entur.damu.export.producer.DefaultServiceCalendarProducer;
 import no.entur.damu.export.producer.DefaultShapeProducer;
+import no.entur.damu.export.producer.DefaultStopProducer;
 import no.entur.damu.export.producer.DefaultStopTimeProducer;
 import no.entur.damu.export.producer.DefaultTransferProducer;
 import no.entur.damu.export.producer.DefaultTripProducer;
 import no.entur.damu.export.producer.FeedInfoProducer;
-import no.entur.damu.export.producer.DefaultGtfsServiceRepository;
 import no.entur.damu.export.producer.GtfsServiceRepository;
 import no.entur.damu.export.producer.RouteProducer;
-import no.entur.damu.export.producer.DefaultServiceCalendarDateProducer;
-import no.entur.damu.export.producer.DefaultServiceCalendarProducer;
 import no.entur.damu.export.producer.ServiceCalendarDateProducer;
 import no.entur.damu.export.producer.ServiceCalendarProducer;
 import no.entur.damu.export.producer.ShapeProducer;
-import no.entur.damu.export.producer.DefaultStopProducer;
 import no.entur.damu.export.producer.StopProducer;
 import no.entur.damu.export.producer.StopTimeProducer;
 import no.entur.damu.export.producer.TransferProducer;
@@ -33,9 +34,8 @@ import no.entur.damu.export.repository.DefaultNetexDatasetRepository;
 import no.entur.damu.export.repository.GtfsDatasetRepository;
 import no.entur.damu.export.repository.NetexDatasetRepository;
 import no.entur.damu.export.stop.StopAreaRepository;
-import no.entur.damu.export.util.NetexDatasetParserUtil;
-import org.entur.netex.NetexParser;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.FeedInfo;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.ServiceCalendar;
 import org.onebusaway.gtfs.model.StopTime;
@@ -52,42 +52,43 @@ import org.rutebanken.netex.model.TimetabledPassingTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.zip.ZipInputStream;
 
 public class DefaultGtfsExporter implements GtfsExporter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultGtfsExporter.class);
 
-    private final NetexParser netexParser;
-    private final InputStream timetableDataset;
+    private final String codespace;
 
     private final NetexDatasetRepository netexDatasetRepository;
     private final GtfsDatasetRepository gtfsDatasetRepository;
     private final GtfsServiceRepository gtfsServiceRepository;
     private final StopAreaRepository stopAreaRepository;
 
-    private  TransferProducer transferProducer;
-    private  AgencyProducer agencyProducer;
-    private  FeedInfoProducer feedInfoProducer;
-    private  RouteProducer routeProducer;
-    private  ShapeProducer shapeProducer;
-    private  TripProducer tripProducer;
-    private  StopTimeProducer stopTimeProducer;
-    private  ServiceCalendarDateProducer serviceCalendarDateProducer;
-    private  ServiceCalendarProducer serviceCalendarProducer;
-    private  StopProducer stopProducer;
+    private TransferProducer transferProducer;
+    private AgencyProducer agencyProducer;
+    private FeedInfoProducer feedInfoProducer;
+    private RouteProducer routeProducer;
+    private ShapeProducer shapeProducer;
+    private TripProducer tripProducer;
+    private StopTimeProducer stopTimeProducer;
+    private ServiceCalendarDateProducer serviceCalendarDateProducer;
+    private ServiceCalendarProducer serviceCalendarProducer;
+    private StopProducer stopProducer;
+    private NetexDatasetLoader netexDatasetLoader;
 
-    public DefaultGtfsExporter(String codespace, InputStream timetableDataset, StopAreaRepository stopAreaRepository) {
-        this.timetableDataset = timetableDataset;
+    public DefaultGtfsExporter(String codespace, StopAreaRepository stopAreaRepository) {
+
+        this.codespace = codespace;
+
+        this.netexDatasetLoader = new DefaultNetexDatasetLoader();
+
         this.stopAreaRepository = stopAreaRepository;
-        this.netexParser = new NetexParser();
         this.gtfsDatasetRepository = new DefaultGtfsRepository();
         this.netexDatasetRepository = new DefaultNetexDatasetRepository();
         this.gtfsServiceRepository = new DefaultGtfsServiceRepository(codespace, netexDatasetRepository);
@@ -106,20 +107,16 @@ public class DefaultGtfsExporter implements GtfsExporter {
     }
 
     @Override
-    public InputStream exportGtfs() {
-        importNetex();
+    public InputStream convertNetexToGtfs(InputStream netexTimetableDataset) {
+        loadNetex(netexTimetableDataset);
         convertNetexToGtfs();
         return gtfsDatasetRepository.writeGtfs();
 
     }
 
-    private void importNetex() {
+    private void loadNetex(InputStream netexTimetableDataset) {
         LOGGER.info("Importing NeTEx Timetable dataset");
-        try (ZipInputStream zipInputStream = new ZipInputStream(timetableDataset)) {
-            NetexDatasetParserUtil.parse(netexParser, zipInputStream, netexDatasetRepository);
-        } catch (IOException e) {
-            throw new NetexParsingException("Error while parsing the NeTEx timetable dataset", e);
-        }
+        netexDatasetLoader.load(netexTimetableDataset, netexDatasetRepository);
         LOGGER.info("Imported NeTEx Timetable dataset");
     }
 
@@ -143,7 +140,10 @@ public class DefaultGtfsExporter implements GtfsExporter {
 
 
     private void addFeedInfo() {
-        gtfsDatasetRepository.saveEntity(feedInfoProducer.produceFeedInfo());
+        FeedInfo feedInfo = feedInfoProducer.produceFeedInfo();
+        if(feedInfo != null) {
+            gtfsDatasetRepository.saveEntity(feedInfo);
+        }
     }
 
     private void convertRoutes() {
@@ -275,59 +275,68 @@ public class DefaultGtfsExporter implements GtfsExporter {
     }
 
 
-    protected NetexDatasetRepository getNetexDatasetRepository() {
+    protected final String getCodespace() {
+        return codespace;
+    }
+
+    protected final NetexDatasetRepository getNetexDatasetRepository() {
         return netexDatasetRepository;
     }
 
-    protected GtfsDatasetRepository getGtfsDatasetRepository() {
+    protected final GtfsDatasetRepository getGtfsDatasetRepository() {
         return gtfsDatasetRepository;
     }
 
-    protected GtfsServiceRepository getGtfsServiceRepository() {
+    protected final GtfsServiceRepository getGtfsServiceRepository() {
         return gtfsServiceRepository;
     }
 
-    protected StopAreaRepository getStopAreaRepository() {
+    protected final StopAreaRepository getStopAreaRepository() {
         return stopAreaRepository;
     }
 
-    protected void setTransferProducer(TransferProducer transferProducer) {
+
+    protected final void setNetexDatasetLoader(NetexDatasetLoader netexDatasetLoader) {
+        this.netexDatasetLoader = netexDatasetLoader;
+    }
+
+    protected final void setTransferProducer(TransferProducer transferProducer) {
         this.transferProducer = transferProducer;
     }
 
-    protected void setAgencyProducer(AgencyProducer agencyProducer) {
+    protected final void setAgencyProducer(AgencyProducer agencyProducer) {
         this.agencyProducer = agencyProducer;
     }
 
-    protected void setFeedInfoProducer(FeedInfoProducer feedInfoProducer) {
+    protected final void setFeedInfoProducer(FeedInfoProducer feedInfoProducer) {
         this.feedInfoProducer = feedInfoProducer;
     }
 
-    protected void setRouteProducer(RouteProducer routeProducer) {
+    protected final void setRouteProducer(RouteProducer routeProducer) {
         this.routeProducer = routeProducer;
     }
 
-    protected void setShapeProducer(ShapeProducer shapeProducer) {
+    protected final void setShapeProducer(ShapeProducer shapeProducer) {
         this.shapeProducer = shapeProducer;
     }
 
-    protected void setTripProducer(TripProducer tripProducer) {
+    protected final void setTripProducer(TripProducer tripProducer) {
         this.tripProducer = tripProducer;
     }
 
-    protected void setStopTimeProducer(StopTimeProducer stopTimeProducer) {
+    protected final void setStopTimeProducer(StopTimeProducer stopTimeProducer) {
         this.stopTimeProducer = stopTimeProducer;
     }
 
-    protected void setServiceCalendarDateProducer(ServiceCalendarDateProducer serviceCalendarDateProducer) {
+    protected final void setServiceCalendarDateProducer(ServiceCalendarDateProducer serviceCalendarDateProducer) {
         this.serviceCalendarDateProducer = serviceCalendarDateProducer;
     }
 
-    protected void setServiceCalendarProducer(ServiceCalendarProducer serviceCalendarProducer) {
+    protected final void setServiceCalendarProducer(ServiceCalendarProducer serviceCalendarProducer) {
         this.serviceCalendarProducer = serviceCalendarProducer;
     }
 
-    protected void setStopProducer(StopProducer stopProducer) {
+    protected final void setStopProducer(StopProducer stopProducer) {
         this.stopProducer = stopProducer;
     }
 

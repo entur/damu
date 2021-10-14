@@ -1,9 +1,6 @@
 package no.entur.damu.export.util;
 
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.Date;
 
 public final class GtfsUtil {
 
@@ -29,12 +26,6 @@ public final class GtfsUtil {
     public static int toGtfsTimeWithDayOffset(LocalTime netexTime, int dayOffset) {
         return toGtfsTime(netexTime) + dayOffset * 60 * 60 * 24;
     }
-
-
-    public static Date toGtfsDate(LocalDateTime netexDate) {
-        return Date.from(netexDate.atZone(ZoneId.systemDefault()).toInstant());
-    }
-
 
     public static String toGtfsId(String neptuneId, String prefix, boolean keepOriginal) {
         if (keepOriginal) {

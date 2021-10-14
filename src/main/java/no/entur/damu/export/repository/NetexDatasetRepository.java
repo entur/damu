@@ -42,7 +42,7 @@ public interface NetexDatasetRepository {
 
     /**
      * Return the authority id for a given line.
-     * This is the authority of the network or group of lines referenced by the line
+     * This is the authority of the network or group of lines referenced by the line.
      *
      * @param line a NeTEx line
      * @return the line authority

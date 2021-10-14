@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 public class DefaultNetexDatasetRepository implements NetexDatasetRepository {
 
     private final NetexEntitiesIndex netexEntitiesIndex;
+    private volatile String timezone;
 
     public DefaultNetexDatasetRepository() {
         this.netexEntitiesIndex = new NetexEntitiesIndexImpl();
@@ -61,20 +62,22 @@ public class DefaultNetexDatasetRepository implements NetexDatasetRepository {
 
     @Override
     public String getTimeZone() {
-        Set<String> timeZones = netexEntitiesIndex.getCompositeFrames()
-                .stream()
-                .map(VersionFrame_VersionStructure::getFrameDefaults)
-                .filter(Objects::nonNull)
-                .map(VersionFrameDefaultsStructure::getDefaultLocale)
-                .filter(Objects::nonNull)
-                .map(LocaleStructure::getTimeZone)
-                .collect(Collectors.toSet());
+        if (timezone == null) {
+            Set<String> timeZones = netexEntitiesIndex.getCompositeFrames()
+                    .stream()
+                    .map(VersionFrame_VersionStructure::getFrameDefaults)
+                    .filter(Objects::nonNull)
+                    .map(VersionFrameDefaultsStructure::getDefaultLocale)
+                    .filter(Objects::nonNull)
+                    .map(LocaleStructure::getTimeZone)
+                    .collect(Collectors.toSet());
 
-        if (timeZones.size() > 1) {
-            throw new NetexParsingException("The dataset contains more than one default timezone");
+            if (timeZones.size() > 1) {
+                throw new NetexParsingException("The dataset contains more than one default timezone");
+            }
+            timezone = timeZones.stream().findFirst().orElseThrow(() -> new NetexParsingException("The dataset does not contain a default timezone"));
         }
-
-        return timeZones.stream().findFirst().orElseThrow(() -> new NetexParsingException("The dataset does not contain a default timezone"));
+        return timezone;
     }
 
 
@@ -205,5 +208,6 @@ public class DefaultNetexDatasetRepository implements NetexDatasetRepository {
     public OperatingDay getOperatingDayById(String operatingDayId) {
         return netexEntitiesIndex.getOperatingDayIndex().get(operatingDayId);
     }
+
 
 }

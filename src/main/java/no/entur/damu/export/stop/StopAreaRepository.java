@@ -4,7 +4,7 @@ import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.StopPlace;
 
 /**
- * A repository containing quays and stop places
+ * A repository containing NeTEx quays and stop places.
  */
 public interface StopAreaRepository {
 
