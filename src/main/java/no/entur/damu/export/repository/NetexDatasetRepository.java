@@ -17,6 +17,9 @@ import org.rutebanken.netex.model.ServiceLink;
 
 import java.util.Collection;
 
+/**
+ * Repository giving read access to the input NeTEx dataset.
+ */
 public interface NetexDatasetRepository {
 
     NetexEntitiesIndex getIndex();
@@ -36,7 +39,7 @@ public interface NetexDatasetRepository {
      * This is the timezone set at the CompositeFrame level.
      *
      * @return the dataset default timezone
-     * @throws no.entur.damu.export.exception.NetexParsingException if there is no default timezone or if there is more than one default timezone.
+     * @throws no.entur.damu.export.exception.GtfsExportException if there is no default timezone or if there is more than one default timezone.
      */
     String getTimeZone();
 

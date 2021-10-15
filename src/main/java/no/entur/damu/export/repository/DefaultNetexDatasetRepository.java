@@ -1,6 +1,6 @@
 package no.entur.damu.export.repository;
 
-import no.entur.damu.export.exception.NetexParsingException;
+import no.entur.damu.export.exception.DefaultTimeZoneException;
 import org.entur.netex.index.api.NetexEntitiesIndex;
 import org.entur.netex.index.impl.NetexEntitiesIndexImpl;
 import org.rutebanken.netex.model.Authority;
@@ -73,9 +73,9 @@ public class DefaultNetexDatasetRepository implements NetexDatasetRepository {
                     .collect(Collectors.toSet());
 
             if (timeZones.size() > 1) {
-                throw new NetexParsingException("The dataset contains more than one default timezone");
+                throw new DefaultTimeZoneException("The dataset contains more than one default timezone");
             }
-            timezone = timeZones.stream().findFirst().orElseThrow(() -> new NetexParsingException("The dataset does not contain a default timezone"));
+            timezone = timeZones.stream().findFirst().orElseThrow(() -> new DefaultTimeZoneException("The dataset does not contain a default timezone"));
         }
         return timezone;
     }

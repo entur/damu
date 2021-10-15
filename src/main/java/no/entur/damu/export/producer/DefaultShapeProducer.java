@@ -3,7 +3,6 @@ package no.entur.damu.export.producer;
 import no.entur.damu.export.model.GtfsShape;
 import no.entur.damu.export.repository.GtfsDatasetRepository;
 import no.entur.damu.export.repository.NetexDatasetRepository;
-import no.entur.damu.export.util.GtfsUtil;
 import no.entur.damu.export.util.JtsGmlConverter;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -56,7 +55,7 @@ public class DefaultShapeProducer implements ShapeProducer {
         List<Double> travelledDistanceToStop = new ArrayList<>(nbStopPoints);
         // distance travelled to first stop is 0.
         travelledDistanceToStop.add(0.0);
-        String shapeId = GtfsUtil.toGtfsId(journeyPattern.getId(), null, true);
+        String shapeId = journeyPattern.getId();
         int sequence = 0;
         double distanceFromStart = 0;
         Coordinate previousPoint = null;

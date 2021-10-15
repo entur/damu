@@ -13,10 +13,12 @@ import org.locationtech.jts.geom.impl.CoordinateArraySequence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Convert GML LineString into JTS LineString.
+ */
 public final class JtsGmlConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JtsGmlConverter.class);
@@ -25,12 +27,16 @@ public final class JtsGmlConverter {
     private static final String DEFAULT_SRID_AS_STRING = "4326";
     private static final int DEFAULT_SRID_AS_INT = 4326;
 
-
     private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory(new PrecisionModel(), DEFAULT_SRID_AS_INT);
 
     private JtsGmlConverter() {
     }
 
+    /**
+     * Convert a GML LIneString object into a JTS LineString.
+     * @param gml the GML LineString.
+     * @return the JTS LineString.
+     */
     public static LineString fromGmlToJts(LineStringType gml) {
         List<Double> coordinateList;
         DirectPositionListType posList = gml.getPosList();
@@ -87,7 +93,12 @@ public final class JtsGmlConverter {
     }
 
 
-    public static CoordinateSequence convert(List<Double> values) {
+    /**
+     * Convert a list of double values into a sequence of coordinates.
+     * @param values the list of coordinate.
+     * @return a coordinate sequence.
+     */
+    private static CoordinateSequence convert(List<Double> values) {
         Coordinate[] coordinates = new Coordinate[values.size() / 2];
         int coordinateIndex = 0;
         for (int index = 0; index < values.size(); index += 2) {
@@ -98,28 +109,5 @@ public final class JtsGmlConverter {
     }
 
 
-    public static LineStringType fromJtsToGml(LineString jts, String id) {
 
-        LineStringType gml = new LineStringType();
-
-        DirectPositionListType directPositionListType = new DirectPositionListType();
-
-        if (jts.getCoordinates() != null) {
-            LOGGER.trace("Converting coordinates {}", jts.getCoordinates());
-            List<Double> positions = directPositionListType.getValue();
-            for (Coordinate coordinate : jts.getCoordinates()) {
-                positions.add(coordinate.y);
-                positions.add(coordinate.x);
-
-            }
-            directPositionListType.setCount(BigInteger.valueOf(positions.size()));
-            directPositionListType.setSrsDimension(BigInteger.valueOf(2L));
-        }
-        gml.setPosList(directPositionListType);
-        gml.setId(id);
-        gml.setSrsDimension(BigInteger.valueOf(2L));
-        gml.setSrsName(DEFAULT_SRID_AS_STRING);
-
-        return gml;
-    }
 }

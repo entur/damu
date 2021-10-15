@@ -1,5 +1,6 @@
 package no.entur.damu.export.producer;
 
+import no.entur.damu.export.exception.GtfsExportException;
 import no.entur.damu.export.model.GtfsService;
 import no.entur.damu.export.model.ServiceCalendarPeriod;
 import no.entur.damu.export.repository.NetexDatasetRepository;
@@ -78,27 +79,34 @@ public class DefaultGtfsServiceRepository implements GtfsServiceRepository {
     }
 
     private String getServiceIdForDayTypes(Set<DayType> dayTypes) {
-        String key = codespace + ":DayType:" + dayTypes.stream().map(EntityStructure::getId).map(this::splitId).sorted().collect(Collectors.joining("-"));
-        // Avoid too long strings. Replace truncated part by its hash to preserve a (best effort) semi uniqueness
-        if (key.length() > MAX_SERVICE_ID_CHARS) {
-            String tooLongPart = key.substring(MAX_SERVICE_ID_CHARS - 10);
-            key = key.replace(tooLongPart, StringUtils.truncate("" + tooLongPart.hashCode(), 10));
+        String serviceId = codespace + ":DayType:" + dayTypes.stream().map(EntityStructure::getId).map(this::splitId).sorted().collect(Collectors.joining("-"));
+        if (serviceId.length() > MAX_SERVICE_ID_CHARS) {
+            serviceId = truncateServiceId(serviceId);
         }
-        return key;
+        return serviceId;
     }
 
     private String getServiceIdForOperatingDays(Set<OperatingDay> operatingDays) {
-        String key = codespace + ":OperatingDay:" + operatingDays.stream().map(EntityStructure::getId).map(this::splitId).sorted().collect(Collectors.joining("-"));
-        // Avoid too long strings. Replace truncated part by its hash to preserve a (best effort) semi uniqueness
-        if (key.length() > MAX_SERVICE_ID_CHARS) {
-            String tooLongPart = key.substring(MAX_SERVICE_ID_CHARS - 10);
-            key = key.replace(tooLongPart, StringUtils.truncate("" + tooLongPart.hashCode(), 10));
+        String serviceId = codespace + ":OperatingDay:" + operatingDays.stream().map(EntityStructure::getId).map(this::splitId).sorted().collect(Collectors.joining("-"));
+        if (serviceId.length() > MAX_SERVICE_ID_CHARS) {
+            serviceId = truncateServiceId(serviceId);
         }
-        return key;
+        return serviceId;
+    }
+
+    /**
+     * Truncate long IDs and add a hash to preserve uniqueness.
+     * @param serviceId the GTFS service id
+     * @return a truncated GTFS ID if the service id length is greater than {@link #MAX_SERVICE_ID_CHARS}
+     */
+    private static String truncateServiceId(String serviceId) {
+        String tooLongPart = serviceId.substring(MAX_SERVICE_ID_CHARS - 10);
+        serviceId = serviceId.replace(tooLongPart, StringUtils.truncate("" + tooLongPart.hashCode(), 10));
+        return serviceId;
     }
 
 
-    private String splitId(String id) {
+    private static String splitId(String id) {
         return id.split(":")[2];
     }
 
@@ -114,7 +122,7 @@ public class DefaultGtfsServiceRepository implements GtfsServiceRepository {
         }
     }
 
-    private GtfsService createGtfsServiceForOperatingDays(Set<OperatingDay> operatingDays, String serviceId) {
+    private static GtfsService createGtfsServiceForOperatingDays(Set<OperatingDay> operatingDays, String serviceId) {
         LOGGER.debug("Creating GTFS Service for operating days for serviceId {}", serviceId);
         GtfsService gtfsService = new GtfsService(serviceId);
         operatingDays.forEach(operatingDay -> gtfsService.addIncludedDate(operatingDay.getCalendarDate()));
@@ -139,7 +147,7 @@ public class DefaultGtfsServiceRepository implements GtfsServiceRepository {
         } else if (dayTypeAssignment.getDate() != null) {
             date = dayTypeAssignment.getDate();
         } else {
-            throw new IllegalStateException("Both Date and OperatingDay are undefined");
+            throw new GtfsExportException("Both Date and OperatingDay are undefined on DayTypeAssignment " + dayTypeAssignment.getId());
         }
         if (dayTypeAssignment.isIsAvailable() != null && !dayTypeAssignment.isIsAvailable()) {
             gtfsService.addExcludedDate(date);
@@ -173,7 +181,7 @@ public class DefaultGtfsServiceRepository implements GtfsServiceRepository {
         return gtfsService;
     }
 
-    private List<DayOfWeekEnumeration> getNetexDaysOfWeek(DayType dayType) {
+    private static List<DayOfWeekEnumeration> getNetexDaysOfWeek(DayType dayType) {
         if (dayType.getProperties() != null && dayType.getProperties().getPropertyOfDay() != null) {
             for (PropertyOfDay propertyOfDay : dayType.getProperties().getPropertyOfDay()) {
                 if (propertyOfDay.getDaysOfWeek() != null && !propertyOfDay.getDaysOfWeek().isEmpty()) {
@@ -237,14 +245,14 @@ public class DefaultGtfsServiceRepository implements GtfsServiceRepository {
             } else if (DayOfWeekEnumeration.EVERYDAY == dayOfWeekEnumeration) {
                 return List.of(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
             } else {
-                throw new IllegalArgumentException("Unsupported day of week: " + dayOfWeekEnumeration);
+                throw new GtfsExportException("Unsupported day of week: " + dayOfWeekEnumeration);
             }
 
         }).flatMap(Collection::stream).collect(Collectors.toSet());
     }
 
 
-    private boolean isActiveDate(LocalDateTime date, Set<DayOfWeek> daysOfWeek) {
+    private static boolean isActiveDate(LocalDateTime date, Set<DayOfWeek> daysOfWeek) {
         if (daysOfWeek == null) {
             return true;
         }

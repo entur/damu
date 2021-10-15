@@ -1,7 +1,7 @@
 package no.entur.damu.export.stop;
 
 /**
- * Factory for creating stop area repositories
+ * Factory for creating stop area repositories.
  */
 public interface StopAreaRepositoryFactory {
 

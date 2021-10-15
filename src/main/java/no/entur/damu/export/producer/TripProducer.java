@@ -7,6 +7,10 @@ import org.rutebanken.netex.model.JourneyPattern;
 import org.rutebanken.netex.model.Route;
 import org.rutebanken.netex.model.ServiceJourney;
 
+
+/**
+ * Produce a GTFS Trip
+ */
 public interface TripProducer {
     Trip produce(ServiceJourney serviceJourney, JourneyPattern journeyPattern, Route netexRoute, org.onebusaway.gtfs.model.Route gtfsRoute, AgencyAndId shapeId, DestinationDisplay startDestinationDisplay);
 }
