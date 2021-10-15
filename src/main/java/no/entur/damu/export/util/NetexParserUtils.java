@@ -1,7 +1,7 @@
 package no.entur.damu.export.util;
 
-import no.entur.damu.export.model.TransportModeNameEnum;
-import no.entur.damu.export.model.TransportSubModeNameEnum;
+import no.entur.damu.export.model.NetexTransportMode;
+import no.entur.damu.export.model.NetexTransportSubMode;
 import org.rutebanken.netex.model.AirSubmodeEnumeration;
 import org.rutebanken.netex.model.BusSubmodeEnumeration;
 import org.rutebanken.netex.model.CoachSubmodeEnumeration;
@@ -17,172 +17,172 @@ import org.slf4j.LoggerFactory;
 
 public class NetexParserUtils {
 
-    private static Logger log = LoggerFactory.getLogger(NetexParserUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NetexParserUtils.class);
 
-    public static TransportModeNameEnum toTransportModeNameEnum(String value) {
+    public static NetexTransportMode toTransportModeNameEnum(String value) {
         if (value == null)
             return null;
         else if (value.equals("air"))
-            return TransportModeNameEnum.Air;
+            return NetexTransportMode.Air;
         else if (value.equals("rail"))
-            return TransportModeNameEnum.Rail;
+            return NetexTransportMode.Rail;
         else if (value.equals("metro"))
-            return TransportModeNameEnum.Metro;
+            return NetexTransportMode.Metro;
         else if (value.equals("tram"))
-            return TransportModeNameEnum.Tram;
+            return NetexTransportMode.Tram;
         else if (value.equals("coach"))
-            return TransportModeNameEnum.Coach;
+            return NetexTransportMode.Coach;
         else if (value.equals("bus"))
-            return TransportModeNameEnum.Bus;
+            return NetexTransportMode.Bus;
         else if (value.equals("water"))
-            return TransportModeNameEnum.Water;
+            return NetexTransportMode.Water;
         else if (value.equals("ferry"))
-            return TransportModeNameEnum.Ferry;
+            return NetexTransportMode.Ferry;
         else if (value.equals("trolleyBus"))
-            return TransportModeNameEnum.TrolleyBus;
+            return NetexTransportMode.TrolleyBus;
         else if (value.equals("taxi"))
-            return TransportModeNameEnum.Taxi;
+            return NetexTransportMode.Taxi;
         else if (value.equals("cableway"))
-            return TransportModeNameEnum.Cableway;
+            return NetexTransportMode.Cableway;
         else if (value.equals("funicular"))
-            return TransportModeNameEnum.Funicular;
+            return NetexTransportMode.Funicular;
         else if (value.equals("lift"))
-            return TransportModeNameEnum.Lift;
+            return NetexTransportMode.Lift;
         else if (value.equals("unknown"))
-            return TransportModeNameEnum.Other;
+            return NetexTransportMode.Other;
         else if (value.equals("bicycle"))
-            return TransportModeNameEnum.Bicycle;
+            return NetexTransportMode.Bicycle;
         else
-            return TransportModeNameEnum.Other;
+            return NetexTransportMode.Other;
     }
 
-    public static TransportSubModeNameEnum toTransportSubModeNameEnum(TransportSubmodeStructure subModeStructure) {
+    public static NetexTransportSubMode toTransportSubModeNameEnum(TransportSubmodeStructure subModeStructure) {
         if (subModeStructure != null) {
             if (subModeStructure.getAirSubmode() != null) {
                 AirSubmodeEnumeration mode = subModeStructure.getAirSubmode();
                 switch (mode) {
                     case DOMESTIC_FLIGHT:
-                        return TransportSubModeNameEnum.DomesticFlight;
+                        return NetexTransportSubMode.DomesticFlight;
                     case HELICOPTER_SERVICE:
-                        return TransportSubModeNameEnum.HelicopterService;
+                        return NetexTransportSubMode.HelicopterService;
                     case INTERNATIONAL_FLIGHT:
-                        return TransportSubModeNameEnum.InternationalFlight;
+                        return NetexTransportSubMode.InternationalFlight;
                     default:
-                        log.error("Unsupported air sub mode " + mode);
+                        LOGGER.error("Unsupported air sub mode " + mode);
                 }
             } else if (subModeStructure.getBusSubmode() != null) {
                 BusSubmodeEnumeration mode = subModeStructure.getBusSubmode();
                 switch (mode) {
                     case AIRPORT_LINK_BUS:
-                        return TransportSubModeNameEnum.AirportLinkBus;
+                        return NetexTransportSubMode.AirportLinkBus;
                     case EXPRESS_BUS:
-                        return TransportSubModeNameEnum.ExpressBus;
+                        return NetexTransportSubMode.ExpressBus;
                     case LOCAL_BUS:
-                        return TransportSubModeNameEnum.LocalBus;
+                        return NetexTransportSubMode.LocalBus;
                     case NIGHT_BUS:
-                        return TransportSubModeNameEnum.NightBus;
+                        return NetexTransportSubMode.NightBus;
                     case RAIL_REPLACEMENT_BUS:
-                        return TransportSubModeNameEnum.RailReplacementBus;
+                        return NetexTransportSubMode.RailReplacementBus;
                     case REGIONAL_BUS:
-                        return TransportSubModeNameEnum.RegionalBus;
+                        return NetexTransportSubMode.RegionalBus;
                     case SCHOOL_BUS:
-                        return TransportSubModeNameEnum.SchoolBus;
+                        return NetexTransportSubMode.SchoolBus;
                     case SHUTTLE_BUS:
-                        return TransportSubModeNameEnum.ShuttleBus;
+                        return NetexTransportSubMode.ShuttleBus;
                     case SIGHTSEEING_BUS:
-                        return TransportSubModeNameEnum.SightseeingBus;
+                        return NetexTransportSubMode.SightseeingBus;
                     default:
-                        log.error("Unsupported bus sub mode " + mode);
+                        LOGGER.error("Unsupported bus sub mode " + mode);
                 }
             } else if (subModeStructure.getCoachSubmode() != null) {
                 CoachSubmodeEnumeration mode = subModeStructure.getCoachSubmode();
                 switch (mode) {
                     case TOURIST_COACH:
-                        return TransportSubModeNameEnum.TouristCoach;
+                        return NetexTransportSubMode.TouristCoach;
                     case INTERNATIONAL_COACH:
-                        return TransportSubModeNameEnum.InternationalCoach;
+                        return NetexTransportSubMode.InternationalCoach;
                     case NATIONAL_COACH:
-                        return TransportSubModeNameEnum.NationalCoach;
+                        return NetexTransportSubMode.NationalCoach;
                     default:
-                        log.error("Unsupported coach sub mode " + mode);
+                        LOGGER.error("Unsupported coach sub mode " + mode);
                 }
             } else if (subModeStructure.getFunicularSubmode() != null) {
                 FunicularSubmodeEnumeration mode = subModeStructure.getFunicularSubmode();
                 switch (mode) {
                     case FUNICULAR:
-                        return TransportSubModeNameEnum.Funicular;
+                        return NetexTransportSubMode.Funicular;
                     default:
-                        log.error("Unsupported funicular sub mode " + mode);
+                        LOGGER.error("Unsupported funicular sub mode " + mode);
                 }
             } else if (subModeStructure.getMetroSubmode() != null) {
                 MetroSubmodeEnumeration mode = subModeStructure.getMetroSubmode();
                 switch (mode) {
                     case METRO:
-                        return TransportSubModeNameEnum.Metro;
+                        return NetexTransportSubMode.Metro;
                     default:
-                        log.error("Unsupported metro sub mode " + mode);
+                        LOGGER.error("Unsupported metro sub mode " + mode);
                 }
             } else if (subModeStructure.getRailSubmode() != null) {
                 RailSubmodeEnumeration mode = subModeStructure.getRailSubmode();
                 switch (mode) {
                     case INTERNATIONAL:
-                        return TransportSubModeNameEnum.International;
+                        return NetexTransportSubMode.International;
                     case INTERREGIONAL_RAIL:
-                        return TransportSubModeNameEnum.InterregionalRail;
+                        return NetexTransportSubMode.InterregionalRail;
                     case LOCAL:
-                        return TransportSubModeNameEnum.Local;
+                        return NetexTransportSubMode.Local;
                     case LONG_DISTANCE:
-                        return TransportSubModeNameEnum.LongDistance;
+                        return NetexTransportSubMode.LongDistance;
                     case NIGHT_RAIL:
-                        return TransportSubModeNameEnum.NightRail;
+                        return NetexTransportSubMode.NightRail;
                     case REGIONAL_RAIL:
-                        return TransportSubModeNameEnum.RegionalRail;
+                        return NetexTransportSubMode.RegionalRail;
                     case TOURIST_RAILWAY:
-                        return TransportSubModeNameEnum.TouristRailway;
+                        return NetexTransportSubMode.TouristRailway;
                     case AIRPORT_LINK_RAIL:
-                        return TransportSubModeNameEnum.AirportLinkRail;
+                        return NetexTransportSubMode.AirportLinkRail;
                     default:
-                        log.error("Unsupported rail sub mode " + mode);
+                        LOGGER.error("Unsupported rail sub mode " + mode);
                 }
             } else if (subModeStructure.getTelecabinSubmode() != null) {
                 TelecabinSubmodeEnumeration mode = subModeStructure.getTelecabinSubmode();
                 switch (mode) {
                     case TELECABIN:
-                        return TransportSubModeNameEnum.Telecabin;
+                        return NetexTransportSubMode.Telecabin;
                     default:
-                        log.error("Unsupported telecabin sub mode " + mode);
+                        LOGGER.error("Unsupported telecabin sub mode " + mode);
                 }
             } else if (subModeStructure.getTramSubmode() != null) {
                 TramSubmodeEnumeration mode = subModeStructure.getTramSubmode();
                 switch (mode) {
                     case LOCAL_TRAM:
-                        return TransportSubModeNameEnum.LocalTram;
+                        return NetexTransportSubMode.LocalTram;
                     case CITY_TRAM:
-                        return TransportSubModeNameEnum.CityTram;
+                        return NetexTransportSubMode.CityTram;
                     default:
-                        log.error("Unsupported tram sub mode " + mode);
+                        LOGGER.error("Unsupported tram sub mode " + mode);
                 }
             } else if (subModeStructure.getWaterSubmode() != null) {
                 WaterSubmodeEnumeration mode = subModeStructure.getWaterSubmode();
                 switch (mode) {
                     case HIGH_SPEED_PASSENGER_SERVICE:
-                        return TransportSubModeNameEnum.HighSpeedPassengerService;
+                        return NetexTransportSubMode.HighSpeedPassengerService;
                     case HIGH_SPEED_VEHICLE_SERVICE:
-                        return TransportSubModeNameEnum.HighSpeedVehicleService;
+                        return NetexTransportSubMode.HighSpeedVehicleService;
                     case INTERNATIONAL_CAR_FERRY:
-                        return TransportSubModeNameEnum.InternationalCarFerry;
+                        return NetexTransportSubMode.InternationalCarFerry;
                     case INTERNATIONAL_PASSENGER_FERRY:
-                        return TransportSubModeNameEnum.InternationalPassengerFerry;
+                        return NetexTransportSubMode.InternationalPassengerFerry;
                     case LOCAL_CAR_FERRY:
-                        return TransportSubModeNameEnum.LocalCarFerry;
+                        return NetexTransportSubMode.LocalCarFerry;
                     case LOCAL_PASSENGER_FERRY:
-                        return TransportSubModeNameEnum.LocalPassengerFerry;
+                        return NetexTransportSubMode.LocalPassengerFerry;
                     case NATIONAL_CAR_FERRY:
-                        return TransportSubModeNameEnum.NationalCarFerry;
+                        return NetexTransportSubMode.NationalCarFerry;
                     case SIGHTSEEING_SERVICE:
-                        return TransportSubModeNameEnum.SightseeingService;
+                        return NetexTransportSubMode.SightseeingService;
                     default:
-                        log.error("Unsupported water sub mode " + mode);
+                        LOGGER.error("Unsupported water sub mode " + mode);
                 }
             }
 
@@ -190,5 +190,7 @@ public class NetexParserUtils {
 
         return null;
     }
+
+
 
 }

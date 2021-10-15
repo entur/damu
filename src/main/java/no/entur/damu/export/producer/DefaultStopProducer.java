@@ -1,7 +1,7 @@
 package no.entur.damu.export.producer;
 
-import no.entur.damu.export.model.RouteTypeEnum;
-import no.entur.damu.export.model.TransportModeNameEnum;
+import no.entur.damu.export.model.GtfsRouteType;
+import no.entur.damu.export.model.NetexTransportMode;
 import no.entur.damu.export.repository.GtfsDatasetRepository;
 import no.entur.damu.export.stop.StopAreaRepository;
 import no.entur.damu.export.util.NetexParserUtils;
@@ -159,8 +159,8 @@ public class DefaultStopProducer implements StopProducer {
     }
 
     private int getGtfsVehicleTypeFromNeTexTransportMode(VehicleModeEnumeration netexTransportMode) {
-        TransportModeNameEnum transportMode = NetexParserUtils.toTransportModeNameEnum(netexTransportMode.value());
-        return RouteTypeEnum.from(transportMode, null).getValue();
+        NetexTransportMode transportMode = NetexParserUtils.toTransportModeNameEnum(netexTransportMode.value());
+        return GtfsRouteType.from(transportMode, null).getValue();
     }
 
 }

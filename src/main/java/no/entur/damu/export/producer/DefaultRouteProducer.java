@@ -1,8 +1,8 @@
 package no.entur.damu.export.producer;
 
-import no.entur.damu.export.model.RouteTypeEnum;
-import no.entur.damu.export.model.TransportModeNameEnum;
-import no.entur.damu.export.model.TransportSubModeNameEnum;
+import no.entur.damu.export.model.GtfsRouteType;
+import no.entur.damu.export.model.NetexTransportMode;
+import no.entur.damu.export.model.NetexTransportSubMode;
 import no.entur.damu.export.repository.GtfsDatasetRepository;
 import no.entur.damu.export.repository.NetexDatasetRepository;
 import no.entur.damu.export.util.NetexParserUtils;
@@ -56,9 +56,9 @@ public class DefaultRouteProducer implements RouteProducer {
         route.setUrl(line.getUrl());
 
         // route type
-        TransportModeNameEnum transportMode = NetexParserUtils.toTransportModeNameEnum(line.getTransportMode().value());
-        TransportSubModeNameEnum transportSubMode = NetexParserUtils.toTransportSubModeNameEnum(line.getTransportSubmode());
-        route.setType(RouteTypeEnum.from(transportMode, transportSubMode).getValue());
+        NetexTransportMode transportMode = NetexParserUtils.toTransportModeNameEnum(line.getTransportMode().value());
+        NetexTransportSubMode transportSubMode = NetexParserUtils.toTransportSubModeNameEnum(line.getTransportSubmode());
+        route.setType(GtfsRouteType.from(transportMode, transportSubMode).getValue());
 
         // route color
         PresentationStructure presentation = line.getPresentation();
