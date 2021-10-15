@@ -52,26 +52,12 @@ public class DefaultGtfsServiceRepository implements GtfsServiceRepository {
         return gtfsServices.values();
     }
 
-    /**
-     * Create a service for a set of DayTypes.
-     * This is used for creating trips based on ServiceJourneys (not DatedServiceJourneys).
-     *
-     * @param dayTypes dayTypes for the service.
-     * @return a service running on the days specified by the provided DayTypes.
-     */
     @Override
     public GtfsService getServiceForDayTypes(Set<DayType> dayTypes) {
         String serviceId = getServiceIdForDayTypes(dayTypes);
         return gtfsServices.computeIfAbsent(serviceId, s -> createGtfsServiceForDayTypes(dayTypes, serviceId));
     }
 
-    /**
-     * Create a service for a set of operating days.
-     * This is used for creating trips based on DatedServiceJourneys.
-     *
-     * @param operatingDays operating days for the service.
-     * @return a service running on the given operating days.
-     */
     @Override
     public GtfsService getServiceForOperatingDays(Set<OperatingDay> operatingDays) {
         String serviceId = getServiceIdForOperatingDays(operatingDays);

@@ -15,6 +15,7 @@ public interface GtfsServiceRepository {
 
     /**
      * Return the list of services.
+     *
      * @return the list of services.
      */
     Collection<GtfsService> getAllServices();
@@ -22,6 +23,8 @@ public interface GtfsServiceRepository {
     /**
      * Create or retrieve the GTFS service corresponding to a set of DayTypes.
      * Multiple calls to this method with the same set of day types return the same object.
+     * GTFS services based on day types are used for producing trips from ServiceJourneys (not DatedServiceJourneys).
+     *
      * @param dayTypes the set of NeTEx DayTypes.
      * @return the GTFS service for this set of DayTypes.
      */
@@ -30,6 +33,8 @@ public interface GtfsServiceRepository {
     /**
      * Create or retrieve the GTFS service corresponding to a set of OperatingDays.
      * Multiple calls to this method with the same set of operating days return the same object.
+     * GTFS services based on operating days are used for producing trips from DatedServiceJourneys.
+     *
      * @param operatingDays the set of NeTEx OperatingDays.
      * @return the GTFS service for this set of OperatingDays.
      */
