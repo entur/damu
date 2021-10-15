@@ -1,6 +1,6 @@
 package no.entur.damu.netex;
 
-import no.entur.damu.export.exception.NetexParsingException;
+import no.entur.damu.export.exception.MissingAuthorityUrlException;
 import no.entur.damu.export.producer.DefaultAgencyProducer;
 import no.entur.damu.export.repository.NetexDatasetRepository;
 import org.onebusaway.gtfs.model.Agency;
@@ -49,7 +49,7 @@ public class EnturAgencyProducer extends DefaultAgencyProducer {
                 LOGGER.warn("Adding missing URL {} for codespace {}", knownUrl, codespace);
                 agency.setUrl(knownUrl);
             } else {
-                throw new NetexParsingException("URL not found for agency " + agency.getId());
+                throw new MissingAuthorityUrlException("URL not found for agency " + agency.getId());
             }
         }
         return agency;

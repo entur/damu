@@ -107,6 +107,7 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
                     exchange.getIn().setBody(gtfsExporter.convertNetexToGtfs(timetableDataset));
                 })
                 .log(LoggingLevel.INFO, correlation() + "Dataset processing complete")
+                // catching only GtfsExportException. They are generally not retryable.
                 .doCatch(GtfsExportException.class)
                 .log(LoggingLevel.ERROR, correlation() + "Dataset processing failed: ${exception.message} stacktrace: ${exception.stacktrace}")
                 .stop()

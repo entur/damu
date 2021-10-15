@@ -4,10 +4,12 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * A GTFS service representing an operating period and/or a set of explicitly included/excluded dates
+ */
 public class GtfsService {
 
     private final String id;
-
 
     private ServiceCalendarPeriod serviceCalendarPeriod;
     private final Set<LocalDateTime> includedDates = new HashSet<>();

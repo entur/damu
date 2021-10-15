@@ -1,7 +1,6 @@
 package no.entur.damu.export.producer;
 
 import no.entur.damu.export.repository.NetexDatasetRepository;
-import no.entur.damu.export.util.GtfsUtil;
 import org.onebusaway.gtfs.model.Agency;
 import org.rutebanken.netex.model.Authority;
 import org.rutebanken.netex.model.ContactStructure;
@@ -24,7 +23,7 @@ public class DefaultAgencyProducer implements AgencyProducer {
         String timeZone = netexDatasetRepository.getTimeZone();
 
         Agency agency = new Agency();
-        agency.setId(GtfsUtil.toGtfsId(authority.getId(), null, true));
+        agency.setId(authority.getId());
 
         // agency name
         agency.setName(authority.getName().getValue());

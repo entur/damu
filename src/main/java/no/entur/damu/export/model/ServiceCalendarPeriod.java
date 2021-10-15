@@ -8,6 +8,10 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * A GTFS service calendar period defined by an interval [startDate, endDate] and a set of days of week for which the service is running.
+ * If no days of week are specified then the service runs every day of the week.
+ */
 public class ServiceCalendarPeriod {
 
     private final ServiceDate startDate;

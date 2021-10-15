@@ -2,6 +2,9 @@ package no.entur.damu.export;
 
 import java.io.InputStream;
 
+/**
+ * Entry point class for generating a GTFS dataset from a NeTEx dataset
+ */
 public interface GtfsExporter {
 
     /**

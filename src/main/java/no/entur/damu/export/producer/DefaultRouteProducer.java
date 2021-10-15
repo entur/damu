@@ -5,7 +5,6 @@ import no.entur.damu.export.model.TransportModeNameEnum;
 import no.entur.damu.export.model.TransportSubModeNameEnum;
 import no.entur.damu.export.repository.GtfsDatasetRepository;
 import no.entur.damu.export.repository.NetexDatasetRepository;
-import no.entur.damu.export.util.GtfsUtil;
 import no.entur.damu.export.util.NetexParserUtils;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -30,7 +29,7 @@ public class DefaultRouteProducer implements RouteProducer {
 
     @Override
     public Route produce(Line line) {
-        String lineId = GtfsUtil.toGtfsId(line.getId(), null, true);
+        String lineId = line.getId();
         Route route = new Route();
 
         // route agency
