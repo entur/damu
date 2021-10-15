@@ -111,7 +111,7 @@ public class DefaultStopTimeProducer implements StopTimeProducer {
 
         // distance travelled
         if (trip.getShapeId() == null) {
-            LOGGER.debug("skipping distance travelled for trip {}", trip.getId());
+            LOGGER.trace("skipping distance travelled for trip {}", trip.getId());
         } else {
             stopTime.setShapeDistTraveled(gtfsShape.getDistanceTravelledToStop(stopSequence));
         }

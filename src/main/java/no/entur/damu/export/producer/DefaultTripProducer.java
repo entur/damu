@@ -94,7 +94,7 @@ public class DefaultTripProducer implements TripProducer {
                     .collect(Collectors.toSet());
             serviceAgencyAndId.setId(gtfsServiceRepository.getServiceForDayTypes(dayTypes).getId());
         } else {
-            LOGGER.debug("Producing trip based on DatedServiceJourneys for ServiceJourney {}", serviceJourney.getId());
+            LOGGER.trace("Producing trip based on DatedServiceJourneys for ServiceJourney {}", serviceJourney.getId());
             // DatedServiceJourneys for cancelled and replaced trips are filtered out
             Set<OperatingDay> operatingDays = netexDatasetRepository.getDatedServiceJourneysByServiceJourneyId(serviceJourney.getId())
                     .stream()
