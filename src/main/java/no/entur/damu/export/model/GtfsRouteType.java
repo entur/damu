@@ -1,8 +1,8 @@
 package no.entur.damu.export.model;
 
-
 /**
- * https://developers.google.com/transit/gtfs/reference/extended-route-types
+ * Enumeration of GTFS extended route types.
+ * See https://developers.google.com/transit/gtfs/reference/extended-route-types
  */
 public enum GtfsRouteType {
 
@@ -121,7 +121,6 @@ public enum GtfsRouteType {
     ShuttleFerryService(1020),
     AllWaterTransportServices(1021),
 
-
     // Extended types : Air
     AirService(1100),
     InternationalAirService(1101),
@@ -191,152 +190,5 @@ public enum GtfsRouteType {
 
     public int getValue() {
         return value;
-    }
-
-    public static GtfsRouteType from(NetexTransportMode transportMode, NetexTransportSubMode subMode) {
-        switch (transportMode) {
-            case Air: {
-                if (subMode == null) {
-                    return AirService;
-                } else {
-                    switch (subMode) {
-                        case DomesticFlight:
-                            return DomesticAirService;
-                        case HelicopterService:
-                            return HelicopterAirService;
-                        case InternationalFlight:
-                            return InternationalAirService;
-                        default:
-                            return AirService;
-                    }
-                }
-            }
-            case Bus: {
-                if (subMode == null) {
-                    return BusService;
-                } else {
-                    switch (subMode) {
-                        case AirportLinkBus:
-                            return BusService;
-                        case ExpressBus:
-                            return ExpressBusService;
-                        case LocalBus:
-                            return LocalBusService;
-                        case NightBus:
-                            return NightBusService;
-                        case RailReplacementBus:
-                            return RailReplacementBusService;
-                        case RegionalBus:
-                            return RegionalBusService;
-                        case SchoolBus:
-                            return SchoolBus;
-                        case ShuttleBus:
-                            return ShuttleBus;
-                        case SightseeingBus:
-                            return SightseeingBus;
-                        default:
-                            return BusService;
-
-                    }
-                }
-
-            }
-            case Coach:
-                if (subMode == null) {
-                    return CoachService;
-                } else {
-                    switch (subMode) {
-                        case InternationalCoach:
-                            return InternationalCoachService;
-                        case NationalCoach:
-                            return NationalCoachService;
-                        case TouristCoach:
-                            return TouristCoachService;
-                        default:
-                            return CoachService;
-                    }
-                }
-
-            case Ferry:
-                return FerryService;
-            case Metro:
-                return MetroService;
-            case Rail:
-                if (subMode == null) {
-                    return RailwayService;
-                } else {
-                    switch (subMode) {
-                        case International:
-                        case LongDistance:
-                            return LongDistanceTrains;
-                        case InterregionalRail:
-                            return InterRegionalRailService;
-                        case Local:
-                            return RailwayService;
-                        case NightRail:
-                            return SleeperRailService;
-                        case RegionalRail:
-                            return RegionalRailService;
-                        case TouristRailway:
-                            return TouristRailwayService;
-                        case AirportLinkRail:
-                            return HighSpeedRailService;
-                        default:
-                            return RailwayService;
-                    }
-                }
-
-            case TrolleyBus:
-                return TrolleybusService;
-            case Tram:
-                if (subMode == null) {
-                    return TramService;
-                } else {
-                    switch (subMode) {
-                        case LocalTram:
-                            return LocalTramService;
-                        case CityTram:
-                            return CityTramService;
-                        default:
-                            return TramService;
-                    }
-                }
-            case Water:
-                if (subMode == null) {
-                    return WaterTransportService;
-                } else {
-                    switch (subMode) {
-                        case HighSpeedPassengerService:
-                            return PassengerHighSpeedFerryService;
-                        case HighSpeedVehicleService:
-                            return CarHighSpeedFerryService;
-                        case InternationalCarFerry:
-                            return InternationalCarFerryService;
-                        case InternationalPassengerFerry:
-                            return InternationalPassengerFerryService;
-                        case LocalCarFerry:
-                            return LocalCarFerryService;
-                        case LocalPassengerFerry:
-                            return LocalPassengerFerryService;
-                        case NationalCarFerry:
-                            return NationalCarFerryService;
-                        case SightseeingService:
-                            return SightseeingBoatService;
-                        default:
-                            return WaterTransportService;
-                    }
-                }
-            case Cableway:
-            case Lift:
-                return TelecabinService;
-            case Funicular:
-                return FunicularService;
-            case Taxi:
-                return TaxiService;
-            case Bicycle:
-            case Other:
-            default:
-                return MiscellaneousService;
-        }
     }
 }

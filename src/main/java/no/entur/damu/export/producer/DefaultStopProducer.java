@@ -1,16 +1,13 @@
 package no.entur.damu.export.producer;
 
-import no.entur.damu.export.model.GtfsRouteType;
-import no.entur.damu.export.model.NetexTransportMode;
 import no.entur.damu.export.repository.GtfsDatasetRepository;
 import no.entur.damu.export.stop.StopAreaRepository;
-import no.entur.damu.export.util.NetexParserUtils;
+import no.entur.damu.export.util.TransportModeUtils;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.VehicleModeEnumeration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +70,7 @@ public class DefaultStopProducer implements StopProducer {
 
         // transport mode
         if (stopPlace.getTransportMode() != null) {
-            stop.setVehicleType(getGtfsVehicleTypeFromNeTexTransportMode(stopPlace.getTransportMode()));
+            stop.setVehicleType(TransportModeUtils.getGtfsExtendedRouteType(stopPlace.getTransportMode()));
         } else {
             LOGGER.warn("Missing transport mode for stop place {}", stop.getId());
         }
@@ -139,7 +136,7 @@ public class DefaultStopProducer implements StopProducer {
 
         // transport mode is inherited from the parent stop place
         if (parentStopPlace.getTransportMode() != null) {
-            stop.setVehicleType(getGtfsVehicleTypeFromNeTexTransportMode(parentStopPlace.getTransportMode()));
+            stop.setVehicleType(TransportModeUtils.getGtfsExtendedRouteType(parentStopPlace.getTransportMode()));
         } else {
             LOGGER.warn("Missing transport mode for quay {}", stop.getId());
         }
@@ -156,11 +153,6 @@ public class DefaultStopProducer implements StopProducer {
         }
 
         return stop;
-    }
-
-    private int getGtfsVehicleTypeFromNeTexTransportMode(VehicleModeEnumeration netexTransportMode) {
-        NetexTransportMode transportMode = NetexParserUtils.toTransportModeNameEnum(netexTransportMode.value());
-        return GtfsRouteType.from(transportMode, null).getValue();
     }
 
 }
