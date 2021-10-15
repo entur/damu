@@ -79,7 +79,7 @@ public class DefaultGtfsServiceRepository implements GtfsServiceRepository {
     }
 
     private String getServiceIdForDayTypes(Set<DayType> dayTypes) {
-        String serviceId = codespace + ":DayType:" + dayTypes.stream().map(EntityStructure::getId).map(this::splitId).sorted().collect(Collectors.joining("-"));
+        String serviceId = codespace + ":DayType:" + dayTypes.stream().map(EntityStructure::getId).map(DefaultGtfsServiceRepository::splitId).sorted().collect(Collectors.joining("-"));
         if (serviceId.length() > MAX_SERVICE_ID_CHARS) {
             serviceId = truncateServiceId(serviceId);
         }
@@ -87,7 +87,7 @@ public class DefaultGtfsServiceRepository implements GtfsServiceRepository {
     }
 
     private String getServiceIdForOperatingDays(Set<OperatingDay> operatingDays) {
-        String serviceId = codespace + ":OperatingDay:" + operatingDays.stream().map(EntityStructure::getId).map(this::splitId).sorted().collect(Collectors.joining("-"));
+        String serviceId = codespace + ":OperatingDay:" + operatingDays.stream().map(EntityStructure::getId).map(DefaultGtfsServiceRepository::splitId).sorted().collect(Collectors.joining("-"));
         if (serviceId.length() > MAX_SERVICE_ID_CHARS) {
             serviceId = truncateServiceId(serviceId);
         }
