@@ -49,9 +49,9 @@ public class DefaultNetexDatasetLoader implements NetexDatasetLoader {
     /**
      * Parse a zip file containing a NeTEx archive.
       *
-     * @param zipInputStream
-     * @param netexDatasetRepository
-     * @throws IOException
+     * @param zipInputStream a stream on a NeTEx zip archive.
+     * @param netexDatasetRepository the NeTEx dataset repository to be updated with the content of the NeTEx archive.
+     * @throws IOException if the zip file cannot be read.
      */
     protected void parseDataset(ZipInputStream zipInputStream, NetexDatasetRepository netexDatasetRepository) throws IOException {
         ZipEntry zipEntry = zipInputStream.getNextEntry();

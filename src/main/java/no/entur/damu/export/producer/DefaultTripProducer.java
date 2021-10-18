@@ -27,7 +27,6 @@ import org.onebusaway.gtfs.model.Trip;
 import org.rutebanken.netex.model.DayType;
 import org.rutebanken.netex.model.DestinationDisplay;
 import org.rutebanken.netex.model.DirectionTypeEnumeration;
-import org.rutebanken.netex.model.JourneyPattern;
 import org.rutebanken.netex.model.OperatingDay;
 import org.rutebanken.netex.model.Route;
 import org.rutebanken.netex.model.ServiceAlterationEnumeration;
