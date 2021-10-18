@@ -16,27 +16,10 @@
  *
  */
 
-package no.entur.damu.export.producer;
+package no.entur.damu.export.repository;
 
-import org.onebusaway.gtfs.model.ServiceCalendarDate;
-
-import java.time.LocalDateTime;
-
-
-/**
- * Produce a GTFS Service Calendar Date.
- */
-public interface ServiceCalendarDateProducer {
-
-    int SERVICE_ADDED = 1;
-    int SERVICE_REMOVED = 2;
-
-    /**
-     * Produce a GTFS Service Calendar Date for a given GTFS service.
-     * @param serviceId the id of the GTFS service
-     * @param date the service date.
-     * @param isAvailable true if the service runs on this date.
-     * @return a GTFS Service Calendar Date for the given GTFS service.
-     */
-    ServiceCalendarDate produce(String serviceId, LocalDateTime date, boolean isAvailable);
+public class GtfsDatasetRepositoryException extends RuntimeException {
+    public GtfsDatasetRepositoryException(String message) {
+        super(message);
+    }
 }

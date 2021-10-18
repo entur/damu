@@ -47,33 +47,33 @@ public class DefaultServiceCalendarProducer implements ServiceCalendarProducer {
         serviceCalendar.setEndDate(endDate);
 
         if (daysOfWeeks.isEmpty()) {
-            serviceCalendar.setMonday(1);
-            serviceCalendar.setTuesday(1);
-            serviceCalendar.setWednesday(1);
-            serviceCalendar.setThursday(1);
-            serviceCalendar.setFriday(1);
-            serviceCalendar.setSaturday(1);
-            serviceCalendar.setSunday(1);
+            serviceCalendar.setMonday(ServiceCalendarProducer.SERVICE_AVAILABLE);
+            serviceCalendar.setTuesday(ServiceCalendarProducer.SERVICE_AVAILABLE);
+            serviceCalendar.setWednesday(ServiceCalendarProducer.SERVICE_AVAILABLE);
+            serviceCalendar.setThursday(ServiceCalendarProducer.SERVICE_AVAILABLE);
+            serviceCalendar.setFriday(ServiceCalendarProducer.SERVICE_AVAILABLE);
+            serviceCalendar.setSaturday(ServiceCalendarProducer.SERVICE_AVAILABLE);
+            serviceCalendar.setSunday(ServiceCalendarProducer.SERVICE_AVAILABLE);
         } else {
-            serviceCalendar.setMonday(daysOfWeeks.contains(DayOfWeekEnumeration.MONDAY) ? 1 : 0);
-            serviceCalendar.setTuesday(daysOfWeeks.contains(DayOfWeekEnumeration.TUESDAY) ? 1 : 0);
-            serviceCalendar.setWednesday(daysOfWeeks.contains(DayOfWeekEnumeration.WEDNESDAY) ? 1 : 0);
-            serviceCalendar.setThursday(daysOfWeeks.contains(DayOfWeekEnumeration.THURSDAY) ? 1 : 0);
-            serviceCalendar.setFriday(daysOfWeeks.contains(DayOfWeekEnumeration.FRIDAY) ? 1 : 0);
-            serviceCalendar.setSaturday(daysOfWeeks.contains(DayOfWeekEnumeration.SATURDAY) ? 1 : 0);
-            serviceCalendar.setSunday(daysOfWeeks.contains(DayOfWeekEnumeration.SUNDAY) ? 1 : 0);
+            serviceCalendar.setMonday(daysOfWeeks.contains(DayOfWeekEnumeration.MONDAY) ? ServiceCalendarProducer.SERVICE_AVAILABLE : ServiceCalendarProducer.SERVICE_UNAVAILABLE);
+            serviceCalendar.setTuesday(daysOfWeeks.contains(DayOfWeekEnumeration.TUESDAY) ? ServiceCalendarProducer.SERVICE_AVAILABLE : ServiceCalendarProducer.SERVICE_UNAVAILABLE);
+            serviceCalendar.setWednesday(daysOfWeeks.contains(DayOfWeekEnumeration.WEDNESDAY) ? ServiceCalendarProducer.SERVICE_AVAILABLE : ServiceCalendarProducer.SERVICE_UNAVAILABLE);
+            serviceCalendar.setThursday(daysOfWeeks.contains(DayOfWeekEnumeration.THURSDAY) ? ServiceCalendarProducer.SERVICE_AVAILABLE : ServiceCalendarProducer.SERVICE_UNAVAILABLE);
+            serviceCalendar.setFriday(daysOfWeeks.contains(DayOfWeekEnumeration.FRIDAY) ? ServiceCalendarProducer.SERVICE_AVAILABLE : ServiceCalendarProducer.SERVICE_UNAVAILABLE);
+            serviceCalendar.setSaturday(daysOfWeeks.contains(DayOfWeekEnumeration.SATURDAY) ? ServiceCalendarProducer.SERVICE_AVAILABLE : ServiceCalendarProducer.SERVICE_UNAVAILABLE);
+            serviceCalendar.setSunday(daysOfWeeks.contains(DayOfWeekEnumeration.SUNDAY) ? ServiceCalendarProducer.SERVICE_AVAILABLE : ServiceCalendarProducer.SERVICE_UNAVAILABLE);
 
             if (daysOfWeeks.contains(DayOfWeekEnumeration.WEEKDAYS)) {
-                serviceCalendar.setMonday(1);
-                serviceCalendar.setTuesday(1);
-                serviceCalendar.setWednesday(1);
-                serviceCalendar.setThursday(1);
-                serviceCalendar.setFriday(1);
+                serviceCalendar.setMonday(ServiceCalendarProducer.SERVICE_AVAILABLE);
+                serviceCalendar.setTuesday(ServiceCalendarProducer.SERVICE_AVAILABLE);
+                serviceCalendar.setWednesday(ServiceCalendarProducer.SERVICE_AVAILABLE);
+                serviceCalendar.setThursday(ServiceCalendarProducer.SERVICE_AVAILABLE);
+                serviceCalendar.setFriday(ServiceCalendarProducer.SERVICE_AVAILABLE);
             }
 
             if (daysOfWeeks.contains(DayOfWeekEnumeration.WEEKEND)) {
-                serviceCalendar.setSaturday(1);
-                serviceCalendar.setSunday(1);
+                serviceCalendar.setSaturday(ServiceCalendarProducer.SERVICE_AVAILABLE);
+                serviceCalendar.setSunday(ServiceCalendarProducer.SERVICE_AVAILABLE);
             }
         }
 

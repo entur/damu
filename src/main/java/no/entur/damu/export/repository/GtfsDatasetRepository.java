@@ -33,6 +33,7 @@ public interface GtfsDatasetRepository {
      * Return a GTFS agency by id.
      * @param agencyId the agency id
      * @return the GTFS agency
+     *  @throws GtfsDatasetRepositoryException if the agency cannot be found in the repository.
      */
     Agency getAgencyById(String agencyId);
 
@@ -41,6 +42,7 @@ public interface GtfsDatasetRepository {
      * Return a GTFS trip by id.
      * @param tripId the trip id
      * @return the GTFS trip
+     * @throws GtfsDatasetRepositoryException if the trip cannot be found in the repository.
      */
     Trip getTripById(String tripId);
 
@@ -48,6 +50,7 @@ public interface GtfsDatasetRepository {
      * Return a GTFS stop by id.
      * @param stopId the stop id
      * @return the GTFS stop
+     *  @throws GtfsDatasetRepositoryException if the stop cannot be found in the repository.
      */
     Stop getStopById(String stopId);
 

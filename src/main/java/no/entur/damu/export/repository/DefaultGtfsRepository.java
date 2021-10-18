@@ -45,7 +45,11 @@ public class DefaultGtfsRepository implements GtfsDatasetRepository {
 
     @Override
     public Agency getAgencyById(String agencyId) {
-        return gtfsDao.getAgencyForId(agencyId);
+        Agency agency = gtfsDao.getAgencyForId(agencyId);
+        if(agency== null) {
+            throw new GtfsDatasetRepositoryException("Agency not found: " + agencyId);
+        }
+        return agency;
     }
 
     @Override
@@ -54,7 +58,11 @@ public class DefaultGtfsRepository implements GtfsDatasetRepository {
         agencyAndId.setId(tripId);
         agencyAndId.setAgencyId(defaultAgency.getId());
 
-        return gtfsDao.getTripForId(agencyAndId);
+        Trip tripForId = gtfsDao.getTripForId(agencyAndId);
+        if (tripForId == null) {
+            throw new GtfsDatasetRepositoryException("GTFS Trip not found: " + tripId);
+        }
+        return tripForId;
     }
 
     @Override
@@ -62,7 +70,11 @@ public class DefaultGtfsRepository implements GtfsDatasetRepository {
         AgencyAndId agencyAndId = new AgencyAndId();
         agencyAndId.setId(stopId);
         agencyAndId.setAgencyId(defaultAgency.getId());
-        return gtfsDao.getStopForId(agencyAndId);
+        Stop stop = gtfsDao.getStopForId(agencyAndId);
+        if (stop == null) {
+            throw new GtfsDatasetRepositoryException("Stop not found: " + stopId);
+        }
+        return stop;
     }
 
     @Override

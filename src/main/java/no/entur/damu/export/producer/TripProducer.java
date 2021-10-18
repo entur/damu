@@ -30,6 +30,9 @@ import org.rutebanken.netex.model.ServiceJourney;
  */
 public interface TripProducer {
 
+    String GTFS_DIRECTION_OUTBOUND = "0";
+    String GTFS_DIRECTION_INBOUND = "1";
+
     /**
      * Return a GTFS Trip corresponding to the ServiceJourney or null if the ServiceJourney cannot be converted into a valid GTFS trip.
      *

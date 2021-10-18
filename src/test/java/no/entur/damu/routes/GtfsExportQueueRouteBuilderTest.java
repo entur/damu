@@ -53,7 +53,6 @@ import static no.entur.damu.Constants.BLOBSTORE_PATH_OUTBOUND;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = TestApp.class)
-
 class GtfsExportQueueRouteBuilderTest extends DamuRouteBuilderIntegrationTestBase {
 
     private static final String CODESPACE = "rb_flb";

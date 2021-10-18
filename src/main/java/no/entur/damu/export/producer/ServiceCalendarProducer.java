@@ -30,6 +30,9 @@ import java.util.Collection;
  */
 public interface ServiceCalendarProducer {
 
+    int SERVICE_UNAVAILABLE = 0;
+    int SERVICE_AVAILABLE = 1;
+
     /**
      * Produce a GTFS Service Calendar for a given GTFS service.
      * @param serviceId the id of the GTFS service.

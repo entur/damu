@@ -44,7 +44,7 @@ public class DefaultServiceCalendarDateProducer implements  ServiceCalendarDateP
         serviceCalendarDateAgencyAndId.setAgencyId(agency.getId());
         serviceCalendarDate.setServiceId(serviceCalendarDateAgencyAndId);
         serviceCalendarDate.setDate(new ServiceDate(toGtfsDate(date)));
-        serviceCalendarDate.setExceptionType(isAvailable ? 1 : 2);
+        serviceCalendarDate.setExceptionType(isAvailable ? ServiceCalendarDateProducer.SERVICE_ADDED : ServiceCalendarDateProducer.SERVICE_REMOVED);
 
         return serviceCalendarDate;
     }
