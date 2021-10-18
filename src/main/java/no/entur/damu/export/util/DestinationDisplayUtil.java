@@ -2,6 +2,8 @@ package no.entur.damu.export.util;
 
 import no.entur.damu.export.repository.NetexDatasetRepository;
 import org.rutebanken.netex.model.DestinationDisplay;
+import org.rutebanken.netex.model.JourneyPattern;
+import org.rutebanken.netex.model.StopPointInJourneyPattern;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,13 +18,25 @@ public final class DestinationDisplayUtil {
     private DestinationDisplayUtil() {
     }
 
+    public static DestinationDisplay getInitialDestinationDisplay(JourneyPattern journeyPattern, NetexDatasetRepository netexDatasetRepository) {
+        StopPointInJourneyPattern firstStopPointInJourneyPattern = (StopPointInJourneyPattern) journeyPattern.getPointsInSequence()
+                .getPointInJourneyPatternOrStopPointInJourneyPatternOrTimingPointInJourneyPattern()
+                .get(0);
+        return netexDatasetRepository.getDestinationDisplayById(firstStopPointInJourneyPattern.getDestinationDisplayRef().getRef());
+    }
+
     /**
      * Compute a front text (GTFS head sign) from a destination display that may contain a list of vias (intermediate head sign)
-     * @param destinationDisplay the NeTEx destination display
+     *
+     * @param destinationDisplay     the NeTEx destination display
      * @param netexDatasetRepository the netex dataset repository
      * @return a front text that concatenates the destination display and its optional vias.
      */
     public static String getFrontTextWithComputedVias(DestinationDisplay destinationDisplay, NetexDatasetRepository netexDatasetRepository) {
+
+        if (destinationDisplay == null) {
+            return null;
+        }
 
         List<DestinationDisplay> vias;
         if (destinationDisplay.getVias() != null) {

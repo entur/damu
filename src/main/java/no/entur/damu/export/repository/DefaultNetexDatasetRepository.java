@@ -176,7 +176,7 @@ public class DefaultNetexDatasetRepository implements NetexDatasetRepository {
     }
 
     @Override
-    public Collection<JourneyPattern> getJourneyPatternByRoute(org.rutebanken.netex.model.Route route) {
+    public Collection<JourneyPattern> getJourneyPatternsByRoute(org.rutebanken.netex.model.Route route) {
         return netexEntitiesIndex.getJourneyPatternIndex().getAll()
                 .stream()
                 .filter(journeyPattern -> journeyPattern.getRouteRef().getRef().equals(route.getId()))

@@ -42,25 +42,13 @@ public class DefaultTripProducer implements TripProducer {
     }
 
 
-    /**
-     * Return a GTFS Trip corresponding to the ServiceJourney or null if the ServiceJourney cannot be converted into a valid GTFS trip.
-     *
-     * @param serviceJourney
-     * @param journeyPattern
-     * @param netexRoute
-     * @param gtfsRoute
-     * @param shapeId
-     * @param startDestinationDisplay
-     * @return a GTFS Trip corresponding to the ServiceJourney or null if the ServiceJourney cannot be converted into a valid GTFS trip.
-     */
     @Override
-    public Trip produce(ServiceJourney serviceJourney, JourneyPattern journeyPattern, Route netexRoute, org.onebusaway.gtfs.model.Route gtfsRoute, AgencyAndId shapeId, DestinationDisplay startDestinationDisplay) {
+    public Trip produce(ServiceJourney serviceJourney, Route netexRoute, org.onebusaway.gtfs.model.Route gtfsRoute, AgencyAndId shapeId, DestinationDisplay initialDestinationDisplay) {
 
         // Cancelled or replaced service journeys are not valid GTFS trips.
         if (ServiceAlterationEnumeration.CANCELLATION == serviceJourney.getServiceAlteration() || ServiceAlterationEnumeration.REPLACED == serviceJourney.getServiceAlteration()) {
             return null;
         }
-
 
         String tripId = serviceJourney.getId();
 
@@ -109,15 +97,7 @@ public class DefaultTripProducer implements TripProducer {
         trip.setServiceId(serviceAgencyAndId);
 
         // destination display = head sign
-        if (startDestinationDisplay != null) {
-            trip.setTripHeadsign(DestinationDisplayUtil.getFrontTextWithComputedVias(startDestinationDisplay, netexDatasetRepository));
-        } else if (serviceJourney.getName() != null) {
-            trip.setTripHeadsign(serviceJourney.getName().getValue());
-        } else if (journeyPattern.getName() != null) {
-            trip.setTripHeadsign(journeyPattern.getName().getValue());
-        } else {
-            LOGGER.warn("Missing trip head sign for ServiceJourney {}", serviceJourney.getId());
-        }
+        trip.setTripHeadsign(DestinationDisplayUtil.getFrontTextWithComputedVias(initialDestinationDisplay, netexDatasetRepository));
 
         // shape
         trip.setShapeId(shapeId);

@@ -70,7 +70,7 @@ public interface NetexDatasetRepository {
 
     Collection<Route> getRoutesByLine(Line line);
 
-    Collection<JourneyPattern> getJourneyPatternByRoute(Route route);
+    Collection<JourneyPattern> getJourneyPatternsByRoute(Route route);
 
     ServiceLink getServiceLinkById(String serviceLinkId);
 

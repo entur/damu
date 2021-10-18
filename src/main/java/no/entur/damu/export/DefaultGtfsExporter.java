@@ -9,7 +9,6 @@ import no.entur.damu.export.model.GtfsShape;
 import no.entur.damu.export.model.ServiceCalendarPeriod;
 import no.entur.damu.export.producer.AgencyProducer;
 import no.entur.damu.export.producer.DefaultAgencyProducer;
-import no.entur.damu.export.producer.DefaultFeedInfoProducer;
 import no.entur.damu.export.producer.DefaultGtfsServiceRepository;
 import no.entur.damu.export.producer.DefaultRouteProducer;
 import no.entur.damu.export.producer.DefaultServiceCalendarDateProducer;
@@ -34,6 +33,7 @@ import no.entur.damu.export.repository.DefaultNetexDatasetRepository;
 import no.entur.damu.export.repository.GtfsDatasetRepository;
 import no.entur.damu.export.repository.NetexDatasetRepository;
 import no.entur.damu.export.stop.StopAreaRepository;
+import no.entur.damu.export.util.DestinationDisplayUtil;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.FeedInfo;
 import org.onebusaway.gtfs.model.Route;
@@ -95,7 +95,6 @@ public class DefaultGtfsExporter implements GtfsExporter {
 
         this.transferProducer = new DefaultTransferProducer(netexDatasetRepository, gtfsDatasetRepository);
         this.agencyProducer = new DefaultAgencyProducer(netexDatasetRepository);
-        this.feedInfoProducer = new DefaultFeedInfoProducer();
         this.routeProducer = new DefaultRouteProducer(netexDatasetRepository, gtfsDatasetRepository);
         this.shapeProducer = new DefaultShapeProducer(netexDatasetRepository, gtfsDatasetRepository);
         this.tripProducer = new DefaultTripProducer(netexDatasetRepository, gtfsDatasetRepository, gtfsServiceRepository);
@@ -139,19 +138,21 @@ public class DefaultGtfsExporter implements GtfsExporter {
     }
 
 
-    private void addFeedInfo() {
-        FeedInfo feedInfo = feedInfoProducer.produceFeedInfo();
-        if(feedInfo != null) {
-            gtfsDatasetRepository.saveEntity(feedInfo);
+    protected void addFeedInfo() {
+        if(feedInfoProducer != null) {
+            FeedInfo feedInfo = feedInfoProducer.produceFeedInfo();
+            if(feedInfo != null) {
+                gtfsDatasetRepository.saveEntity(feedInfo);
+            }
         }
     }
 
-    private void convertRoutes() {
+    protected void convertRoutes() {
         for (Line netexLine : netexDatasetRepository.getLines()) {
             Route gtfsRoute = routeProducer.produce(netexLine);
             gtfsDatasetRepository.saveEntity(gtfsRoute);
             for (org.rutebanken.netex.model.Route netexRoute : netexDatasetRepository.getRoutesByLine(netexLine)) {
-                for (JourneyPattern journeyPattern : netexDatasetRepository.getJourneyPatternByRoute(netexRoute)) {
+                for (JourneyPattern journeyPattern : netexDatasetRepository.getJourneyPatternsByRoute(netexRoute)) {
                     GtfsShape gtfsShape = shapeProducer.produce(journeyPattern);
                     AgencyAndId shapeId = null;
                     if (gtfsShape != null && !gtfsShape.getShapePoints().isEmpty()) {
@@ -161,13 +162,14 @@ public class DefaultGtfsExporter implements GtfsExporter {
                         shapeId.setId(gtfsShape.getId());
                     }
 
-                    StopPointInJourneyPattern firstStopPointInJourneyPattern = (StopPointInJourneyPattern) journeyPattern.getPointsInSequence().getPointInJourneyPatternOrStopPointInJourneyPatternOrTimingPointInJourneyPattern().get(0);
-                    DestinationDisplay startDestinationDisplay = netexDatasetRepository.getDestinationDisplayById(firstStopPointInJourneyPattern.getDestinationDisplayRef().getRef());
+                    DestinationDisplay initialDestinationDisplay = DestinationDisplayUtil.getInitialDestinationDisplay(journeyPattern, netexDatasetRepository);
 
                     for (ServiceJourney serviceJourney : netexDatasetRepository.getServiceJourneysByJourneyPattern(journeyPattern)) {
-                        Trip trip = tripProducer.produce(serviceJourney, journeyPattern, netexRoute, gtfsRoute, shapeId, startDestinationDisplay);
+                        Trip trip = tripProducer.produce(serviceJourney, netexRoute, gtfsRoute, shapeId, initialDestinationDisplay);
                         if (trip != null) {
                             gtfsDatasetRepository.saveEntity(trip);
+                            // the head sign set on a given stop depends on the one set on the previous stop
+                            // i.e. it must be repeated from one stop to the next unless there is an explicit change.
                             String currentHeadSign = null;
                             for (TimetabledPassingTime timetabledPassingTime : serviceJourney.getPassingTimes().getTimetabledPassingTime()) {
                                 StopTime stopTime = stopTimeProducer.produce(timetabledPassingTime, journeyPattern, trip, gtfsShape, currentHeadSign);
@@ -181,7 +183,7 @@ public class DefaultGtfsExporter implements GtfsExporter {
         }
     }
 
-    private void convertServices() {
+    protected void convertServices() {
         for (GtfsService gtfsService : gtfsServiceRepository.getAllServices()) {
             ServiceCalendarPeriod serviceCalendarPeriod = gtfsService.getServiceCalendarPeriod();
             if (serviceCalendarPeriod != null) {
@@ -194,22 +196,17 @@ public class DefaultGtfsExporter implements GtfsExporter {
             for (LocalDateTime excludedDate : gtfsService.getExcludedDates()) {
                 gtfsDatasetRepository.saveEntity(serviceCalendarDateProducer.produce(gtfsService.getId(), excludedDate, false));
             }
-
         }
-
     }
 
-    private void convertTransfers() {
+    protected void convertTransfers() {
         netexDatasetRepository.getServiceJourneyInterchanges()
                 .stream()
                 .map(transferProducer::produce)
                 .forEach(gtfsDatasetRepository::saveEntity);
     }
 
-
-    private void convertStops() {
-
-
+    protected void convertStops() {
         // Retrieve all quays referenced by valid ServiceJourneys
         // This excludes quays referenced by cancelled or replaced service journeys
         // and quays referenced only as route points or in dead runs
@@ -294,7 +291,6 @@ public class DefaultGtfsExporter implements GtfsExporter {
     protected final StopAreaRepository getStopAreaRepository() {
         return stopAreaRepository;
     }
-
 
     protected final void setNetexDatasetLoader(NetexDatasetLoader netexDatasetLoader) {
         this.netexDatasetLoader = netexDatasetLoader;

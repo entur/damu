@@ -1,3 +1,4 @@
+
 package no.entur.damu.export.exception;
 
 /**
