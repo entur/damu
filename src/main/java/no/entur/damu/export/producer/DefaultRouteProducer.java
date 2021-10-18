@@ -1,11 +1,8 @@
 package no.entur.damu.export.producer;
 
-import no.entur.damu.export.model.RouteTypeEnum;
-import no.entur.damu.export.model.TransportModeNameEnum;
-import no.entur.damu.export.model.TransportSubModeNameEnum;
 import no.entur.damu.export.repository.GtfsDatasetRepository;
 import no.entur.damu.export.repository.NetexDatasetRepository;
-import no.entur.damu.export.util.NetexParserUtils;
+import no.entur.damu.export.util.TransportModeUtils;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
@@ -14,6 +11,10 @@ import org.rutebanken.netex.model.PresentationStructure;
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 
+/**
+ * Produce a GTFS Route from a NeTEx Line.
+ * Supported GTFS Extension: the route_type field is ammped to GTFS extended route types.
+ */
 public class DefaultRouteProducer implements RouteProducer {
 
     private final HexBinaryAdapter hexBinaryAdapter;
@@ -56,9 +57,7 @@ public class DefaultRouteProducer implements RouteProducer {
         route.setUrl(line.getUrl());
 
         // route type
-        TransportModeNameEnum transportMode = NetexParserUtils.toTransportModeNameEnum(line.getTransportMode().value());
-        TransportSubModeNameEnum transportSubMode = NetexParserUtils.toTransportSubModeNameEnum(line.getTransportSubmode());
-        route.setType(RouteTypeEnum.from(transportMode, transportSubMode).getValue());
+       route.setType(TransportModeUtils.getGtfsExtendedRouteType(line));
 
         // route color
         PresentationStructure presentation = line.getPresentation();
