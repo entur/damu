@@ -39,9 +39,6 @@ public class DefaultStopTimeProducer implements StopTimeProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultStopTimeProducer.class);
 
-    private static final int PICKUP_AND_DROP_OFF_TYPE_NOT_AVAILABLE = 1;
-    private static final int PICKUP_AND_DROP_OFF_TYPE_MUST_COORDINATE_WITH_DRIVER = 3;
-
     private final NetexDatasetRepository netexDatasetRepository;
     private final GtfsDatasetRepository gtfsDatasetRepository;
 
@@ -113,18 +110,18 @@ public class DefaultStopTimeProducer implements StopTimeProducer {
 
         // boarding = pickup
         if (Boolean.FALSE.equals(stopPointInSequence.isForBoarding())) {
-            stopTime.setPickupType(PICKUP_AND_DROP_OFF_TYPE_NOT_AVAILABLE);
+            stopTime.setPickupType(StopTimeProducer.PICKUP_AND_DROP_OFF_TYPE_NOT_AVAILABLE);
         }
 
         // alighting = drop off
         if (Boolean.FALSE.equals(stopPointInSequence.isForAlighting())) {
-            stopTime.setDropOffType(PICKUP_AND_DROP_OFF_TYPE_NOT_AVAILABLE);
+            stopTime.setDropOffType(StopTimeProducer.PICKUP_AND_DROP_OFF_TYPE_NOT_AVAILABLE);
         }
 
         // pickup and stop on request override the values set in isForBoarding and isForAlighting
         if (Boolean.TRUE.equals(stopPointInSequence.isRequestStop())) {
-            stopTime.setPickupType(PICKUP_AND_DROP_OFF_TYPE_MUST_COORDINATE_WITH_DRIVER);
-            stopTime.setDropOffType(PICKUP_AND_DROP_OFF_TYPE_MUST_COORDINATE_WITH_DRIVER);
+            stopTime.setPickupType(StopTimeProducer.PICKUP_AND_DROP_OFF_TYPE_MUST_COORDINATE_WITH_DRIVER);
+            stopTime.setDropOffType(StopTimeProducer.PICKUP_AND_DROP_OFF_TYPE_MUST_COORDINATE_WITH_DRIVER);
         }
 
         // distance travelled

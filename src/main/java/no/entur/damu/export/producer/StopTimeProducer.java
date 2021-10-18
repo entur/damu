@@ -29,5 +29,8 @@ import org.rutebanken.netex.model.TimetabledPassingTime;
  * Produce a GTFS Stop Time.
  */
 public interface StopTimeProducer {
+    int PICKUP_AND_DROP_OFF_TYPE_NOT_AVAILABLE = 1;
+    int PICKUP_AND_DROP_OFF_TYPE_MUST_COORDINATE_WITH_DRIVER = 3;
+
     StopTime produce(TimetabledPassingTime timetabledPassingTime, JourneyPattern journeyPattern, Trip trip, GtfsShape gtfsShape, String currentHeadSign);
 }

@@ -31,7 +31,7 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 
 /**
  * Produce a GTFS Route from a NeTEx Line.
- * Supported GTFS Extension: the route_type field is ammped to GTFS extended route types.
+ * Supported GTFS Extension: the route_type field is mapped to GTFS extended route types.
  */
 public class DefaultRouteProducer implements RouteProducer {
 

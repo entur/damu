@@ -28,6 +28,9 @@ import org.rutebanken.netex.model.StopPlace;
  */
 public interface StopProducer {
 
+    int WHEELCHAIR_BOARDING_TRUE = 1;
+    int WHEELCHAIR_BOARDING_FALSE = 2;
+
     /**
      * Produce a GTFS Stop from a NeTEx StopPlace
      * @param stopPlace a NeTEx StopPlace

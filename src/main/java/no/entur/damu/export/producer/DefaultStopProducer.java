@@ -36,8 +36,6 @@ import org.slf4j.LoggerFactory;
 public class DefaultStopProducer implements StopProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultStopProducer.class);
-    private static final int WHEELCHAIR_BOARDING_TRUE = 1;
-    private static final int WHEELCHAIR_BOARDING_FALSE = 2;
 
     private final Agency defaultAgency;
     private final StopAreaRepository stopAreaRepository;
@@ -96,10 +94,10 @@ public class DefaultStopProducer implements StopProducer {
         if (stopPlace.getAccessibilityAssessment() != null) {
             String wheelchairAccess = stopPlace.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation().getWheelchairAccess().value();
             if ("true".equals(wheelchairAccess)) {
-                stop.setWheelchairBoarding(WHEELCHAIR_BOARDING_TRUE);
+                stop.setWheelchairBoarding(StopProducer.WHEELCHAIR_BOARDING_TRUE);
 
             } else if ("false".equals(wheelchairAccess)) {
-                stop.setWheelchairBoarding(WHEELCHAIR_BOARDING_FALSE);
+                stop.setWheelchairBoarding(StopProducer.WHEELCHAIR_BOARDING_FALSE);
             }
         }
 
@@ -163,10 +161,10 @@ public class DefaultStopProducer implements StopProducer {
         if (quay.getAccessibilityAssessment() != null) {
             String wheelchairAccess = quay.getAccessibilityAssessment().getLimitations().getAccessibilityLimitation().getWheelchairAccess().value();
             if ("true".equals(wheelchairAccess)) {
-                stop.setWheelchairBoarding(WHEELCHAIR_BOARDING_TRUE);
+                stop.setWheelchairBoarding(StopProducer.WHEELCHAIR_BOARDING_TRUE);
 
             } else if ("false".equals(wheelchairAccess)) {
-                stop.setWheelchairBoarding(WHEELCHAIR_BOARDING_FALSE);
+                stop.setWheelchairBoarding(StopProducer.WHEELCHAIR_BOARDING_FALSE);
             }
         }
 
