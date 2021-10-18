@@ -44,8 +44,6 @@ import java.util.stream.Collectors;
 public class DefaultTripProducer implements TripProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultTripProducer.class);
-    private static final String GTFS_DIRECTION_OUTBOUND = "0";
-    private static final String GTFS_DIRECTION_INBOUND = "1";
 
 
     private final Agency agency;
@@ -83,9 +81,9 @@ public class DefaultTripProducer implements TripProducer {
         // direction
         DirectionTypeEnumeration directionType = netexRoute.getDirectionType();
         if (DirectionTypeEnumeration.INBOUND == directionType) {
-            trip.setDirectionId(GTFS_DIRECTION_INBOUND);
+            trip.setDirectionId(TripProducer.GTFS_DIRECTION_INBOUND);
         } else {
-            trip.setDirectionId(GTFS_DIRECTION_OUTBOUND);
+            trip.setDirectionId(TripProducer.GTFS_DIRECTION_OUTBOUND);
         }
 
         // service

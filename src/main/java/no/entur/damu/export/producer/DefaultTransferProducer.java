@@ -28,11 +28,6 @@ import org.rutebanken.netex.model.ServiceJourneyInterchange;
 
 public class DefaultTransferProducer implements TransferProducer {
 
-    private static final int TRANSFER_RECOMMENDED = 0;
-    private static final int TRANSFER_TIMED = 1;
-    private static final int TRANSFER_MINIMAL = 2;
-    private static final int TRANSFER_NOT_ALLOWED = 3;
-
     private final NetexDatasetRepository netexDatasetRepository;
     private final GtfsDatasetRepository gtfsDatasetRepository;
 
@@ -63,14 +58,14 @@ public class DefaultTransferProducer implements TransferProducer {
         transfer.setToStop(toStop);
 
         if (Boolean.TRUE.equals(serviceJourneyInterchange.isGuaranteed())) {
-            transfer.setTransferType(TRANSFER_TIMED);
+            transfer.setTransferType(TransferProducer.TRANSFER_TIMED);
         } else if (serviceJourneyInterchange.getMinimumTransferTime() != null) {
-            transfer.setTransferType(TRANSFER_MINIMAL);
+            transfer.setTransferType(TransferProducer.TRANSFER_MINIMAL);
             transfer.setMinTransferTime((int) (serviceJourneyInterchange.getMinimumTransferTime().getSeconds()));
         } else if (serviceJourneyInterchange.getPriority() != null && serviceJourneyInterchange.getPriority().intValueExact() < 0) {
-            transfer.setTransferType(TRANSFER_NOT_ALLOWED);
+            transfer.setTransferType(TransferProducer.TRANSFER_NOT_ALLOWED);
         } else {
-            transfer.setTransferType(TRANSFER_RECOMMENDED);
+            transfer.setTransferType(TransferProducer.TRANSFER_RECOMMENDED);
         }
 
 
