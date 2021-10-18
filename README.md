@@ -1,8 +1,8 @@
 
 # Damu [![CircleCI](https://circleci.com/gh/entur/damu/tree/master.svg?style=svg)](https://circleci.com/gh/entur/damu/tree/master)
 
-Damu converts NeTEX dataset into GTFS dataset.
-The input NeTEx datasets are required to follow the requirements of the [Nordic NeTEx Profile](https://enturas.atlassian.net/wiki/spaces/PUBLIC/pages/728891481/Nordic+NeTEx+Profile).
+Damu converts NeTEX datasets into GTFS datasets.
+The input NeTEx datasets are required to follow the [Nordic NeTEx Profile](https://enturas.atlassian.net/wiki/spaces/PUBLIC/pages/728891481/Nordic+NeTEx+Profile).
 
 # Input data
 The converter requires:
@@ -11,19 +11,19 @@ The converter requires:
 - A NeTEx dataset containing the full definition of the StopPlaces and Quays referred from the timetable data. 
 
 # Output
-The converter produces a GTFS zip archive corresponding to the input timetable data.
+The converter produces a GTFS zip archive containing timetable data.
 
 # Data format prerequisites
-The library supports out-of-the-box NeTEx datasets that follow the Nordic NeTEx Profile and assumes the dataset structure and completeness are compatible with the Nordic NeTEx Profile (example: required name on a Line, required DestinationDisplay on the first stop of a JourneyPattern, ...)
-Supporting different NeTEx profiles is possible by overriding the default conversion process (see Extension points below).
+The library supports out-of-the-box NeTEx datasets that follow the Nordic NeTEx Profile and assumes that the dataset structure and completeness are compatible with the Nordic NeTEx Profile (example: required name on a Line, required DestinationDisplay on the first stop of a JourneyPattern, ...).
+Supporting other NeTEx profiles is possible by overriding the default conversion process (see Extension points below).
 
 # Usage
 
-        InputStream stopsAndQuaysDataset = // input stream on a zip archive containing the NeTEX stops and quays definitions.
+        InputStream stopsAndQuaysDataset = // input stream pointing to a zip archive containing the NeTEX stops and quays definitions.
         DefaultStopAreaRepository defaultStopAreaRepository = new DefaultStopAreaRepository();
         defaultStopAreaRepository.loadStopAreas(stopsAndQuaysDataset);
 
-        InputStream netexTimetableDataset = // input stream on a zip archive containing the NeTEX timetable data.
+        InputStream netexTimetableDataset = // input stream pointing to a zip archive containing the NeTEX timetable data.
         String codespace = // NeTEX codespace for the timetable data provider.
 
         GtfsExporter gtfsExport = new DefaultGtfsExporter(codespace, defaultStopAreaRepository);
