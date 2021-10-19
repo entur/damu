@@ -225,7 +225,17 @@ public final class TransportModeUtils {
     }
 
 
+    /**
+     * Return the submode as a String for a given TransportModeStructure, or null if the transport mode is not set.
+     * @param subModeStructure a transport sub mode structure.
+     * @return the submode as a String for a given TransportModeStructure, or null if the transport mode is not set.
+     */
     private static String getSubMode(TransportSubmodeStructure subModeStructure) {
+
+        if(subModeStructure == null) {
+            return null;
+        }
+
         if (subModeStructure.getAirSubmode() != null) {
             return subModeStructure.getAirSubmode().value();
         }
