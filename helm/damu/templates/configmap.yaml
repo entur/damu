@@ -20,6 +20,7 @@ data:
     camel.servlet.mapping.context-path=/services/*
     # the Camel shutdown timeout must be shorter than the Kubernetes terminationGracePeriod
     damu.shutdown.timeout=25
+    damu.camel.redelivery.max=0
 
     # PubSub
     damu.pubsub.project.id={{ .Values.gcp.pubsubProjectId }}
