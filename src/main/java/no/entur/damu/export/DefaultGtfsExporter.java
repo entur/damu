@@ -221,7 +221,7 @@ public class DefaultGtfsExporter implements GtfsExporter {
     protected void convertTransfers() {
         netexDatasetRepository.getServiceJourneyInterchanges()
                 .stream()
-                .filter(this::isValidServiceJourneyTransfer)
+                .filter(this::isValidServiceJourneyInterchange)
                 .map(transferProducer::produce)
                 .forEach(gtfsDatasetRepository::saveEntity);
     }
@@ -262,7 +262,7 @@ public class DefaultGtfsExporter implements GtfsExporter {
      * @param serviceJourneyInterchange the ServiceJourneyInterchange to check.
      * @return true if the referenced ServiceJourneys are neither replaced nor cancelled.
      */
-    private boolean isValidServiceJourneyTransfer(ServiceJourneyInterchange serviceJourneyInterchange) {
+    private boolean isValidServiceJourneyInterchange(ServiceJourneyInterchange serviceJourneyInterchange) {
         ServiceJourney fromServiceJourney = netexDatasetRepository.getServiceJourneyById(serviceJourneyInterchange.getFromJourneyRef().getRef());
         ServiceJourney toServiceJourney = netexDatasetRepository.getServiceJourneyById(serviceJourneyInterchange.getToJourneyRef().getRef());
         boolean isValid = fromServiceJourney != null
