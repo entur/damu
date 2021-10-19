@@ -63,9 +63,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.onebusaway.gtfs.model.Route;
 import org.rutebanken.netex.model.AllVehicleModesOfTransportEnumeration;
+import org.rutebanken.netex.model.BusSubmodeEnumeration;
 import org.rutebanken.netex.model.GroupOfLinesRefStructure;
 import org.rutebanken.netex.model.Line;
 import org.rutebanken.netex.model.MultilingualString;
+import org.rutebanken.netex.model.TransportSubmodeStructure;
 
 class RouteProducerTest {
 
@@ -86,6 +88,9 @@ class RouteProducerTest {
         lineName.setValue(LINE_NAME);
         line.setName(lineName);
         line.setTransportMode(AllVehicleModesOfTransportEnumeration.BUS);
+        TransportSubmodeStructure transportSubmode = new TransportSubmodeStructure();
+        transportSubmode.setBusSubmode(BusSubmodeEnumeration.LOCAL_BUS);
+        line.setTransportSubmode(transportSubmode);
         GroupOfLinesRefStructure groupOfLineRef = new GroupOfLinesRefStructure();
         groupOfLineRef.setRef(TestNetexDatasetRepository.NETWORK_ID);
         line.setRepresentedByGroupRef(groupOfLineRef);
@@ -96,7 +101,7 @@ class RouteProducerTest {
         Assertions.assertNotNull(route.getId());
         Assertions.assertEquals(LINE_ID, route.getId().getId());
         Assertions.assertEquals(LINE_NAME, route.getLongName());
-        Assertions.assertEquals(GtfsRouteType.BusService.getValue(), route.getType());
+        Assertions.assertEquals(GtfsRouteType.LocalBusService.getValue(), route.getType());
 
     }
 }
