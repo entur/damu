@@ -97,8 +97,9 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
                 .to("direct:uploadGtfsDataset")
                 .setBody(constant(STATUS_EXPORT_OK))
                 .to("direct:notifyMarduk")
-                .doCatch(Exception.class)
-                .log(LoggingLevel.WARN, correlation() + "GTFS export failed for codespace ${header." + DATASET_CODESPACE + "}")
+                // catching only GtfsExportException. They are generally not retryable.
+                .doCatch(GtfsExportException.class)
+                .log(LoggingLevel.ERROR, correlation() + "Dataset processing failed: ${exception.message} stacktrace: ${exception.stacktrace}")
                 .setBody(constant(STATUS_EXPORT_FAILED))
                 .to("direct:notifyMarduk")
                 .routeId("gtfs-export-queue");
@@ -117,7 +118,6 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
 
         from("direct:convertToGtfs")
                 .log(LoggingLevel.INFO, correlation() + "Converting to GTFS")
-                .doTry()
                 .process(exchange -> {
                     InputStream timetableDataset = exchange.getIn().getHeader(TIMETABLE_DATASET_FILE, InputStream.class);
                     String codespace = exchange.getIn().getHeader(DATASET_CODESPACE, String.class).replace("rb_", "").toUpperCase();
@@ -125,11 +125,6 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
                     exchange.getIn().setBody(gtfsExporter.convertNetexToGtfs(timetableDataset));
                 })
                 .log(LoggingLevel.INFO, correlation() + "Dataset processing complete")
-                // catching only GtfsExportException. They are generally not retryable.
-                .doCatch(GtfsExportException.class)
-                .log(LoggingLevel.ERROR, correlation() + "Dataset processing failed: ${exception.message} stacktrace: ${exception.stacktrace}")
-                .stop()
-                .end()
                 .routeId("convert-to-gtfs");
 
         from("direct:uploadGtfsDataset")
