@@ -21,6 +21,7 @@ package no.entur.damu.export.producer;
 import no.entur.damu.export.repository.GtfsDatasetRepository;
 import no.entur.damu.export.repository.NetexDatasetRepository;
 import no.entur.damu.export.util.DestinationDisplayUtil;
+import no.entur.damu.export.util.ServiceJourneyUtil;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Trip;
@@ -29,12 +30,12 @@ import org.rutebanken.netex.model.DestinationDisplay;
 import org.rutebanken.netex.model.DirectionTypeEnumeration;
 import org.rutebanken.netex.model.OperatingDay;
 import org.rutebanken.netex.model.Route;
-import org.rutebanken.netex.model.ServiceAlterationEnumeration;
 import org.rutebanken.netex.model.ServiceJourney;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -61,7 +62,7 @@ public class DefaultTripProducer implements TripProducer {
     public Trip produce(ServiceJourney serviceJourney, Route netexRoute, org.onebusaway.gtfs.model.Route gtfsRoute, AgencyAndId shapeId, DestinationDisplay initialDestinationDisplay) {
 
         // Cancelled or replaced service journeys are not valid GTFS trips.
-        if (ServiceAlterationEnumeration.CANCELLATION == serviceJourney.getServiceAlteration() || ServiceAlterationEnumeration.REPLACED == serviceJourney.getServiceAlteration()) {
+        if (ServiceJourneyUtil.isReplacedOrCancelled(serviceJourney)) {
             return null;
         }
 
@@ -100,10 +101,7 @@ public class DefaultTripProducer implements TripProducer {
             // DatedServiceJourneys for cancelled and replaced trips are filtered out
             Set<OperatingDay> operatingDays = netexDatasetRepository.getDatedServiceJourneysByServiceJourneyId(serviceJourney.getId())
                     .stream()
-                    .filter(datedServiceJourney -> {
-                        ServiceAlterationEnumeration serviceAlteration = datedServiceJourney.getServiceAlteration();
-                        return ServiceAlterationEnumeration.CANCELLATION != serviceAlteration && ServiceAlterationEnumeration.REPLACED != serviceAlteration;
-                    })
+                    .filter(Predicate.not(ServiceJourneyUtil::isReplacedOrCancelled))
                     .map(datedServiceJourney -> netexDatasetRepository.getOperatingDayById(datedServiceJourney.getOperatingDayRef().getRef()))
                     .collect(Collectors.toSet());
             serviceAgencyAndId.setId(gtfsServiceRepository.getServiceForOperatingDays(operatingDays).getId());

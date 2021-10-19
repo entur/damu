@@ -52,6 +52,7 @@ import no.entur.damu.export.repository.GtfsDatasetRepository;
 import no.entur.damu.export.repository.NetexDatasetRepository;
 import no.entur.damu.export.stop.StopAreaRepository;
 import no.entur.damu.export.util.DestinationDisplayUtil;
+import no.entur.damu.export.util.ServiceJourneyUtil;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.FeedInfo;
 import org.onebusaway.gtfs.model.Route;
@@ -62,8 +63,8 @@ import org.rutebanken.netex.model.DestinationDisplay;
 import org.rutebanken.netex.model.JourneyPattern;
 import org.rutebanken.netex.model.Line;
 import org.rutebanken.netex.model.Quay;
-import org.rutebanken.netex.model.ServiceAlterationEnumeration;
 import org.rutebanken.netex.model.ServiceJourney;
+import org.rutebanken.netex.model.ServiceJourneyInterchange;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.StopPointInJourneyPattern;
 import org.rutebanken.netex.model.TimetabledPassingTime;
@@ -157,9 +158,9 @@ public class DefaultGtfsExporter implements GtfsExporter {
 
 
     protected void addFeedInfo() {
-        if(feedInfoProducer != null) {
+        if (feedInfoProducer != null) {
             FeedInfo feedInfo = feedInfoProducer.produceFeedInfo();
-            if(feedInfo != null) {
+            if (feedInfo != null) {
                 gtfsDatasetRepository.saveEntity(feedInfo);
             }
         }
@@ -220,6 +221,7 @@ public class DefaultGtfsExporter implements GtfsExporter {
     protected void convertTransfers() {
         netexDatasetRepository.getServiceJourneyInterchanges()
                 .stream()
+                .filter(this::isValidServiceJourneyInterchange)
                 .map(transferProducer::produce)
                 .forEach(gtfsDatasetRepository::saveEntity);
     }
@@ -230,8 +232,7 @@ public class DefaultGtfsExporter implements GtfsExporter {
         // and quays referenced only as route points or in dead runs
         Set<String> allQuaysId = netexDatasetRepository.getServiceJourneys()
                 .stream()
-                .filter(serviceJourney -> ServiceAlterationEnumeration.CANCELLATION != serviceJourney.getServiceAlteration()
-                        && ServiceAlterationEnumeration.REPLACED != serviceJourney.getServiceAlteration())
+                .filter(Predicate.not(ServiceJourneyUtil::isReplacedOrCancelled))
                 .map(serviceJourney -> serviceJourney.getJourneyPatternRef().getValue().getRef())
                 .distinct()
                 .map(netexDatasetRepository::getJourneyPatternById)
@@ -255,6 +256,25 @@ public class DefaultGtfsExporter implements GtfsExporter {
                 .map(stopProducer::produceStopFromStopPlace)
                 .forEach(gtfsDatasetRepository::saveEntity);
     }
+
+    /**
+     * A service journey is valid if the referenced ServiceJourneys are neither replaced nor cancelled.
+     * @param serviceJourneyInterchange the ServiceJourneyInterchange to check.
+     * @return true if the referenced ServiceJourneys are neither replaced nor cancelled.
+     */
+    private boolean isValidServiceJourneyInterchange(ServiceJourneyInterchange serviceJourneyInterchange) {
+        ServiceJourney fromServiceJourney = netexDatasetRepository.getServiceJourneyById(serviceJourneyInterchange.getFromJourneyRef().getRef());
+        ServiceJourney toServiceJourney = netexDatasetRepository.getServiceJourneyById(serviceJourneyInterchange.getToJourneyRef().getRef());
+        boolean isValid = fromServiceJourney != null
+                && toServiceJourney != null
+                && !ServiceJourneyUtil.isReplacedOrCancelled(fromServiceJourney)
+                && !ServiceJourneyUtil.isReplacedOrCancelled(toServiceJourney);
+        if (!isValid) {
+            LOGGER.warn("Filtering invalid ServiceJourneyInterchange {}", serviceJourneyInterchange.getId());
+        }
+        return isValid;
+    }
+
 
     private boolean isFlexibleScheduledStopPoint(String scheduledStopPointId) {
         String flexibleStopPlaceId = netexDatasetRepository.getFlexibleStopPlaceIdByScheduledStopPointId(scheduledStopPointId);
