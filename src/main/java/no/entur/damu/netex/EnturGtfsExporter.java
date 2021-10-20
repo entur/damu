@@ -18,8 +18,8 @@
 
 package no.entur.damu.netex;
 
-import no.entur.damu.export.DefaultGtfsExporter;
-import no.entur.damu.export.stop.StopAreaRepository;
+import org.entur.netex.gtfs.export.DefaultGtfsExporter;
+import org.entur.netex.gtfs.export.stop.StopAreaRepository;
 
 /**
  * Custom GTFS exporter that handles missing or incomplete data in the input NeTEx dataset.

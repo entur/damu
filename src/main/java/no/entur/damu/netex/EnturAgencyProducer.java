@@ -18,9 +18,9 @@
 
 package no.entur.damu.netex;
 
-import no.entur.damu.export.exception.MissingAuthorityUrlException;
-import no.entur.damu.export.producer.DefaultAgencyProducer;
-import no.entur.damu.export.repository.NetexDatasetRepository;
+import org.entur.netex.gtfs.export.exception.MissingAuthorityUrlException;
+import org.entur.netex.gtfs.export.producer.DefaultAgencyProducer;
+import org.entur.netex.gtfs.export.repository.NetexDatasetRepository;
 import org.onebusaway.gtfs.model.Agency;
 import org.rutebanken.netex.model.Authority;
 import org.slf4j.Logger;
