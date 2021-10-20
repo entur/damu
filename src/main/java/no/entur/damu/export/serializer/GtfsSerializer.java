@@ -18,11 +18,20 @@
 
 package no.entur.damu.export.serializer;
 
+import org.onebusaway.gtfs.services.GtfsDao;
+
 import java.io.InputStream;
 
 /**
  * Serialize a GTFS dataset into a zip archive.
  */
 public interface GtfsSerializer {
-    InputStream writeGtfs();
+
+    /**
+     * Generate a GTFS archive from an in-memory GTFS data model.
+     *
+     * @param gtfsDao the in-memory GTFS data model.
+     * @return an input stream pointing to a GTFS archive.
+     */
+    InputStream writeGtfs(GtfsDao gtfsDao);
 }

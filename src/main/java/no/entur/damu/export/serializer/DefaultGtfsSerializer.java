@@ -46,16 +46,8 @@ public class DefaultGtfsSerializer implements GtfsSerializer {
             Trip.class, List.of("drt_advance_book_min", "peak_offpeak")
     );
 
-    private final GtfsDao gtfsDao;
 
-    /**
-     * Create a GTFS serializer for a given in-memory dataset.
-     *
-     * @param gtfsDao the in-memory dataset.
-     */
-    public DefaultGtfsSerializer(GtfsDao gtfsDao) {
-        this.gtfsDao = gtfsDao;
-    }
+
 
     /**
      * Create a zip archive containing the GTFS dataset and return an input stream pointing to it.
@@ -63,7 +55,7 @@ public class DefaultGtfsSerializer implements GtfsSerializer {
      * @return an input stream on the GTFS zip file.
      */
     @Override
-    public InputStream writeGtfs() {
+    public InputStream writeGtfs(GtfsDao gtfsDao) {
         LOGGER.info("Exporting GTFS archive");
         GtfsWriter writer = null;
         try {
