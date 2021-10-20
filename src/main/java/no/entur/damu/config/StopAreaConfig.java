@@ -34,8 +34,8 @@
 
 package no.entur.damu.config;
 
-import no.entur.damu.export.stop.DefaultStopAreaRepositoryFactory;
-import no.entur.damu.export.stop.StopAreaRepositoryFactory;
+import org.entur.netex.gtfs.export.stop.DefaultStopAreaRepositoryFactory;
+import org.entur.netex.gtfs.export.stop.StopAreaRepositoryFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

@@ -35,11 +35,11 @@
 package no.entur.damu.routes.export;
 
 import no.entur.damu.Constants;
-import no.entur.damu.export.GtfsExporter;
-import no.entur.damu.export.exception.GtfsExportException;
+import org.entur.netex.gtfs.export.GtfsExporter;
+import org.entur.netex.gtfs.export.exception.GtfsExportException;
 import no.entur.damu.netex.EnturGtfsExporter;
 import no.entur.damu.routes.BaseRouteBuilder;
-import no.entur.damu.export.stop.StopAreaRepositoryFactory;
+import org.entur.netex.gtfs.export.stop.StopAreaRepositoryFactory;
 import org.apache.camel.LoggingLevel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

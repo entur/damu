@@ -18,7 +18,7 @@
 
 package no.entur.damu.netex;
 
-import no.entur.damu.export.producer.FeedInfoProducer;
+import org.entur.netex.gtfs.export.producer.FeedInfoProducer;
 import org.onebusaway.gtfs.model.FeedInfo;
 
 public class EnturFeedInfoProducer implements FeedInfoProducer {

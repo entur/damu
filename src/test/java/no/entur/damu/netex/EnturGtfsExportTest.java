@@ -34,8 +34,8 @@
 
 package no.entur.damu.netex;
 
-import no.entur.damu.export.GtfsExporter;
-import no.entur.damu.export.stop.DefaultStopAreaRepository;
+import org.entur.netex.gtfs.export.GtfsExporter;
+import org.entur.netex.gtfs.export.stop.DefaultStopAreaRepository;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

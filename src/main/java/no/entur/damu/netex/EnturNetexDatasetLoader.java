@@ -18,8 +18,8 @@
 
 package no.entur.damu.netex;
 
-import no.entur.damu.export.loader.DefaultNetexDatasetLoader;
-import no.entur.damu.export.repository.NetexDatasetRepository;
+import org.entur.netex.gtfs.export.loader.DefaultNetexDatasetLoader;
+import org.entur.netex.gtfs.export.repository.NetexDatasetRepository;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
