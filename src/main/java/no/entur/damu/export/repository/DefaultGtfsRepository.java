@@ -39,14 +39,14 @@ public class DefaultGtfsRepository implements GtfsDatasetRepository {
 
     public DefaultGtfsRepository() {
         this.gtfsDao = new GtfsRelationalDaoImpl();
-        this.gtfsSerializer = new DefaultGtfsSerializer(gtfsDao);
+        this.gtfsSerializer = new DefaultGtfsSerializer();
         this.defaultAgency = createDefaultAgency();
     }
 
     @Override
     public Agency getAgencyById(String agencyId) {
         Agency agency = gtfsDao.getAgencyForId(agencyId);
-        if(agency== null) {
+        if (agency == null) {
             throw new GtfsDatasetRepositoryException("Agency not found: " + agencyId);
         }
         return agency;
@@ -84,7 +84,7 @@ public class DefaultGtfsRepository implements GtfsDatasetRepository {
 
     @Override
     public InputStream writeGtfs() {
-        return gtfsSerializer.writeGtfs();
+        return gtfsSerializer.writeGtfs(gtfsDao);
     }
 
     @Override

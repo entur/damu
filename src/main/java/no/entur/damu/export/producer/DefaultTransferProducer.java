@@ -36,7 +36,6 @@ public class DefaultTransferProducer implements TransferProducer {
         this.gtfsDatasetRepository = gtfsDatasetRepository;
     }
 
-
     @Override
     public Transfer produce(ServiceJourneyInterchange serviceJourneyInterchange) {
         Transfer transfer = new Transfer();
@@ -68,10 +67,6 @@ public class DefaultTransferProducer implements TransferProducer {
             transfer.setTransferType(TransferProducer.TRANSFER_RECOMMENDED);
         }
 
-
         return transfer;
-
     }
-
-
 }
