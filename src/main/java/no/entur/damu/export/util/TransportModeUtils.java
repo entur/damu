@@ -36,49 +36,49 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static no.entur.damu.export.model.GtfsRouteType.AirService;
-import static no.entur.damu.export.model.GtfsRouteType.BusService;
-import static no.entur.damu.export.model.GtfsRouteType.CarHighSpeedFerryService;
-import static no.entur.damu.export.model.GtfsRouteType.CityTramService;
-import static no.entur.damu.export.model.GtfsRouteType.CoachService;
-import static no.entur.damu.export.model.GtfsRouteType.DomesticAirService;
-import static no.entur.damu.export.model.GtfsRouteType.ExpressBusService;
-import static no.entur.damu.export.model.GtfsRouteType.FerryService;
-import static no.entur.damu.export.model.GtfsRouteType.FunicularService;
-import static no.entur.damu.export.model.GtfsRouteType.HelicopterAirService;
-import static no.entur.damu.export.model.GtfsRouteType.HighSpeedRailService;
-import static no.entur.damu.export.model.GtfsRouteType.InterRegionalRailService;
-import static no.entur.damu.export.model.GtfsRouteType.InternationalAirService;
-import static no.entur.damu.export.model.GtfsRouteType.InternationalCarFerryService;
-import static no.entur.damu.export.model.GtfsRouteType.InternationalCoachService;
-import static no.entur.damu.export.model.GtfsRouteType.InternationalPassengerFerryService;
-import static no.entur.damu.export.model.GtfsRouteType.LocalBusService;
-import static no.entur.damu.export.model.GtfsRouteType.LocalCarFerryService;
-import static no.entur.damu.export.model.GtfsRouteType.LocalPassengerFerryService;
-import static no.entur.damu.export.model.GtfsRouteType.LocalTramService;
-import static no.entur.damu.export.model.GtfsRouteType.LongDistanceTrains;
-import static no.entur.damu.export.model.GtfsRouteType.MetroService;
-import static no.entur.damu.export.model.GtfsRouteType.MiscellaneousService;
-import static no.entur.damu.export.model.GtfsRouteType.NationalCarFerryService;
-import static no.entur.damu.export.model.GtfsRouteType.NationalCoachService;
-import static no.entur.damu.export.model.GtfsRouteType.NightBusService;
-import static no.entur.damu.export.model.GtfsRouteType.PassengerHighSpeedFerryService;
-import static no.entur.damu.export.model.GtfsRouteType.RailReplacementBusService;
-import static no.entur.damu.export.model.GtfsRouteType.RailwayService;
-import static no.entur.damu.export.model.GtfsRouteType.RegionalBusService;
-import static no.entur.damu.export.model.GtfsRouteType.RegionalRailService;
-import static no.entur.damu.export.model.GtfsRouteType.SchoolBus;
-import static no.entur.damu.export.model.GtfsRouteType.ShuttleBus;
-import static no.entur.damu.export.model.GtfsRouteType.SightseeingBoatService;
-import static no.entur.damu.export.model.GtfsRouteType.SightseeingBus;
-import static no.entur.damu.export.model.GtfsRouteType.SleeperRailService;
-import static no.entur.damu.export.model.GtfsRouteType.TaxiService;
-import static no.entur.damu.export.model.GtfsRouteType.TelecabinService;
-import static no.entur.damu.export.model.GtfsRouteType.TouristCoachService;
-import static no.entur.damu.export.model.GtfsRouteType.TouristRailwayService;
-import static no.entur.damu.export.model.GtfsRouteType.TramService;
-import static no.entur.damu.export.model.GtfsRouteType.TrolleybusService;
-import static no.entur.damu.export.model.GtfsRouteType.WaterTransportService;
+import static no.entur.damu.export.model.GtfsRouteType.AIR_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.BUS_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.CAR_HIGH_SPEED_FERRY_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.CITY_TRAM_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.COACH_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.DOMESTIC_AIR_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.EXPRESS_BUS_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.FERRY_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.FUNICULAR_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.HELICOPTER_AIR_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.HIGH_SPEED_RAIL_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.INTER_REGIONAL_RAIL_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.INTERNATIONAL_AIR_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.INTERNATIONAL_CAR_FERRY_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.INTERNATIONAL_COACH_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.INTERNATIONAL_PASSENGER_FERRY_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.LOCAL_BUS_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.LOCAL_CAR_FERRY_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.LOCAL_PASSENGER_FERRY_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.LOCAL_TRAM_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.LONG_DISTANCE_TRAINS;
+import static no.entur.damu.export.model.GtfsRouteType.METRO_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.MISCELLANEOUS_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.NATIONAL_CAR_FERRY_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.NATIONAL_COACH_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.NIGHT_BUS_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.PASSENGER_HIGH_SPEED_FERRY_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.RAIL_REPLACEMENT_BUS_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.RAILWAY_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.REGIONAL_BUS_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.REGIONAL_RAIL_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.SCHOOL_BUS;
+import static no.entur.damu.export.model.GtfsRouteType.SHUTTLE_BUS;
+import static no.entur.damu.export.model.GtfsRouteType.SIGHTSEEING_BOAT_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.SIGHTSEEING_BUS;
+import static no.entur.damu.export.model.GtfsRouteType.SLEEPER_RAIL_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.TAXI_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.TELECABIN_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.TOURIST_COACH_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.TOURIST_RAILWAY_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.TRAM_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.TROLLEYBUS_SERVICE;
+import static no.entur.damu.export.model.GtfsRouteType.WATER_TRANSPORT_SERVICE;
 
 public final class TransportModeUtils {
 
@@ -116,65 +116,65 @@ public final class TransportModeUtils {
 
     static {
         ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE = new HashMap<>();
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.AIR.value(), null), AirService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.AIR.value(), AirSubmodeEnumeration.DOMESTIC_FLIGHT.value()), DomesticAirService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.AIR.value(), AirSubmodeEnumeration.HELICOPTER_SERVICE.value()), HelicopterAirService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.AIR.value(), AirSubmodeEnumeration.INTERNATIONAL_FLIGHT.value()), InternationalAirService);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.AIR.value(), null), AIR_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.AIR.value(), AirSubmodeEnumeration.DOMESTIC_FLIGHT.value()), DOMESTIC_AIR_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.AIR.value(), AirSubmodeEnumeration.HELICOPTER_SERVICE.value()), HELICOPTER_AIR_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.AIR.value(), AirSubmodeEnumeration.INTERNATIONAL_FLIGHT.value()), INTERNATIONAL_AIR_SERVICE);
 
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.BUS.value(), null), BusService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.BUS.value(), BusSubmodeEnumeration.AIRPORT_LINK_BUS.value()), BusService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.BUS.value(), BusSubmodeEnumeration.EXPRESS_BUS.value()), ExpressBusService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.BUS.value(), BusSubmodeEnumeration.LOCAL_BUS.value()), LocalBusService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.BUS.value(), BusSubmodeEnumeration.NIGHT_BUS.value()), NightBusService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.BUS.value(), BusSubmodeEnumeration.RAIL_REPLACEMENT_BUS.value()), RailReplacementBusService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.BUS.value(), BusSubmodeEnumeration.REGIONAL_BUS.value()), RegionalBusService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.BUS.value(), BusSubmodeEnumeration.SCHOOL_BUS.value()), SchoolBus);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.BUS.value(), BusSubmodeEnumeration.SHUTTLE_BUS.value()), ShuttleBus);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.BUS.value(), BusSubmodeEnumeration.SIGHTSEEING_BUS.value()), SightseeingBus);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.BUS.value(), null), BUS_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.BUS.value(), BusSubmodeEnumeration.AIRPORT_LINK_BUS.value()), BUS_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.BUS.value(), BusSubmodeEnumeration.EXPRESS_BUS.value()), EXPRESS_BUS_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.BUS.value(), BusSubmodeEnumeration.LOCAL_BUS.value()), LOCAL_BUS_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.BUS.value(), BusSubmodeEnumeration.NIGHT_BUS.value()), NIGHT_BUS_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.BUS.value(), BusSubmodeEnumeration.RAIL_REPLACEMENT_BUS.value()), RAIL_REPLACEMENT_BUS_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.BUS.value(), BusSubmodeEnumeration.REGIONAL_BUS.value()), REGIONAL_BUS_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.BUS.value(), BusSubmodeEnumeration.SCHOOL_BUS.value()), SCHOOL_BUS);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.BUS.value(), BusSubmodeEnumeration.SHUTTLE_BUS.value()), SHUTTLE_BUS);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.BUS.value(), BusSubmodeEnumeration.SIGHTSEEING_BUS.value()), SIGHTSEEING_BUS);
 
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.COACH.value(), null), CoachService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.COACH.value(), CoachSubmodeEnumeration.INTERNATIONAL_COACH.value()), InternationalCoachService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.COACH.value(), CoachSubmodeEnumeration.NATIONAL_COACH.value()), NationalCoachService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.COACH.value(), CoachSubmodeEnumeration.TOURIST_COACH.value()), TouristCoachService);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.COACH.value(), null), COACH_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.COACH.value(), CoachSubmodeEnumeration.INTERNATIONAL_COACH.value()), INTERNATIONAL_COACH_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.COACH.value(), CoachSubmodeEnumeration.NATIONAL_COACH.value()), NATIONAL_COACH_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.COACH.value(), CoachSubmodeEnumeration.TOURIST_COACH.value()), TOURIST_COACH_SERVICE);
 
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(VehicleModeEnumeration.FERRY.value(), null), FerryService);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(VehicleModeEnumeration.FERRY.value(), null), FERRY_SERVICE);
 
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.METRO.value(), null), MetroService);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.METRO.value(), null), METRO_SERVICE);
 
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.RAIL.value(), null), RailwayService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.RAIL.value(), RailSubmodeEnumeration.INTERNATIONAL.value()), LongDistanceTrains);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.RAIL.value(), RailSubmodeEnumeration.LONG_DISTANCE.value()), LongDistanceTrains);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.RAIL.value(), RailSubmodeEnumeration.INTERREGIONAL_RAIL.value()), InterRegionalRailService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.RAIL.value(), RailSubmodeEnumeration.LOCAL.value()), RailwayService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.RAIL.value(), RailSubmodeEnumeration.NIGHT_RAIL.value()), SleeperRailService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.RAIL.value(), RailSubmodeEnumeration.REGIONAL_RAIL.value()), RegionalRailService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.RAIL.value(), RailSubmodeEnumeration.TOURIST_RAILWAY.value()), TouristRailwayService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.RAIL.value(), RailSubmodeEnumeration.AIRPORT_LINK_RAIL.value()), HighSpeedRailService);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.RAIL.value(), null), RAILWAY_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.RAIL.value(), RailSubmodeEnumeration.INTERNATIONAL.value()), LONG_DISTANCE_TRAINS);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.RAIL.value(), RailSubmodeEnumeration.LONG_DISTANCE.value()), LONG_DISTANCE_TRAINS);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.RAIL.value(), RailSubmodeEnumeration.INTERREGIONAL_RAIL.value()), INTER_REGIONAL_RAIL_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.RAIL.value(), RailSubmodeEnumeration.LOCAL.value()), RAILWAY_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.RAIL.value(), RailSubmodeEnumeration.NIGHT_RAIL.value()), SLEEPER_RAIL_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.RAIL.value(), RailSubmodeEnumeration.REGIONAL_RAIL.value()), REGIONAL_RAIL_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.RAIL.value(), RailSubmodeEnumeration.TOURIST_RAILWAY.value()), TOURIST_RAILWAY_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.RAIL.value(), RailSubmodeEnumeration.AIRPORT_LINK_RAIL.value()), HIGH_SPEED_RAIL_SERVICE);
 
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.TROLLEY_BUS.value(), null), TrolleybusService);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.TROLLEY_BUS.value(), null), TROLLEYBUS_SERVICE);
 
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.TRAM.value(), null), TramService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.TRAM.value(), TramSubmodeEnumeration.LOCAL_TRAM.value()), LocalTramService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.TRAM.value(), TramSubmodeEnumeration.CITY_TRAM.value()), CityTramService);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.TRAM.value(), null), TRAM_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.TRAM.value(), TramSubmodeEnumeration.LOCAL_TRAM.value()), LOCAL_TRAM_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.TRAM.value(), TramSubmodeEnumeration.CITY_TRAM.value()), CITY_TRAM_SERVICE);
 
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.WATER.value(), null), WaterTransportService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.WATER.value(), WaterSubmodeEnumeration.HIGH_SPEED_PASSENGER_SERVICE.value()), PassengerHighSpeedFerryService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.WATER.value(), WaterSubmodeEnumeration.HIGH_SPEED_VEHICLE_SERVICE.value()), CarHighSpeedFerryService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.WATER.value(), WaterSubmodeEnumeration.INTERNATIONAL_CAR_FERRY.value()), InternationalCarFerryService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.WATER.value(), WaterSubmodeEnumeration.INTERNATIONAL_PASSENGER_FERRY.value()), InternationalPassengerFerryService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.WATER.value(), WaterSubmodeEnumeration.LOCAL_CAR_FERRY.value()), LocalCarFerryService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.WATER.value(), WaterSubmodeEnumeration.LOCAL_PASSENGER_FERRY.value()), LocalPassengerFerryService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.WATER.value(), WaterSubmodeEnumeration.NATIONAL_CAR_FERRY.value()), NationalCarFerryService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.WATER.value(), WaterSubmodeEnumeration.SIGHTSEEING_SERVICE.value()), SightseeingBoatService);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.WATER.value(), null), WATER_TRANSPORT_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.WATER.value(), WaterSubmodeEnumeration.HIGH_SPEED_PASSENGER_SERVICE.value()), PASSENGER_HIGH_SPEED_FERRY_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.WATER.value(), WaterSubmodeEnumeration.HIGH_SPEED_VEHICLE_SERVICE.value()), CAR_HIGH_SPEED_FERRY_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.WATER.value(), WaterSubmodeEnumeration.INTERNATIONAL_CAR_FERRY.value()), INTERNATIONAL_CAR_FERRY_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.WATER.value(), WaterSubmodeEnumeration.INTERNATIONAL_PASSENGER_FERRY.value()), INTERNATIONAL_PASSENGER_FERRY_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.WATER.value(), WaterSubmodeEnumeration.LOCAL_CAR_FERRY.value()), LOCAL_CAR_FERRY_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.WATER.value(), WaterSubmodeEnumeration.LOCAL_PASSENGER_FERRY.value()), LOCAL_PASSENGER_FERRY_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.WATER.value(), WaterSubmodeEnumeration.NATIONAL_CAR_FERRY.value()), NATIONAL_CAR_FERRY_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.WATER.value(), WaterSubmodeEnumeration.SIGHTSEEING_SERVICE.value()), SIGHTSEEING_BOAT_SERVICE);
 
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.CABLEWAY.value(), null), TelecabinService);
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(VehicleModeEnumeration.LIFT.value(), null), TelecabinService);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.CABLEWAY.value(), null), TELECABIN_SERVICE);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(VehicleModeEnumeration.LIFT.value(), null), TELECABIN_SERVICE);
 
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.FUNICULAR.value(), null), FunicularService);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.FUNICULAR.value(), null), FUNICULAR_SERVICE);
 
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.TAXI.value(), null), TaxiService);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(AllVehicleModesOfTransportEnumeration.TAXI.value(), null), TAXI_SERVICE);
 
-        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(VehicleModeEnumeration.OTHER.value(), null), MiscellaneousService);
+        ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(VehicleModeEnumeration.OTHER.value(), null), MISCELLANEOUS_SERVICE);
     }
 
 
@@ -218,7 +218,7 @@ public final class TransportModeUtils {
         }
         if (routeType == null) {
             LOGGER.debug("Unknown transport mode {}, falling back to route type for miscellaneous services", transportMode);
-            routeType = MiscellaneousService;
+            routeType = MISCELLANEOUS_SERVICE;
         }
         return routeType;
 

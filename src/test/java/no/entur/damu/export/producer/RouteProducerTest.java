@@ -101,7 +101,7 @@ class RouteProducerTest {
         Assertions.assertNotNull(route.getId());
         Assertions.assertEquals(LINE_ID, route.getId().getId());
         Assertions.assertEquals(LINE_NAME, route.getLongName());
-        Assertions.assertEquals(GtfsRouteType.LocalBusService.getValue(), route.getType());
+        Assertions.assertEquals(GtfsRouteType.LOCAL_BUS_SERVICE.getValue(), route.getType());
 
     }
 }
