@@ -21,11 +21,9 @@ package no.entur.damu.export.producer;
 import no.entur.damu.export.model.GtfsShape;
 import no.entur.damu.export.repository.GtfsDatasetRepository;
 import no.entur.damu.export.repository.NetexDatasetRepository;
-import no.entur.damu.export.util.JtsGmlConverter;
+import no.entur.damu.export.util.GeometryUtil;
 import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.PrecisionModel;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.ShapePoint;
@@ -46,21 +44,12 @@ public class DefaultShapeProducer implements ShapeProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultShapeProducer.class);
 
-    /**
-     * Earth radius on the equator for the WGS84 system, in meters.
-     */
-    private static final int EQUATORIAL_RADIUS = 6378137;
-
-
     private final Agency agency;
     private final NetexDatasetRepository netexDatasetRepository;
-    private final GeometryFactory factory;
-
 
     public DefaultShapeProducer(NetexDatasetRepository netexDatasetRepository, GtfsDatasetRepository gtfsDatasetRepository) {
         this.agency = gtfsDatasetRepository.getDefaultAgency();
         this.netexDatasetRepository = netexDatasetRepository;
-        this.factory = new GeometryFactory(new PrecisionModel(10), 4326);
     }
 
     @Override
@@ -94,14 +83,14 @@ public class DefaultShapeProducer implements ShapeProducer {
             }
             for (JAXBElement<?> jaxbElement : projections.getProjectionRefOrProjection()) {
                 LinkSequenceProjection linkSequenceProjection = (LinkSequenceProjection) jaxbElement.getValue();
-                LineString lineString = JtsGmlConverter.fromGmlToJts(linkSequenceProjection.getLineString());
+                LineString lineString = GeometryUtil.convertLineStringFromGmlToJts(linkSequenceProjection.getLineString());
                 for (Coordinate currentPoint : lineString.getCoordinates()) {
                     // the first point of the current link is the last point of the previous link, it can be skipped.
                     // as a side effect, duplicate points that follow one another are also filtered out
                     if (currentPoint.equals(previousPoint)) {
                         continue;
                     }
-                    distanceFromStart += computeDistance(previousPoint, currentPoint);
+                    distanceFromStart += GeometryUtil.distance(previousPoint, currentPoint);
                     ShapePoint shapePoint = new ShapePoint();
                     AgencyAndId agencyAndId = new AgencyAndId();
                     agencyAndId.setId(shapeId);
@@ -119,20 +108,6 @@ public class DefaultShapeProducer implements ShapeProducer {
             travelledDistanceToStop.add((double) Math.round(distanceFromStart));
         }
         return new GtfsShape(shapeId, shapePoints, travelledDistanceToStop);
-    }
-
-    /**
-     * Calculate the distance between 2 coordinates, in meters.
-     * @param from from coordinate
-     * @param to to coordinate
-     * @return the distance between the 2 coordinates, in meters.
-     */
-    private double computeDistance(Coordinate from, Coordinate to) {
-        if (from == null) {
-            return 0;
-        }
-        LineString ls = factory.createLineString(new Coordinate[]{from, to});
-        return ls.getLength() * (Math.PI / 180) * EQUATORIAL_RADIUS;
     }
 
 }

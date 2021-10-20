@@ -83,9 +83,9 @@ import static no.entur.damu.export.model.GtfsRouteType.WATER_TRANSPORT_SERVICE;
 /**
  * Utility class for transport modes.
  */
-public final class TransportModeUtils {
+public final class TransportModeUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransportModeUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransportModeUtil.class);
 
     /**
      * Represent a pair (TransportMode, TransportSubMode)
@@ -118,7 +118,6 @@ public final class TransportModeUtils {
     }
 
     private static final Map<TransportModeAndSubMode, GtfsRouteType> ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE;
-
 
     static {
         ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE = new HashMap<>();
@@ -183,8 +182,7 @@ public final class TransportModeUtils {
         ROUTE_TYPE_FOR_TRANSPORT_MODE_AND_SUB_MODE.put(new TransportModeAndSubMode(VehicleModeEnumeration.OTHER.value(), null), MISCELLANEOUS_SERVICE);
     }
 
-
-    private TransportModeUtils() {
+    private TransportModeUtil() {
     }
 
     /**
@@ -210,7 +208,7 @@ public final class TransportModeUtils {
     }
 
     /**
-     * Convert a pair of NeTEx (transport mode, transport submode) into a GTFS extended route type.
+     * Convert a pair of NeTEx (transport mode, transport sub mode) into a GTFS extended route type.
      *
      * @param transportMode    a NeTEx transport mode.
      * @param transportSubMode a NeTEx transport submode.
@@ -230,9 +228,8 @@ public final class TransportModeUtils {
 
     }
 
-
     /**
-     * Return the submode as a String for a given TransportModeStructure, or null if the transport mode is not set.
+     * Return the sub mode as a String for a given TransportModeStructure, or null if the transport mode is not set.
      * @param subModeStructure a transport sub mode structure.
      * @return the submode as a String for a given TransportModeStructure, or null if the transport mode is not set.
      */
