@@ -35,19 +35,41 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Convert GML LineString into JTS LineString.
+ * Utility class for geometric conversions.
  */
-public final class JtsGmlConverter {
+public final class GeometryUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JtsGmlConverter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GeometryUtil.class);
 
+    /**
+     * SRID for WGS84 as string and code.
+     */
     private static final String DEFAULT_SRID_NAME = "WGS84";
     private static final String DEFAULT_SRID_AS_STRING = "4326";
     private static final int DEFAULT_SRID_AS_INT = 4326;
 
+    /**
+     * Earth radius on the equator for the WGS84 system, in meters.
+     */
+    private static final int EQUATORIAL_RADIUS = 6378137;
+
     private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory(new PrecisionModel(), DEFAULT_SRID_AS_INT);
 
-    private JtsGmlConverter() {
+    private GeometryUtil() {
+    }
+
+    /**
+     * Calculate the distance between 2 coordinates, in meters.
+     * @param from from coordinate
+     * @param to to coordinate
+     * @return the distance between the 2 coordinates, in meters.
+     */
+    public static double distance(Coordinate from, Coordinate to) {
+        if (from == null) {
+            return 0;
+        }
+        LineString ls = GEOMETRY_FACTORY.createLineString(new Coordinate[]{from, to});
+        return ls.getLength() * (Math.PI / 180) * EQUATORIAL_RADIUS;
     }
 
     /**
@@ -55,7 +77,7 @@ public final class JtsGmlConverter {
      * @param gml the GML LineString.
      * @return the JTS LineString.
      */
-    public static LineString fromGmlToJts(LineStringType gml) {
+    public static LineString convertLineStringFromGmlToJts(LineStringType gml) {
         List<Double> coordinateList;
         DirectPositionListType posList = gml.getPosList();
         if (posList != null && !posList.getValue().isEmpty()) {
@@ -81,7 +103,6 @@ public final class JtsGmlConverter {
                 return null;
             }
         }
-
 
         CoordinateSequence coordinateSequence = convert(coordinateList);
         LineString jts = new LineString(coordinateSequence, GEOMETRY_FACTORY);
@@ -110,7 +131,6 @@ public final class JtsGmlConverter {
         }
     }
 
-
     /**
      * Convert a list of double values into a sequence of coordinates.
      * @param values the list of coordinate.
@@ -125,7 +145,4 @@ public final class JtsGmlConverter {
         }
         return new CoordinateArraySequence(coordinates);
     }
-
-
-
 }

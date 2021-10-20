@@ -20,7 +20,7 @@ package no.entur.damu.export.producer;
 
 import no.entur.damu.export.repository.GtfsDatasetRepository;
 import no.entur.damu.export.repository.NetexDatasetRepository;
-import no.entur.damu.export.util.TransportModeUtils;
+import no.entur.damu.export.util.TransportModeUtil;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
@@ -75,7 +75,7 @@ public class DefaultRouteProducer implements RouteProducer {
         route.setUrl(line.getUrl());
 
         // route type
-       route.setType(TransportModeUtils.getGtfsExtendedRouteType(line));
+       route.setType(TransportModeUtil.getGtfsExtendedRouteType(line));
 
         // route color
         PresentationStructure presentation = line.getPresentation();

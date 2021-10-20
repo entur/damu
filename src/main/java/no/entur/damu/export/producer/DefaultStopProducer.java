@@ -20,7 +20,7 @@ package no.entur.damu.export.producer;
 
 import no.entur.damu.export.repository.GtfsDatasetRepository;
 import no.entur.damu.export.stop.StopAreaRepository;
-import no.entur.damu.export.util.TransportModeUtils;
+import no.entur.damu.export.util.TransportModeUtil;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
@@ -86,7 +86,7 @@ public class DefaultStopProducer implements StopProducer {
 
         // transport mode
         if (stopPlace.getTransportMode() != null) {
-            stop.setVehicleType(TransportModeUtils.getGtfsExtendedRouteType(stopPlace.getTransportMode()));
+            stop.setVehicleType(TransportModeUtil.getGtfsExtendedRouteType(stopPlace.getTransportMode()));
         } else {
             LOGGER.warn("Missing transport mode for stop place {}", stop.getId());
         }
@@ -152,7 +152,7 @@ public class DefaultStopProducer implements StopProducer {
 
         // transport mode is inherited from the parent stop place
         if (parentStopPlace.getTransportMode() != null) {
-            stop.setVehicleType(TransportModeUtils.getGtfsExtendedRouteType(parentStopPlace.getTransportMode()));
+            stop.setVehicleType(TransportModeUtil.getGtfsExtendedRouteType(parentStopPlace.getTransportMode()));
         } else {
             LOGGER.warn("Missing transport mode for quay {}", stop.getId());
         }
