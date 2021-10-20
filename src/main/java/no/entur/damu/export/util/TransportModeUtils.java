@@ -80,10 +80,16 @@ import static no.entur.damu.export.model.GtfsRouteType.TRAM_SERVICE;
 import static no.entur.damu.export.model.GtfsRouteType.TROLLEYBUS_SERVICE;
 import static no.entur.damu.export.model.GtfsRouteType.WATER_TRANSPORT_SERVICE;
 
+/**
+ * Utility class for transport modes.
+ */
 public final class TransportModeUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransportModeUtils.class);
 
+    /**
+     * Represent a pair (TransportMode, TransportSubMode)
+     */
     private static class TransportModeAndSubMode {
         private final String transportMode;
         private final String transportSubMode;

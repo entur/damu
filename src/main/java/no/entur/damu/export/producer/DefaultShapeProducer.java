@@ -46,6 +46,11 @@ public class DefaultShapeProducer implements ShapeProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultShapeProducer.class);
 
+    /**
+     * Earth radius on the equator for the WGS84 system, in meters.
+     */
+    private static final int EQUATORIAL_RADIUS = 6378137;
+
 
     private final Agency agency;
     private final NetexDatasetRepository netexDatasetRepository;
@@ -116,12 +121,18 @@ public class DefaultShapeProducer implements ShapeProducer {
         return new GtfsShape(shapeId, shapePoints, travelledDistanceToStop);
     }
 
+    /**
+     * Calculate the distance between 2 coordinates, in meters.
+     * @param from from coordinate
+     * @param to to coordinate
+     * @return the distance between the 2 coordinates, in meters.
+     */
     private double computeDistance(Coordinate from, Coordinate to) {
         if (from == null) {
             return 0;
         }
         LineString ls = factory.createLineString(new Coordinate[]{from, to});
-        return ls.getLength() * (Math.PI / 180) * 6378137;
+        return ls.getLength() * (Math.PI / 180) * EQUATORIAL_RADIUS;
     }
 
 }

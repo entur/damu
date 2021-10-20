@@ -36,6 +36,12 @@ public final class DestinationDisplayUtil {
     private DestinationDisplayUtil() {
     }
 
+    /**
+     * Return the destination display on the first stop in the journey pattern.
+     * @param journeyPattern the journey pattern.
+     * @param netexDatasetRepository the repository of NeTEx data.
+     * @return the destination display on the first stop in the journey pattern.
+     */
     public static DestinationDisplay getInitialDestinationDisplay(JourneyPattern journeyPattern, NetexDatasetRepository netexDatasetRepository) {
         StopPointInJourneyPattern firstStopPointInJourneyPattern = (StopPointInJourneyPattern) journeyPattern.getPointsInSequence()
                 .getPointInJourneyPatternOrStopPointInJourneyPatternOrTimingPointInJourneyPattern()

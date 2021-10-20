@@ -68,16 +68,16 @@ public final class JtsGmlConverter {
                         DirectPositionType directPositionType = (DirectPositionType) o;
                         coordinateList.addAll(directPositionType.getValue());
                     } else {
-                        LOGGER.warn("Got unrecognized class ({}) for PosOrPointProperty for gmlString {}", o.getClass(), gml.getId());
+                        LOGGER.warn("Unknown class ({}) for PosOrPointProperty for gmlString {}", o.getClass(), gml.getId());
                     }
                 }
                 if (coordinateList.isEmpty()) {
-                    LOGGER.warn("No recognized class in PosOrPointProperty for gmlString {}", gml.getId());
+                    LOGGER.warn("Unknown class in PosOrPointProperty for gmlString {}", gml.getId());
                     return null;
                 }
 
             } else {
-                LOGGER.warn("Got LineStringType without posList or PosOrPointProperty {}", gml.getId());
+                LOGGER.warn("LineStringType without posList or PosOrPointProperty for gmlString {}", gml.getId());
                 return null;
             }
         }

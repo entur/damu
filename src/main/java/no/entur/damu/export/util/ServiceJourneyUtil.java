@@ -22,14 +22,29 @@ import org.rutebanken.netex.model.DatedServiceJourney;
 import org.rutebanken.netex.model.ServiceAlterationEnumeration;
 import org.rutebanken.netex.model.ServiceJourney;
 
+/**
+ * Utility class for ServiceJourneys.
+ */
 public final class ServiceJourneyUtil {
     private ServiceJourneyUtil() {
     }
 
+    /**
+     * Return true if the service journey has a ServiceAlteration equals to CANCELLATION or REPLACED.
+     * @see ServiceAlterationEnumeration
+     * @param serviceJourney the service journey to check
+     * @return true if the service journey has a ServiceAlteration equals to CANCELLATION or REPLACED.
+     */
     public static boolean isReplacedOrCancelled(ServiceJourney serviceJourney) {
         return ServiceAlterationEnumeration.CANCELLATION == serviceJourney.getServiceAlteration() || ServiceAlterationEnumeration.REPLACED == serviceJourney.getServiceAlteration();
     }
 
+    /**
+     * Return true if the dated service journey has a ServiceAlteration equals to CANCELLATION or REPLACED.
+     * @see ServiceAlterationEnumeration
+     * @param datedServiceJourney the dated service journey to check
+     * @return true if the service journey has a ServiceAlteration equals to CANCELLATION or REPLACED.
+     */
     public static boolean isReplacedOrCancelled(DatedServiceJourney datedServiceJourney) {
         return ServiceAlterationEnumeration.CANCELLATION == datedServiceJourney.getServiceAlteration() || ServiceAlterationEnumeration.REPLACED == datedServiceJourney.getServiceAlteration();
     }

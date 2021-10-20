@@ -46,7 +46,7 @@ import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServic
 import org.springframework.context.annotation.Import;
 
 /**
- * A spring-boot application that includes a Camel route builder to setup the Camel no.entur.damu.routes
+ * A spring-boot application that includes a Camel route builder to set up the Camel context.
  */
 @SpringBootApplication(exclude = {UserDetailsServiceAutoConfiguration.class})
 @Import({GcsStorageConfig.class, GooglePubSubConfig.class})

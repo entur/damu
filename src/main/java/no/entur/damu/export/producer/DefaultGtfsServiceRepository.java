@@ -222,7 +222,7 @@ public class DefaultGtfsServiceRepository implements GtfsServiceRepository {
         return gtfsService;
     }
 
-    private Set<DayOfWeek> getDaysOfWeek(DayType dayType) {
+    private static Set<DayOfWeek> getDaysOfWeek(DayType dayType) {
         List<DayOfWeekEnumeration> netexDaysOfWeek = getNetexDaysOfWeek(dayType);
         if (netexDaysOfWeek == null) {
             return null;
