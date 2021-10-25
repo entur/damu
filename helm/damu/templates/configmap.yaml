@@ -9,7 +9,7 @@ data:
 
     # Damu
     damu.netex.stop.cache.refresh.quartz.trigger:?cron=0+0+3+?+*+*
-    damu.gtfs.export.folder=damu
+    damu.gtfs.export.folder={{ .Values.gcp.marduk.gtfsFolder }}
 
     # Camel
     camel.springboot.name=damu
