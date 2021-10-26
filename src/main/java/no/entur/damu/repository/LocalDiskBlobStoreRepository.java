@@ -87,7 +87,7 @@ public class LocalDiskBlobStoreRepository implements BlobStoreRepository {
     }
 
     @Override
-    public void uploadBlob(String objectName, InputStream inputStream) {
+    public void uploadBlob(String objectName, InputStream inputStream, boolean makePublic) {
         LOGGER.debug("Upload blob called in local-disk blob store on {}", objectName);
         try {
             Path localPath = Paths.get(objectName);
