@@ -41,7 +41,7 @@ public class EnturAgencyProducer extends DefaultAgencyProducer {
             "AKT", "https://www.akt.no/",
             "TID", "https://flybussen.no/",
             "GOA", "https://www.go-aheadnordic.no/",
-            "INN", "https:/www.innlandstrafikk.no/",
+            "INN", "https://www.innlandstrafikk.no/",
             "VKT", "https://www.vkt.no/",
 
             "RUT", "https://ruter.no/",
