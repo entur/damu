@@ -34,6 +34,7 @@
 
 package no.entur.damu.repository;
 
+import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Storage;
 import org.rutebanken.helper.gcp.BlobStoreHelper;
 import org.springframework.context.annotation.Profile;
@@ -68,8 +69,8 @@ public class GcsBlobStoreRepository implements BlobStoreRepository {
     }
 
     @Override
-    public void uploadBlob(String name, InputStream inputStream) {
-        BlobStoreHelper.uploadBlobWithRetry(storage, containerName, name, inputStream, false);
+    public void uploadBlob(String name, InputStream inputStream, boolean makePublic) {
+        Blob blob = BlobStoreHelper.uploadBlobWithRetry(storage, containerName, name, inputStream, makePublic);
     }
 
 }

@@ -54,8 +54,10 @@ public abstract class AbstractBlobStoreService {
         return repository.getBlob(name);
     }
 
-    public void uploadBlob(@Header(value = Constants.FILE_HANDLE) String name, InputStream inputStream, Exchange exchange) {
-        repository.uploadBlob(name, inputStream);
+
+    public void uploadBlob(@Header(value = Constants.FILE_HANDLE) String name,
+                           @Header(value = Constants.BLOBSTORE_MAKE_BLOB_PUBLIC) boolean makePublic, InputStream inputStream, Exchange exchange) {
+        repository.uploadBlob(name, inputStream, makePublic);
     }
 
 

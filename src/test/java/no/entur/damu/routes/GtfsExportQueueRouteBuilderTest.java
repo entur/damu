@@ -74,10 +74,10 @@ class GtfsExportQueueRouteBuilderTest extends DamuRouteBuilderIntegrationTestBas
         checkUploadedDataset.setResultWaitTime(200000);
 
         mardukInMemoryBlobStoreRepository.uploadBlob(BLOBSTORE_PATH_OUTBOUND + Constants.NETEX_FILENAME_PREFIX + CODESPACE + Constants.NETEX_FILENAME_SUFFIX,
-                getClass().getResourceAsStream("/rb_flb-aggregated-netex.zip"));
+                getClass().getResourceAsStream("/rb_flb-aggregated-netex.zip"), true);
 
         mardukInMemoryBlobStoreRepository.uploadBlob(stopExportFilename,
-                getClass().getResourceAsStream("/RailStations_latest.zip"));
+                getClass().getResourceAsStream("/RailStations_latest.zip"), true);
 
         context.start();
         gtfsExportQueueProducerTemplate.sendBody(CODESPACE);
