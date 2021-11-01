@@ -7,7 +7,7 @@ gcp:
 
   marduk:
     bucketName: marduk-production
-    gtfsFolder: damu
+    gtfsFolder: outbound
 
 monitoringEnabled: false
 
