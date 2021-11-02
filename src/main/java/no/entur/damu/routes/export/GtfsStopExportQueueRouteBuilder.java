@@ -45,7 +45,7 @@ import static no.entur.damu.Constants.BLOBSTORE_MAKE_BLOB_PUBLIC;
 import static no.entur.damu.Constants.FILE_HANDLE;
 
 /**
- * Receive a notification when a new NeTEx export is available in the blob store and convert it into a GTFS dataset.
+ * Generate a GTFS stops export and upload it to the GCS bucket.
  */
 @Component
 public class GtfsStopExportQueueRouteBuilder extends BaseRouteBuilder {
