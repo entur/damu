@@ -123,7 +123,7 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
                     InputStream timetableDataset = exchange.getIn().getHeader(TIMETABLE_DATASET_FILE, InputStream.class);
                     String codespace = exchange.getIn().getHeader(DATASET_CODESPACE, String.class).replace("rb_", "").toUpperCase();
                     GtfsExporter gtfsExporter = new EnturGtfsExporter(codespace, stopAreaRepositoryFactory.getStopAreaRepository());
-                    exchange.getIn().setBody(gtfsExporter.convertNetexToGtfs(timetableDataset));
+                    exchange.getIn().setBody(gtfsExporter.convertTimetablesToGtfs(timetableDataset));
                 })
                 .log(LoggingLevel.INFO, correlation() + "Dataset processing complete")
                 .routeId("convert-to-gtfs");

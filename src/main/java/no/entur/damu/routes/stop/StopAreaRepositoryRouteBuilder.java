@@ -63,10 +63,12 @@ public class StopAreaRepositoryRouteBuilder extends BaseRouteBuilder {
 
         from("quartz://damu/refreshStopsAtStartup?" + "?fireNow=true&trigger.repeatCount=0")
                 .to("direct:refreshStops")
+                .to("direct:exportStops")
                 .routeId("stop-area-refresh-at-startup-quartz");
 
         from("quartz://damu/refreshStopsPeriodically?" + quartzTrigger)
                 .to("direct:refreshStops")
+                .to("direct:exportStops")
                 .routeId("stop-area-refresh-periodically-quartz");
 
         from("direct:refreshStops")
