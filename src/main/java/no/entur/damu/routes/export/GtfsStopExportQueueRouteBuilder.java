@@ -38,8 +38,11 @@ import no.entur.damu.netex.EnturGtfsExporter;
 import no.entur.damu.routes.BaseRouteBuilder;
 import org.apache.camel.LoggingLevel;
 import org.entur.netex.gtfs.export.GtfsExporter;
-import org.entur.netex.gtfs.export.stop.StopAreaRepositoryFactory;
+import org.entur.netex.gtfs.export.stop.DefaultStopAreaRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.io.InputStream;
 
 import static no.entur.damu.Constants.BLOBSTORE_MAKE_BLOB_PUBLIC;
 import static no.entur.damu.Constants.FILE_HANDLE;
@@ -50,40 +53,60 @@ import static no.entur.damu.Constants.FILE_HANDLE;
 @Component
 public class GtfsStopExportQueueRouteBuilder extends BaseRouteBuilder {
 
-    private static final String GTFS_EXPORT_FILE_NAME = "tiamat/Full_latest-gtfs.zip";
+    private static final String GTFS_EXPORT_FILE_NAME = "tiamat/Current_latest-gtfs.zip";
 
-    private final StopAreaRepositoryFactory stopAreaRepositoryFactory;
+    private final String stopExportFilename;
+    private final String quartzTrigger;
 
-    public GtfsStopExportQueueRouteBuilder(StopAreaRepositoryFactory stopAreaRepositoryFactory) {
+    public GtfsStopExportQueueRouteBuilder(@Value("${damu.netex.stop.current.filename:tiamat/Current_latest.zip}") String stopExportFilename, @Value("${damu.netex.stop.export.quartz.trigger:?cron=0+30+03+?+*+*}") String quartzTrigger) {
         super();
-        this.stopAreaRepositoryFactory = stopAreaRepositoryFactory;
+        this.stopExportFilename = stopExportFilename;
+        this.quartzTrigger = quartzTrigger;
     }
 
     @Override
     public void configure() throws Exception {
         super.configure();
 
+        from("quartz://damu/exportStopsPeriodically?" + quartzTrigger)
+                .to("direct:exportStops")
+                .routeId("export-stops-quartz");
+
         from("direct:exportStops")
-                .to("direct:convertStopsToGtfs")
-                .to("direct:uploadStopsGtfsDataset")
+                .to("direct:downloadCurrentStopsNetexDataset")
+                .to("direct:convertCurrentStopsToGtfs")
+                .to("direct:uploadCurrentStopsGtfsDataset")
                 .routeId("export-stops");
 
-        from("direct:convertStopsToGtfs")
-                .log(LoggingLevel.INFO, correlation() + "Converting Stops to GTFS")
-                .process(exchange -> {
-                    GtfsExporter gtfsExporter = new EnturGtfsExporter(stopAreaRepositoryFactory.getStopAreaRepository());
-                    exchange.getIn().setBody(gtfsExporter.convertStopsToGtfs());
-                })
-                .log(LoggingLevel.INFO, correlation() + "Converted Stops to GTFS")
-                .routeId("export-stops-convert-to-gtfs");
+        from("direct:downloadCurrentStopsNetexDataset")
+                .log(LoggingLevel.INFO, correlation() + "Downloading Current Stop dataset")
+                .setHeader(FILE_HANDLE, constant(stopExportFilename))
+                .to("direct:getMardukBlob")
+                .filter(body().isNull())
+                .log(LoggingLevel.ERROR, correlation() + "NeTEx Stopfile not found")
+                .stop()
+                //end filter
+                .end()
+                .routeId("download-current-stop-netex-dataset");
 
-        from("direct:uploadStopsGtfsDataset")
+        from("direct:uploadCurrentStopsGtfsDataset")
                 .setHeader(FILE_HANDLE, simple(GTFS_EXPORT_FILE_NAME))
                 .setHeader(BLOBSTORE_MAKE_BLOB_PUBLIC, simple("true", Boolean.class))
                 .log(LoggingLevel.INFO, correlation() + "Uploading GTFS file " + GTFS_EXPORT_FILE_NAME + " to GCS file ${header." + FILE_HANDLE + "}")
                 .to("direct:uploadMardukBlob")
                 .log(LoggingLevel.INFO, correlation() + "Uploaded GTFS file " + GTFS_EXPORT_FILE_NAME + " to GCS file ${header." + FILE_HANDLE + "}")
-                .routeId("export-stops-upload-gtfs-dataset");
+                .routeId("upload-current-stops-gtfs-dataset");
 
+        from("direct:convertCurrentStopsToGtfs")
+                .log(LoggingLevel.INFO, correlation() + "Converting Current Stops to GTFS")
+                .process(exchange -> {
+                    DefaultStopAreaRepository stopAreaRepository = new DefaultStopAreaRepository();
+                    stopAreaRepository.loadStopAreas(exchange.getIn().getBody(InputStream.class));
+                    GtfsExporter gtfsExporter = new EnturGtfsExporter(stopAreaRepository);
+                    exchange.getIn().setBody(gtfsExporter.convertStopsToGtfs());
+                })
+                .log(LoggingLevel.INFO, correlation() + "Converted Current Stops to GTFS")
+                .routeId("convert-current-stops-to-gtfs");
     }
 }
+
