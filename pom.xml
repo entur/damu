@@ -28,9 +28,8 @@
         <entur.helpers.version>1.0.61</entur.helpers.version>
         <commons-io.version>2.11.0</commons-io.version>
         <google.cloud.bom-version>20.4.0</google.cloud.bom-version>
-        <netex-gtfs-converter-java.version>1.6-SNAPSHOT</netex-gtfs-converter-java.version>
+        <netex-gtfs-converter-java.version>1.8</netex-gtfs-converter-java.version>
         <onebusaway.version>1.3.88</onebusaway.version>
-        <jts.version>1.18.1</jts.version>
 
         <!-- empty argLine property, the value is set up by Jacoco during unit tests execution -->
         <argLine/>
