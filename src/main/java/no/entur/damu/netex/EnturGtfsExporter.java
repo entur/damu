@@ -25,11 +25,16 @@ import org.entur.netex.gtfs.export.stop.StopAreaRepository;
  * Custom GTFS exporter that handles missing or incomplete data in the input NeTEx dataset.
  */
 public class EnturGtfsExporter extends DefaultGtfsExporter {
+
     public EnturGtfsExporter(String codespace, StopAreaRepository stopAreaRepository) {
         super(codespace, stopAreaRepository);
-
         setNetexDatasetLoader(new EnturNetexDatasetLoader());
         setAgencyProducer(new EnturAgencyProducer(getNetexDatasetRepository(), codespace));
+        setFeedInfoProducer(new EnturFeedInfoProducer());
+    }
+
+    public EnturGtfsExporter(StopAreaRepository stopAreaRepository) {
+        super(stopAreaRepository);
         setFeedInfoProducer(new EnturFeedInfoProducer());
     }
 }

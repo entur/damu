@@ -59,7 +59,7 @@ class EnturGtfsExportTest {
         GtfsExporter gtfsExport = new EnturGtfsExporter("FLB", defaultStopAreaRepository);
 
 
-        InputStream exportedGtfs = gtfsExport.convertNetexToGtfs(netexTimetableDataset);
+        InputStream exportedGtfs = gtfsExport.convertTimetablesToGtfs(netexTimetableDataset);
 
         java.nio.file.Files.copy(
                 exportedGtfs,
