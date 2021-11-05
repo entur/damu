@@ -14,6 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Copied from https://github.com/apache/camel/blob/camel-3.11.3/components/camel-google/camel-google-pubsub/src/main/java/org/apache/camel/component/google/pubsub/GooglePubsubConsumer.java
+ * Original source licensed under the Apache Licence V2  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Notice:
+ * Apache Camel
+ * Copyright 2007-2021 The Apache Software Foundation
+ *
+ * This product includes software developed at
+ * The Apache Software Foundation (http://www.apache.org/).
+ *
+ * Changes:
+ * - modified retry logic for synchronous pull (see synchronousPull)
+ */
+
 package org.apache.camel.component.google.pubsub;
 
 import com.google.api.core.AbstractApiService;
@@ -31,8 +47,6 @@ import com.google.pubsub.v1.ReceivedMessage;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExtendedExchange;
 import org.apache.camel.Processor;
-import org.apache.camel.component.google.pubsub.GooglePubsubConstants;
-import org.apache.camel.component.google.pubsub.GooglePubsubEndpoint;
 import org.apache.camel.component.google.pubsub.consumer.AcknowledgeSync;
 import org.apache.camel.component.google.pubsub.consumer.CamelMessageReceiver;
 import org.apache.camel.support.DefaultConsumer;
@@ -127,7 +141,7 @@ public class GooglePubsubConsumer extends DefaultConsumer {
 
         private void asynchronousPull(String subscriptionName) throws IOException {
             while (isRunAllowed() && !isSuspendingOrSuspended()) {
-                MessageReceiver messageReceiver = new CamelMessageReceiver(org.apache.camel.component.google.pubsub.GooglePubsubConsumer.this, endpoint, processor);
+                MessageReceiver messageReceiver = new CamelMessageReceiver(GooglePubsubConsumer.this, endpoint, processor);
 
                 Subscriber subscriber = endpoint.getComponent().getSubscriber(subscriptionName, messageReceiver,
                         endpoint.getServiceAccountKey());
