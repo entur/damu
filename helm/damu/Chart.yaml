@@ -11,4 +11,3 @@ sources:
 maintainers:
   - name: 'team-ror'
     email: team.rutedata@entur.org
-engine: gotpl
