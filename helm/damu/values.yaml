@@ -11,5 +11,5 @@ resources:
   cpuLimit: 2000m
   memLimit: 15000Mi
   cpuRequest: 2000m
-  memRequest: 10000Mi
-  xmx: 9000m
+  memRequest: 12000Mi
+  xmx: 11000m
