@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.rutebanken.superpom</groupId>
         <artifactId>superpom</artifactId>
-        <version>1.0.30</version>
+        <version>1.0.31</version>
     </parent>
 
     <groupId>no.entur.damu</groupId>
@@ -25,13 +25,12 @@
     <properties>
         <entur.google.pubsub.emulator.download.skip>false</entur.google.pubsub.emulator.download.skip>
         <camel.version>3.11.3</camel.version>
-        <entur.helpers.version>1.0.61</entur.helpers.version>
+        <entur.helpers.version>1.0.62</entur.helpers.version>
         <commons-io.version>2.11.0</commons-io.version>
         <google.cloud.bom-version>24.0.0</google.cloud.bom-version>
         <netex-gtfs-converter-java.version>1.9</netex-gtfs-converter-java.version>
         <zt-zip.version>1.14</zt-zip.version>
         <commons-csv.version>1.9.0</commons-csv.version>
-        <logback-classic.version>1.2.6</logback-classic.version>
 
         <!-- empty argLine property, the value is set up by Jacoco during unit tests execution -->
         <argLine/>
@@ -222,12 +221,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
             <version>${commons-csv.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logback-classic.version}</version>
             <scope>test</scope>
         </dependency>
 
