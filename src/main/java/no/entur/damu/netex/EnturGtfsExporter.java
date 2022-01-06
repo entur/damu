@@ -29,7 +29,6 @@ public class EnturGtfsExporter extends DefaultGtfsExporter {
     public EnturGtfsExporter(String codespace, StopAreaRepository stopAreaRepository) {
         super(codespace, stopAreaRepository);
         setNetexDatasetLoader(new EnturNetexDatasetLoader());
-        setAgencyProducer(new EnturAgencyProducer(getNetexDatasetRepository(), codespace));
         setFeedInfoProducer(new EnturFeedInfoProducer());
     }
 
