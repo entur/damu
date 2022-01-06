@@ -10,6 +10,3 @@ gcp:
     gtfsFolder: outbound
 
 monitoringEnabled: true
-
-ingress:
-  loadBalancerIP: 130.211.80.129
