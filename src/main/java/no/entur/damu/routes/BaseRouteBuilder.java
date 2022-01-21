@@ -83,8 +83,8 @@ public abstract class BaseRouteBuilder extends RouteBuilder {
                     if (exchange.getIn().getHeader(Constants.CORRELATION_ID) != null) {
                         pubSubAttributes.put(Constants.CORRELATION_ID, exchange.getIn().getHeader(Constants.CORRELATION_ID, String.class));
                     }
-                    if (exchange.getIn().getHeader(Constants.DATASET_CODESPACE) != null) {
-                        pubSubAttributes.put(Constants.DATASET_CODESPACE, exchange.getIn().getHeader(Constants.DATASET_CODESPACE, String.class));
+                    if (exchange.getIn().getHeader(Constants.DATASET_REFERENTIAL) != null) {
+                        pubSubAttributes.put(Constants.DATASET_REFERENTIAL, exchange.getIn().getHeader(Constants.DATASET_REFERENTIAL, String.class));
                     }
 
                     if (exchange.getIn().getHeader(Constants.PROVIDER_ID) != null) {
@@ -123,7 +123,7 @@ public abstract class BaseRouteBuilder extends RouteBuilder {
     }
 
     protected String correlation() {
-        return "[codespace=${header." + Constants.DATASET_CODESPACE + "} correlationId=${header." + Constants.CORRELATION_ID + "}] ";
+        return "[codespace=${header." + Constants.DATASET_REFERENTIAL + "} correlationId=${header." + Constants.CORRELATION_ID + "}] ";
     }
 
     public void extendAckDeadline(Exchange exchange) throws IOException {
