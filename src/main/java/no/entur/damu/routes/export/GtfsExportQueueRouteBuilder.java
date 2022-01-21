@@ -32,7 +32,7 @@ import java.io.InputStream;
 
 import static no.entur.damu.Constants.BLOBSTORE_MAKE_BLOB_PUBLIC;
 import static no.entur.damu.Constants.BLOBSTORE_PATH_OUTBOUND;
-import static no.entur.damu.Constants.DATASET_CODESPACE;
+import static no.entur.damu.Constants.DATASET_REFERENTIAL;
 import static no.entur.damu.Constants.FILE_HANDLE;
 
 /**
@@ -41,8 +41,8 @@ import static no.entur.damu.Constants.FILE_HANDLE;
 @Component
 public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
 
-    private static final String TIMETABLE_EXPORT_FILE_NAME = BLOBSTORE_PATH_OUTBOUND + Constants.NETEX_FILENAME_PREFIX + "${header." + DATASET_CODESPACE + "}" + Constants.NETEX_FILENAME_SUFFIX;
-    private static final String GTFS_EXPORT_FILE_NAME = Constants.GTFS_FILENAME_PREFIX + "${header." + DATASET_CODESPACE + "}" + Constants.GTFS_FILENAME_SUFFIX;
+    private static final String TIMETABLE_EXPORT_FILE_NAME = BLOBSTORE_PATH_OUTBOUND + Constants.NETEX_FILENAME_PREFIX + "${header." + DATASET_REFERENTIAL + "}" + Constants.NETEX_FILENAME_SUFFIX;
+    private static final String GTFS_EXPORT_FILE_NAME = Constants.GTFS_FILENAME_PREFIX + "${header." + DATASET_REFERENTIAL + "}" + Constants.GTFS_FILENAME_SUFFIX;
 
     private static final String TIMETABLE_DATASET_FILE = "TIMETABLE_DATASET_FILE";
 
@@ -68,7 +68,7 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
         from("google-pubsub:{{damu.pubsub.project.id}}:DamuExportGtfsQueue?synchronousPull=true")
 
                 .process(this::setCorrelationIdIfMissing)
-                .setHeader(DATASET_CODESPACE, bodyAs(String.class))
+                .setHeader(DATASET_REFERENTIAL, bodyAs(String.class))
                 .log(LoggingLevel.INFO, correlation() + "Received GTFS export request")
 
                 .setBody(constant(STATUS_EXPORT_STARTED))
@@ -105,7 +105,7 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
                 .log(LoggingLevel.INFO, correlation() + "Converting to GTFS")
                 .process(exchange -> {
                     InputStream timetableDataset = exchange.getIn().getHeader(TIMETABLE_DATASET_FILE, InputStream.class);
-                    String codespace = exchange.getIn().getHeader(DATASET_CODESPACE, String.class).replace("rb_", "").toUpperCase();
+                    String codespace = exchange.getIn().getHeader(DATASET_REFERENTIAL, String.class).replace("rb_", "").toUpperCase();
                     GtfsExporter gtfsExporter = new EnturGtfsExporter(codespace, stopAreaRepositoryFactory.getStopAreaRepository());
                     exchange.getIn().setBody(gtfsExporter.convertTimetablesToGtfs(timetableDataset));
                 })

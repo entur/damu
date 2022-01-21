@@ -24,7 +24,7 @@ public final class Constants {
 
     public static final String BLOBSTORE_PATH_OUTBOUND = "outbound/";
 
-    public static final String DATASET_CODESPACE = "EnturDatasetCodespace";
+    public static final String DATASET_REFERENTIAL = "EnturDatasetReferential";
 
     /**
      * Headers originating from Marduk that must be sent back when notifying Marduk
