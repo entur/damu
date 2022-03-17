@@ -45,7 +45,7 @@ public class StopAreaRepositoryRouteBuilder extends BaseRouteBuilder {
     public void configure() throws Exception {
         super.configure();
 
-        from("quartz://damu/refreshStopsAtStartup?" + "?fireNow=true&trigger.repeatCount=0")
+        from("quartz://damu/refreshStopsAtStartup?" + "?trigger.repeatCount=0")
                 .to("direct:refreshStops")
                 .routeId("stop-area-refresh-at-startup-quartz");
 
