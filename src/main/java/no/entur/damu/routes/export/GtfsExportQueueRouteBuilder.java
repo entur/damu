@@ -19,12 +19,12 @@
 package no.entur.damu.routes.export;
 
 import no.entur.damu.Constants;
-import org.entur.netex.gtfs.export.GtfsExporter;
-import org.entur.netex.gtfs.export.exception.GtfsExportException;
 import no.entur.damu.netex.EnturGtfsExporter;
 import no.entur.damu.routes.BaseRouteBuilder;
-import org.entur.netex.gtfs.export.stop.StopAreaRepositoryFactory;
 import org.apache.camel.LoggingLevel;
+import org.entur.netex.gtfs.export.GtfsExporter;
+import org.entur.netex.gtfs.export.exception.GtfsExportException;
+import org.entur.netex.gtfs.export.stop.StopAreaRepositoryFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -48,16 +48,20 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
 
     private static final String STATUS_EXPORT_STARTED = "started";
     private static final String STATUS_EXPORT_OK = "ok";
-    private static final String STATUS_EXPORT_FAILED= "failed";
+    private static final String STATUS_EXPORT_FAILED = "failed";
 
     private final StopAreaRepositoryFactory stopAreaRepositoryFactory;
 
     private final String gtfsExportFilePath;
+    private final boolean generateStaySeatedTransfer;
 
-    public GtfsExportQueueRouteBuilder(StopAreaRepositoryFactory stopAreaRepositoryFactory, @Value("${damu.gtfs.export.folder:damu}") String gtfsExportFolder) {
+    public GtfsExportQueueRouteBuilder(StopAreaRepositoryFactory stopAreaRepositoryFactory,
+                                       @Value("${damu.gtfs.export.folder:damu}") String gtfsExportFolder,
+                                       @Value("${damu.gtfs.export.transfer.stayseated:false}") boolean generateStaySeatedTransfer) {
         super();
         this.stopAreaRepositoryFactory = stopAreaRepositoryFactory;
         this.gtfsExportFilePath = gtfsExportFolder + '/' + GTFS_EXPORT_FILE_NAME;
+        this.generateStaySeatedTransfer = generateStaySeatedTransfer;
     }
 
     @Override
@@ -106,7 +110,7 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
                 .process(exchange -> {
                     InputStream timetableDataset = exchange.getIn().getHeader(TIMETABLE_DATASET_FILE, InputStream.class);
                     String codespace = exchange.getIn().getHeader(DATASET_REFERENTIAL, String.class).replace("rb_", "").toUpperCase();
-                    GtfsExporter gtfsExporter = new EnturGtfsExporter(codespace, stopAreaRepositoryFactory.getStopAreaRepository());
+                    GtfsExporter gtfsExporter = new EnturGtfsExporter(codespace, stopAreaRepositoryFactory.getStopAreaRepository(), generateStaySeatedTransfer);
                     exchange.getIn().setBody(gtfsExporter.convertTimetablesToGtfs(timetableDataset));
                 })
                 .log(LoggingLevel.INFO, correlation() + "Dataset processing complete")
