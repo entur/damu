@@ -1,6 +1,10 @@
 env: dev
 replicas: 1
 
+damu:
+  gtfs:
+    export:
+      stayseated: true
 gcp:
   blobstoreProjectId: entur-ror-dev
   pubsubProjectId: entur-ror-dev

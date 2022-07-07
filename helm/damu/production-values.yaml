@@ -1,6 +1,11 @@
 env: prod
 replicas: 1
 
+damu:
+  gtfs:
+    export:
+      stayseated: false
+
 gcp:
   blobstoreProjectId: entur-ror-prod
   pubsubProjectId: entur-ror-prod

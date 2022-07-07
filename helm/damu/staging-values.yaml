@@ -1,6 +1,11 @@
 env: test
 replicas: 1
 
+damu:
+  gtfs:
+    export:
+      stayseated: false
+
 gcp:
   blobstoreProjectId: entur-ror-test
   pubsubProjectId: entur-ror-test
