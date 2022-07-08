@@ -9,7 +9,7 @@ data:
 
     # Damu
     # Refresh stop place cache at 01:00 and 14:00 every day
-    damu.netex.stop.cache.refresh.quartz.trigger:?cron=0+0+01,14+?+*+*
+    damu.netex.stop.cache.refresh.quartz.trigger=?cron=0+0+01,14+?+*+*
     damu.gtfs.export.folder={{ .Values.gcp.marduk.gtfsFolder }}
     damu.gtfs.export.transfer.stayseated={{ .Values.damu.gtfs.export.stayseated }}
 
