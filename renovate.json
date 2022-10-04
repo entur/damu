@@ -2,8 +2,5 @@
   "extends": [
     "github>entur/ror-renovate-config"
   ],
-  "minor": {
-    "automerge": false
-  },
   "separateMinorPatch": true
 }
