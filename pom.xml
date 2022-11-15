@@ -79,11 +79,6 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.entur.ror.helpers</groupId>
-            <artifactId>logging</artifactId>
-            <version>${entur.helpers.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.entur</groupId>
             <artifactId>netex-gtfs-converter-java</artifactId>
             <version>${netex-gtfs-converter-java.version}</version>
