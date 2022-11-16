@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Profile;
 @Profile("gcs-blobstore")
 public class GcsStorageConfig {
 
-    @Value("${blobstore.gcs.credential.path:#{null}}}")
+    @Value("${blobstore.gcs.credential.path:#{null}}")
     private String credentialPath;
 
     @Value("${blobstore.gcs.project.id}")
