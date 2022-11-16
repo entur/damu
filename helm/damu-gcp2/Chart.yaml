@@ -1,0 +1,17 @@
+apiVersion: v2
+# template for application version, the actual version number is set at build time
+appVersion: "0.1.99.1"
+description: Backend integration
+name: damu
+version: 0.1.0
+keywords:
+  - damu
+sources:
+  - https://github.com/entur/damu
+maintainers:
+  - name: 'team-ror'
+    email: team.rutedata@entur.org
+dependencies:
+  - name: common
+    version: 1.2.9
+    repository: "https://entur.github.io/helm-charts"

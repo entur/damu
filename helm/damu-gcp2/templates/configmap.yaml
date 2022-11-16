@@ -1,0 +1,62 @@
+apiVersion: v1
+data:
+  application.properties: |+
+
+    # Spring
+    spring.main.sources=no.entur.damu
+    spring.profiles.active=gcs-blobstore
+    server.port={{ .Values.common.service.internalPort }}
+
+    # Damu
+    # Refresh stop place cache at 01:00 and 14:00 every day
+    damu.netex.stop.cache.refresh.quartz.trigger=?cron=0+0+01,14+?+*+*
+    damu.netex.stop.full.filename=tiamat/CurrentAndFuture_latest.zip
+    damu.gtfs.export.folder={{ .Values.gcp.marduk.gtfsFolder }}
+    damu.gtfs.export.transfer.stayseated={{ .Values.damu.gtfs.export.stayseated }}
+
+
+    # Camel
+    camel.springboot.name=damu
+    camel.springboot.streamCachingEnabled=false
+    camel.springboot.streamCachingSpoolEnabled=true
+    camel.dataformat.jackson.module-refs=jacksonJavaTimeModule
+    camel.cluster.kubernetes.enabled=true
+    camel.cluster.kubernetes.cluster-labels[app]=damu
+    camel.cluster.kubernetes.config-map-name=damu-leaders
+    camel.servlet.mapping.context-path=/services/*
+    # the Camel shutdown timeout must be shorter than the Kubernetes terminationGracePeriod
+    damu.shutdown.timeout=25
+    damu.camel.redelivery.max=0
+
+    # PubSub
+    damu.pubsub.project.id={{ .Values.gcp.pubsubProjectId }}
+    spring.cloud.gcp.project-id=${damu.pubsub.project.id}
+    camel.component.google-pubsub.synchronous-pull-retryable-codes=DEADLINE_EXCEEDED
+
+    # Blobstore
+    blobstore.gcs.project.id={{ .Values.gcp.blobstoreProjectId }}
+    blobstore.gcs.marduk.container.name={{ .Values.gcp.marduk.bucketName }}
+
+    # Actuator
+    management.server.port={{ .Values.common.service.internalPort }}
+    management.endpoints.enabled-by-default=false
+    management.endpoint.info.enabled=true
+    management.endpoint.health.enabled=true
+    management.endpoint.health.group.readiness.include=readinessState
+    management.endpoint.prometheus.enabled=true
+    management.endpoints.web.exposure.include=info,health,prometheus
+
+    # Logging
+    logging.config=classpath:logback.xml
+    logging.level.no.entur=INFO
+    logging.level.no.entur.damu=INFO
+    logging.level.org.apache=INFO
+    logging.level.org.apache.camel.component.http.HttpComponent=WARN
+
+
+kind: ConfigMap
+metadata:
+  name: damu-application
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "damu.common.labels" . | indent 4 }}

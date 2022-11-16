@@ -1,0 +1,41 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: damu-service-account
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "damu.common.labels" . | indent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: damu-service-account
+subjects:
+  - kind: ServiceAccount
+    name: application
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: damu-service-account
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "damu.common.labels" . | indent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: ["services", "pods", "endpoints"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "watch", "list", "create"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["damu-leaders"]
+    verbs: ["get", "watch", "list", "update", "patch", "delete"]
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["create"]
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    resourceNames: ["damu-leaders-lockondamuexportgtfsqueueroute"]
+    verbs: ["get", "update", "list"]
