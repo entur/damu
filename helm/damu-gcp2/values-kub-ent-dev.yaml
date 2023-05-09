@@ -15,7 +15,7 @@ damu:
       stayseated: true
 gcp:
   blobstoreProjectId: entur-ror-dev
-  pubsubProjectId: entur-ror-dev
+  pubsubProjectId: ent-marduk-dev
 
   marduk:
     bucketName: marduk-dev
