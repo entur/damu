@@ -15,7 +15,7 @@ damu:
       stayseated: false
 gcp:
   blobstoreProjectId: entur-ror-test
-  pubsubProjectId: entur-ror-test
+  pubsubProjectId: ent-marduk-tst
 
   marduk:
     bucketName: marduk-test
