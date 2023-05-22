@@ -8,7 +8,7 @@ damu:
       stayseated: false
 gcp:
   blobstoreProjectId: entur-ror-prod
-  pubsubProjectId: entur-ror-prod
+  pubsubProjectId: ent-marduk-prd
 
   marduk:
     bucketName: marduk-production
