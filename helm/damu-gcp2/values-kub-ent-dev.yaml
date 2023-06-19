@@ -21,3 +21,4 @@ gcp:
     bucketName: marduk-dev
     gtfsFolder: outbound
 
+stopplaceRegistryUrl: https://api.dev.entur.io/stop-places/v1/read

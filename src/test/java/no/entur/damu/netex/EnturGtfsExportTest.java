@@ -38,7 +38,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.IOUtils;
 import org.entur.netex.gtfs.export.GtfsExporter;
-import org.entur.netex.gtfs.export.stop.DefaultStopAreaRepository;
+import org.entur.netex.gtfs.export.stop.DefaultStopAreaRepositoryFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.zeroturnaround.zip.ZipUtil;
@@ -59,16 +59,15 @@ class EnturGtfsExportTest {
     @Test
     void testEnturExport() throws IOException {
 
-        DefaultStopAreaRepository defaultStopAreaRepository = new DefaultStopAreaRepository();
-        defaultStopAreaRepository.loadStopAreas(getClass().getResourceAsStream("/RailStations_latest.zip"));
+        DefaultStopAreaRepositoryFactory factory = new DefaultStopAreaRepositoryFactory();
+        factory.refreshStopAreaRepository(getClass().getResourceAsStream("/RailStations_latest.zip"));
 
         InputStream netexTimetableDataset = getClass().getResourceAsStream("/rb_flb-aggregated-netex.zip");
 
         String codespace = "FLB";
-        GtfsExporter gtfsExport = new EnturGtfsExporter(codespace, defaultStopAreaRepository);
+        GtfsExporter gtfsExport = new EnturGtfsExporter(factory, new EnturNetexDatasetLoader(), new EnturFeedInfoProducer());
 
-
-        InputStream exportedGtfs = gtfsExport.convertTimetablesToGtfs(netexTimetableDataset);
+        InputStream exportedGtfs = gtfsExport.convertTimetablesToGtfs(codespace, netexTimetableDataset, false);
 
         File gtfsFile = new File("export-gtfs.zip");
         java.nio.file.Files.copy(
@@ -90,7 +89,6 @@ class EnturGtfsExportTest {
         Assertions.assertFalse(records.iterator().hasNext());
     }
 
-
     private Iterable<CSVRecord> getCsvRecords(File gtfsFile, String entryName) throws IOException {
         Assertions.assertTrue(ZipUtil.containsEntry(gtfsFile, entryName));
 
@@ -98,5 +96,4 @@ class EnturGtfsExportTest {
         CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).build();
         return csvFormat.parse(new InputStreamReader(new ByteArrayInputStream(zipEntry)));
     }
-
 }
