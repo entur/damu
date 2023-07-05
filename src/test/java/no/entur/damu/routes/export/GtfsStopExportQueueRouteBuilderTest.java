@@ -56,7 +56,6 @@ import no.entur.damu.DamuRouteBuilderIntegrationTestBase;
 import no.entur.damu.TestApp;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
@@ -82,8 +81,6 @@ class GtfsStopExportQueueRouteBuilderTest extends DamuRouteBuilderIntegrationTes
 
     @Test
     void testGtfsStopExport() throws Exception {
-
-
         mardukInMemoryBlobStoreRepository.uploadBlob(stopExportFilename,
                 getClass().getResourceAsStream("/Current_latest.zip"), true);
 
@@ -99,12 +96,10 @@ class GtfsStopExportQueueRouteBuilderTest extends DamuRouteBuilderIntegrationTes
         Assertions.assertEquals(7, lines.length);
     }
 
-    @NotNull
     private static String extractGtfsStops(InputStream gtfsArchive) throws IOException {
-        String gtfsStops;
+        String gtfsStops = "";
         try (ZipInputStream zis = new ZipInputStream(gtfsArchive)) {
             ZipEntry zipEntry = zis.getNextEntry();
-            gtfsStops = "";
             while (zipEntry != null) {
                 if (zipEntry.getName().equals("stops.txt")) {
                     gtfsStops = new String(zis.readAllBytes());
