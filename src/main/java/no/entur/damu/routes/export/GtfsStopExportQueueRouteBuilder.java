@@ -35,7 +35,7 @@ import static no.entur.damu.Constants.FILE_HANDLE;
 @Component
 public class GtfsStopExportQueueRouteBuilder extends BaseRouteBuilder {
 
-    private static final String GTFS_EXPORT_FILE_NAME = "tiamat/Current_latest-gtfs.zip";
+    static final String GTFS_STOP_EXPORT_FILE_NAME = "tiamat/Current_latest-gtfs.zip";
 
     private final String stopExportFilename;
     private final String quartzTrigger;
@@ -72,11 +72,11 @@ public class GtfsStopExportQueueRouteBuilder extends BaseRouteBuilder {
                 .routeId("download-current-stop-netex-dataset");
 
         from("direct:uploadCurrentStopsGtfsDataset")
-                .setHeader(FILE_HANDLE, simple(GTFS_EXPORT_FILE_NAME))
+                .setHeader(FILE_HANDLE, simple(GTFS_STOP_EXPORT_FILE_NAME))
                 .setHeader(BLOBSTORE_MAKE_BLOB_PUBLIC, simple("true", Boolean.class))
-                .log(LoggingLevel.INFO, correlation() + "Uploading GTFS file " + GTFS_EXPORT_FILE_NAME + " to GCS file ${header." + FILE_HANDLE + "}")
+                .log(LoggingLevel.INFO, correlation() + "Uploading GTFS file " + GTFS_STOP_EXPORT_FILE_NAME + " to GCS file ${header." + FILE_HANDLE + "}")
                 .to("direct:uploadMardukBlob")
-                .log(LoggingLevel.INFO, correlation() + "Uploaded GTFS file " + GTFS_EXPORT_FILE_NAME + " to GCS file ${header." + FILE_HANDLE + "}")
+                .log(LoggingLevel.INFO, correlation() + "Uploaded GTFS file " + GTFS_STOP_EXPORT_FILE_NAME + " to GCS file ${header." + FILE_HANDLE + "}")
                 .routeId("upload-current-stops-gtfs-dataset");
 
         from("direct:convertCurrentStopsToGtfs")

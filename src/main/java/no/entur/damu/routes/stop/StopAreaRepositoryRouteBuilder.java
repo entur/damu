@@ -34,7 +34,7 @@ public class StopAreaRepositoryRouteBuilder extends BaseRouteBuilder {
     private final String stopExportFilename;
     private final String quartzTrigger;
 
-    public StopAreaRepositoryRouteBuilder(@Value("${damu.netex.stop.full.filename:tiamat/Full_latest.zip}") String stopExportFilename,
+    public StopAreaRepositoryRouteBuilder(@Value("${damu.netex.stop.full.filename:tiamat/CurrentAndFuture_latest.zip}") String stopExportFilename,
                                           @Value("${damu.netex.stop.cache.refresh.quartz.trigger:?cron=0+0+03+?+*+*}") String quartzTrigger) {
         super();
         this.stopExportFilename = stopExportFilename;
