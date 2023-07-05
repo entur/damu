@@ -63,7 +63,7 @@ class GtfsExportQueueRouteBuilderTest extends DamuRouteBuilderIntegrationTestBas
     @EndpointInject("mock:checkUploadedDataset")
     protected MockEndpoint checkUploadedDataset;
 
-    @Value("${damu.netex.stop.filename:tiamat/Full_latest.zip}")
+    @Value("${damu.netex.stop.filename:tiamat/CurrentAndFuture_latest.zip}")
     private String stopExportFilename;
 
     @Test
