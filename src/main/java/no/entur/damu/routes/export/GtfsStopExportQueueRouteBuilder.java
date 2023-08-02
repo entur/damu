@@ -19,11 +19,8 @@ package no.entur.damu.routes.export;
 import no.entur.damu.routes.BaseRouteBuilder;
 import org.apache.camel.LoggingLevel;
 import org.entur.netex.gtfs.export.GtfsExporter;
-import org.entur.netex.gtfs.export.stop.DefaultStopAreaRepositoryFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.io.InputStream;
 
 import static no.entur.damu.Constants.BLOBSTORE_MAKE_BLOB_PUBLIC;
 import static no.entur.damu.Constants.FILE_HANDLE;
@@ -83,11 +80,7 @@ public class GtfsStopExportQueueRouteBuilder extends BaseRouteBuilder {
 
         from("direct:convertCurrentStopsToGtfs")
                 .log(LoggingLevel.INFO, correlation() + "Converting Current Stops to GTFS")
-                .process(exchange -> {
-                    DefaultStopAreaRepositoryFactory factory = new DefaultStopAreaRepositoryFactory();
-                    factory.refreshStopAreaRepository(exchange.getIn().getBody(InputStream.class));
-                    exchange.getIn().setBody(gtfsExporter.convertStopsToGtfs());
-                })
+                .process(exchange -> exchange.getIn().setBody(gtfsExporter.convertStopsToGtfs()))
                 .log(LoggingLevel.INFO, correlation() + "Converted Current Stops to GTFS")
                 .routeId("convert-current-stops-to-gtfs");
     }
