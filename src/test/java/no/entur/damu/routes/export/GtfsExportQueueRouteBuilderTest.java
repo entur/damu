@@ -24,7 +24,6 @@ import java.util.Objects;
 
 import static no.entur.damu.Constants.DATASET_REFERENTIAL;
 import static no.entur.damu.routes.export.GtfsExportQueueRouteBuilder.TIMETABLE_DATASET_FILE;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.util.AssertionErrors.assertNotNull;
 
