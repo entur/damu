@@ -19,12 +19,10 @@
 package no.entur.damu.routes.export;
 
 import no.entur.damu.Constants;
-import no.entur.damu.netex.EnturGtfsExporter;
 import no.entur.damu.routes.BaseRouteBuilder;
 import org.apache.camel.LoggingLevel;
 import org.entur.netex.gtfs.export.GtfsExporter;
 import org.entur.netex.gtfs.export.exception.GtfsExportException;
-import org.entur.netex.gtfs.export.stop.StopAreaRepositoryFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -44,22 +42,20 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
     private static final String TIMETABLE_EXPORT_FILE_NAME = BLOBSTORE_PATH_OUTBOUND + Constants.NETEX_FILENAME_PREFIX + "${header." + DATASET_REFERENTIAL + "}" + Constants.NETEX_FILENAME_SUFFIX;
     private static final String GTFS_EXPORT_FILE_NAME = Constants.GTFS_FILENAME_PREFIX + "${header." + DATASET_REFERENTIAL + "}" + Constants.GTFS_FILENAME_SUFFIX;
 
-    private static final String TIMETABLE_DATASET_FILE = "TIMETABLE_DATASET_FILE";
+    static final String TIMETABLE_DATASET_FILE = "TIMETABLE_DATASET_FILE";
 
     private static final String STATUS_EXPORT_STARTED = "started";
     private static final String STATUS_EXPORT_OK = "ok";
     private static final String STATUS_EXPORT_FAILED = "failed";
-
-    private final StopAreaRepositoryFactory stopAreaRepositoryFactory;
-
+    private final GtfsExporter gtfsExporter;
     private final String gtfsExportFilePath;
     private final boolean generateStaySeatedTransfer;
 
-    public GtfsExportQueueRouteBuilder(StopAreaRepositoryFactory stopAreaRepositoryFactory,
+    public GtfsExportQueueRouteBuilder(GtfsExporter gtfsExporter,
                                        @Value("${damu.gtfs.export.folder:damu}") String gtfsExportFolder,
                                        @Value("${damu.gtfs.export.transfer.stayseated:false}") boolean generateStaySeatedTransfer) {
         super();
-        this.stopAreaRepositoryFactory = stopAreaRepositoryFactory;
+        this.gtfsExporter = gtfsExporter;
         this.gtfsExportFilePath = gtfsExportFolder + '/' + GTFS_EXPORT_FILE_NAME;
         this.generateStaySeatedTransfer = generateStaySeatedTransfer;
     }
@@ -110,8 +106,7 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
                 .process(exchange -> {
                     InputStream timetableDataset = exchange.getIn().getHeader(TIMETABLE_DATASET_FILE, InputStream.class);
                     String codespace = exchange.getIn().getHeader(DATASET_REFERENTIAL, String.class).replace("rb_", "").toUpperCase();
-                    GtfsExporter gtfsExporter = new EnturGtfsExporter(codespace, stopAreaRepositoryFactory.getStopAreaRepository(), generateStaySeatedTransfer);
-                    exchange.getIn().setBody(gtfsExporter.convertTimetablesToGtfs(timetableDataset));
+                    exchange.getIn().setBody(gtfsExporter.convertTimetablesToGtfs(codespace, timetableDataset, generateStaySeatedTransfer));
                 })
                 .log(LoggingLevel.INFO, correlation() + "Dataset processing complete")
                 .routeId("convert-to-gtfs");
@@ -127,6 +122,5 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
         from("direct:notifyMarduk")
                 .to("google-pubsub:{{damu.pubsub.project.id}}:DamuExportGtfsStatusQueue")
                 .routeId("notify-marduk");
-
     }
 }

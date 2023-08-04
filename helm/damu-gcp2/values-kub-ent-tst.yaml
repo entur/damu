@@ -21,3 +21,4 @@ gcp:
     bucketName: marduk-test
     gtfsFolder: outbound
 
+stopplaceRegistryUrl: https://api.staging.entur.io/stop-places/v1/read

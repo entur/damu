@@ -56,8 +56,10 @@ import no.entur.damu.DamuRouteBuilderIntegrationTestBase;
 import no.entur.damu.TestApp;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
+import org.entur.netex.gtfs.export.stop.StopAreaRepositoryFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -79,10 +81,18 @@ class GtfsStopExportQueueRouteBuilderTest extends DamuRouteBuilderIntegrationTes
     @Value("${damu.netex.stop.current.filename:tiamat/Current_latest.zip}")
     private String stopExportFilename;
 
+    @Autowired
+    private StopAreaRepositoryFactory stopAreaRepositoryFactory;
+
     @Test
     void testGtfsStopExport() throws Exception {
         mardukInMemoryBlobStoreRepository.uploadBlob(stopExportFilename,
                 getClass().getResourceAsStream("/Current_latest.zip"), true);
+
+        // Populating the stopAreaRepository with stop areas.
+        stopAreaRepositoryFactory.refreshStopAreaRepository(
+                getClass().getResourceAsStream("/Current_latest.zip")
+        );
 
         context.start();
         directExportStops.sendBody(null);
