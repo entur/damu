@@ -13,7 +13,7 @@ data:
     damu.netex.stop.full.filename=tiamat/CurrentAndFuture_latest.zip
     damu.gtfs.export.folder={{ .Values.gcp.marduk.gtfsFolder }}
     damu.gtfs.export.transfer.stayseated={{ .Values.damu.gtfs.export.stayseated }}
-
+    stopplace.registry.url={{ .Values.stopplaceRegistryUrl }}
 
     # Camel
     camel.springboot.name=damu
