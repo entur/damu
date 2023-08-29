@@ -31,16 +31,6 @@ import org.springframework.context.annotation.Configuration;
 public class GtfsConverterConfig {
 
     @Bean
-    public QuayFetcher quayFetcher() {
-        return new QuayFetcher();
-    }
-
-    @Bean
-    public StopPlaceFetcher stopPlaceFetcher() {
-        return new StopPlaceFetcher();
-    }
-
-    @Bean
     public StopAreaRepositoryFactory stopAreaRepositoryFactory(QuayFetcher quayFetcher,
                                                                StopPlaceFetcher stopPlaceFetcher) {
         return new EnturStopAreaRepositoryFactory(quayFetcher, stopPlaceFetcher);

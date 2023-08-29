@@ -1,28 +1,19 @@
 package no.entur.damu.gtfsconverter;
 
 import org.entur.netex.gtfs.export.stop.NetexEntityFetcher;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 public abstract class EnturNetexEntityFetcher<R, S> implements NetexEntityFetcher<R, S> {
 
-    protected final WebClient webClient;
-
-    @Value("${stopplace.registry.url:https://api.dev.entur.io/stop-places/v1/read}")
-    protected String stopPlaceRegistryUrl;
-
     protected static final String ET_CLIENT_ID_HEADER = "ET-Client-ID";
     protected static final String ET_CLIENT_NAME_HEADER = "ET-Client-Name";
+    protected final WebClient webClient;
 
-    @Value("${http.client.name:damu}")
-    protected String clientName;
-
-    @Value("${http.client.id:damu}")
-    protected String clientId;
-
-    protected EnturNetexEntityFetcher() {
+    protected EnturNetexEntityFetcher(String stopPlaceRegistryUrl,
+                                      String clientId,
+                                      String clientName) {
         this.webClient = WebClient.builder()
                 .baseUrl(stopPlaceRegistryUrl)
                 .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE)
