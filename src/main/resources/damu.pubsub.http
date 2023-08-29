@@ -1,0 +1,45 @@
+### PubSub Configuration in application.properties
+# damu.pubsub.project.id=test
+# logging.level.io.grpc.internal.ManagedChannelOrphanWrapper=OFF
+# camel.component.google-pubsub.endpoint=localhost:8085
+# camel.component.google-pubsub.authenticate=false
+# camel.component.google-pubsub.synchronous-pull-retryable-codes=DEADLINE_EXCEEDED
+
+# Start PubSub emulator at PORT 8085
+
+# Create the topic named "DamuExportGtfsQueue" under project "test"
+PUT http://localhost:8085/v1/projects/test/topics/DamuExportGtfsQueue
+###
+PUT http://localhost:8085/v1/projects/test/topics/DamuExportGtfsStatusQueue
+
+###
+# List topics to make sure they are created.
+GET http://localhost:8085/v1/projects/test/topics
+
+###
+# Create the subcription named "DamuExportGtfsQueue"
+PUT http://localhost:8085/v1/projects/test/subscriptions/DamuExportGtfsQueue
+Content-Type: application/json
+
+{ "topic": "projects/test/topics/DamuExportGtfsQueue" }
+
+###
+# Create the subcription named "DamuExportGtfsStatusQueue"
+PUT http://localhost:8085/v1/projects/test/subscriptions/DamuExportGtfsStatusQueue
+Content-Type: application/json
+
+{ "topic": "projects/test/topics/DamuExportGtfsStatusQueue" }
+
+###
+# Publish to the "DamuExportGtfsQueue", to start netex to gtfs convertion
+# data is chouette referencial in base64 encoding. (e.g rb_vyx)
+POST http://localhost:8085/v1/projects/test/topics/DamuExportGtfsQueue:publish
+Content-Type: application/json
+
+{
+  "messages": [
+    {
+      "data": "cmJfdnl4"
+    }
+  ]
+}
