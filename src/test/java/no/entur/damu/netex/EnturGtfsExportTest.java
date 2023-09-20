@@ -65,9 +65,9 @@ class EnturGtfsExportTest {
         InputStream netexTimetableDataset = getClass().getResourceAsStream("/rb_flb-aggregated-netex.zip");
 
         String codespace = "FLB";
-        GtfsExporter gtfsExport = new EnturGtfsExporter(factory, new EnturNetexDatasetLoader(), new EnturFeedInfoProducer());
+        GtfsExporter gtfsExport = new EnturGtfsExporter(codespace, factory.getStopAreaRepository());
 
-        InputStream exportedGtfs = gtfsExport.convertTimetablesToGtfs(codespace, netexTimetableDataset, false);
+        InputStream exportedGtfs = gtfsExport.convertTimetablesToGtfs(netexTimetableDataset);
 
         File gtfsFile = new File("export-gtfs.zip");
         java.nio.file.Files.copy(

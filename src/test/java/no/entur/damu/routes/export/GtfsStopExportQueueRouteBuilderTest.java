@@ -101,7 +101,7 @@ class GtfsStopExportQueueRouteBuilderTest extends DamuRouteBuilderIntegrationTes
         Assertions.assertNotNull(gtfsExport);
 
         String gtfsStops = extractGtfsStops(gtfsExport);
-        Assertions.assertTrue(gtfsStops.length() > 0);
+        Assertions.assertFalse(gtfsStops.isEmpty());
         String[] lines = gtfsStops.split("\n");
         Assertions.assertEquals(7, lines.length);
     }

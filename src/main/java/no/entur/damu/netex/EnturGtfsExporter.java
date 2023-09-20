@@ -19,35 +19,25 @@
 package no.entur.damu.netex;
 
 import org.entur.netex.gtfs.export.DefaultGtfsExporter;
-import org.entur.netex.gtfs.export.loader.NetexDatasetLoader;
-import org.entur.netex.gtfs.export.producer.FeedInfoProducer;
-import org.entur.netex.gtfs.export.repository.NetexDatasetRepository;
-import org.entur.netex.gtfs.export.stop.StopAreaRepositoryFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.InputStream;
+import org.entur.netex.gtfs.export.stop.StopAreaRepository;
 
 /**
  * Custom GTFS exporter that handles missing or incomplete data in the input NeTEx dataset.
  */
 public class EnturGtfsExporter extends DefaultGtfsExporter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EnturGtfsExporter.class);
-    private final NetexDatasetLoader netexDatasetLoader;
-
-    public EnturGtfsExporter(StopAreaRepositoryFactory stopAreaRepositoryFactory,
-                             NetexDatasetLoader netexDatasetLoader,
-                             FeedInfoProducer feedInfoProducer) {
-        super(stopAreaRepositoryFactory, feedInfoProducer);
-        this.netexDatasetLoader = netexDatasetLoader;
+    public EnturGtfsExporter(String codespace, StopAreaRepository stopAreaRepository) {
+        this(codespace, stopAreaRepository, false);
     }
 
-    @Override
-    protected void loadNetexTimetableDatasetToRepository(InputStream netexTimetableDataset,
-                                                         NetexDatasetRepository netexDatasetRepository) {
-        LOGGER.info("Importing NeTEx Timetable dataset");
-        netexDatasetLoader.load(netexTimetableDataset, netexDatasetRepository);
-        LOGGER.info("Imported NeTEx Timetable dataset");
+    public EnturGtfsExporter(String codespace, StopAreaRepository stopAreaRepository, boolean generateStaySeatedTransfer) {
+        super(codespace, stopAreaRepository);
+        setNetexDatasetLoader(new EnturNetexDatasetLoader());
+        setFeedInfoProducer(new EnturFeedInfoProducer());
+    }
+
+    public EnturGtfsExporter(StopAreaRepository stopAreaRepository) {
+        super(stopAreaRepository);
+        setFeedInfoProducer(new EnturFeedInfoProducer());
     }
 }

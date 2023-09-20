@@ -8,7 +8,6 @@ import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.AdviceWith;
 import org.apache.camel.component.mock.MockEndpoint;
-import org.entur.netex.gtfs.export.GtfsExporter;
 import org.entur.netex.gtfs.export.stop.StopAreaRepositoryFactory;
 import org.junit.jupiter.api.Test;
 import org.rutebanken.netex.model.LocationStructure;
@@ -40,9 +39,6 @@ class GtfsExportQueueRouteBuilderTest extends DamuRouteBuilderIntegrationTestBas
 
     @Autowired
     private StopAreaRepositoryFactory stopAreaRepositoryFactory;
-
-    @Autowired
-    private GtfsExporter gtfsExporter;
 
     @MockBean
     private QuayFetcher quayFetcher;
