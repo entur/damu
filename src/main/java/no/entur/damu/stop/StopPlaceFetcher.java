@@ -1,4 +1,4 @@
-package no.entur.damu.gtfsconverter;
+package no.entur.damu.stop;
 
 import org.entur.netex.gtfs.export.exception.StopPlaceNotFoundException;
 import org.rutebanken.netex.model.StopPlace;
@@ -7,6 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+/**
+ * Retrieve stop places from Entur stop place API.
+ */
 @Component
 public class StopPlaceFetcher extends EnturNetexEntityFetcher<StopPlace, String> {
 
@@ -23,18 +26,18 @@ public class StopPlaceFetcher extends EnturNetexEntityFetcher<StopPlace, String>
     }
 
     @Override
-    public StopPlace tryFetch(String stopPlaceId) {
+    public StopPlace tryFetch(String quayId) {
 
-        LOGGER.info("Trying to fetch the stop place with id {}, from read API", stopPlaceId);
+        LOGGER.info("Trying to fetch the parent stop place of quay {}, from read API", quayId);
 
         try {
             return this.webClient.get()
-                    .uri("/quays/{quayId}/stop-place", stopPlaceId)
+                    .uri("/quays/{quayId}/stop-place", quayId)
                     .retrieve()
                     .bodyToMono(StopPlace.class)
                     .block();
         } catch (Exception e) {
-            throw new StopPlaceNotFoundException("Could not find StopPlace for quay id " + stopPlaceId + " due to " + e.getMessage());
+            throw new StopPlaceNotFoundException("Could not find StopPlace for quay id " + quayId + " due to " + e.getMessage());
         }
     }
 }

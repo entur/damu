@@ -1,4 +1,4 @@
-package no.entur.damu.gtfsconverter;
+package no.entur.damu.stop;
 
 import org.entur.netex.gtfs.export.exception.QuayNotFoundException;
 import org.rutebanken.netex.model.Quay;
@@ -7,6 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+/**
+ * Retrieve quays from Entur stop place API.
+ */
 @Component
 public class QuayFetcher extends EnturNetexEntityFetcher<Quay, String> {
 
