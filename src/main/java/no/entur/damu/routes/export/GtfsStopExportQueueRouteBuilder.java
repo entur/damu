@@ -16,9 +16,11 @@
 
 package no.entur.damu.routes.export;
 
+import no.entur.damu.netex.EnturGtfsExporter;
 import no.entur.damu.routes.BaseRouteBuilder;
 import org.apache.camel.LoggingLevel;
 import org.entur.netex.gtfs.export.GtfsExporter;
+import org.entur.netex.gtfs.export.stop.StopAreaRepositoryFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -33,14 +35,14 @@ public class GtfsStopExportQueueRouteBuilder extends BaseRouteBuilder {
 
     static final String GTFS_STOP_EXPORT_FILE_NAME = "tiamat/Current_latest-gtfs.zip";
 
-    private final GtfsExporter gtfsExporter;
+    private final StopAreaRepositoryFactory stopAreaRepositoryFactory;
     private final String stopExportFilename;
     private final String quartzTrigger;
 
-    public GtfsStopExportQueueRouteBuilder(GtfsExporter gtfsExporter,
+    public GtfsStopExportQueueRouteBuilder(StopAreaRepositoryFactory stopAreaRepositoryFactory,
                                            @Value("${damu.netex.stop.current.filename:tiamat/Current_latest.zip}") String stopExportFilename, @Value("${damu.netex.stop.export.quartz.trigger:?cron=0+30+03+?+*+*}") String quartzTrigger) {
         super();
-        this.gtfsExporter = gtfsExporter;
+        this.stopAreaRepositoryFactory = stopAreaRepositoryFactory;
         this.stopExportFilename = stopExportFilename;
         this.quartzTrigger = quartzTrigger;
     }
@@ -80,7 +82,10 @@ public class GtfsStopExportQueueRouteBuilder extends BaseRouteBuilder {
 
         from("direct:convertCurrentStopsToGtfs")
                 .log(LoggingLevel.INFO, correlation() + "Converting Current Stops to GTFS")
-                .process(exchange -> exchange.getIn().setBody(gtfsExporter.convertStopsToGtfs()))
+                .process(exchange ->  {
+                    GtfsExporter gtfsExporter = new EnturGtfsExporter(stopAreaRepositoryFactory.getStopAreaRepository());
+                    exchange.getIn().setBody(gtfsExporter.convertStopsToGtfs());
+                })
                 .log(LoggingLevel.INFO, correlation() + "Converted Current Stops to GTFS")
                 .routeId("convert-current-stops-to-gtfs");
     }
