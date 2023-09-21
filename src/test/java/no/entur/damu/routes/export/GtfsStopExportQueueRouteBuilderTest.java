@@ -52,6 +52,12 @@
 
 package no.entur.damu.routes.export;
 
+import static no.entur.damu.routes.export.GtfsStopExportQueueRouteBuilder.GTFS_STOP_EXPORT_FILE_NAME;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import no.entur.damu.DamuRouteBuilderIntegrationTestBase;
 import no.entur.damu.TestApp;
 import org.apache.camel.Produce;
@@ -63,62 +69,61 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+@SpringBootTest(
+  webEnvironment = SpringBootTest.WebEnvironment.NONE,
+  classes = TestApp.class
+)
+class GtfsStopExportQueueRouteBuilderTest
+  extends DamuRouteBuilderIntegrationTestBase {
 
-import static no.entur.damu.routes.export.GtfsStopExportQueueRouteBuilder.GTFS_STOP_EXPORT_FILE_NAME;
+  @Produce("direct:exportStops")
+  protected ProducerTemplate directExportStops;
 
+  @Value("${damu.netex.stop.current.filename:tiamat/Current_latest.zip}")
+  private String stopExportFilename;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = TestApp.class)
-class GtfsStopExportQueueRouteBuilderTest extends DamuRouteBuilderIntegrationTestBase {
+  @Autowired
+  private StopAreaRepositoryFactory stopAreaRepositoryFactory;
 
-    @Produce("direct:exportStops")
-    protected ProducerTemplate directExportStops;
+  @Test
+  void testGtfsStopExport() throws Exception {
+    mardukInMemoryBlobStoreRepository.uploadBlob(
+      stopExportFilename,
+      getClass().getResourceAsStream("/Current_latest.zip"),
+      true
+    );
 
+    // Populating the stopAreaRepository with stop areas.
+    stopAreaRepositoryFactory.refreshStopAreaRepository(
+      getClass().getResourceAsStream("/Current_latest.zip")
+    );
 
-    @Value("${damu.netex.stop.current.filename:tiamat/Current_latest.zip}")
-    private String stopExportFilename;
+    context.start();
+    directExportStops.sendBody(null);
 
-    @Autowired
-    private StopAreaRepositoryFactory stopAreaRepositoryFactory;
+    InputStream gtfsExport = mardukInMemoryBlobStoreRepository.getBlob(
+      GTFS_STOP_EXPORT_FILE_NAME
+    );
+    Assertions.assertNotNull(gtfsExport);
 
-    @Test
-    void testGtfsStopExport() throws Exception {
-        mardukInMemoryBlobStoreRepository.uploadBlob(stopExportFilename,
-                getClass().getResourceAsStream("/Current_latest.zip"), true);
+    String gtfsStops = extractGtfsStops(gtfsExport);
+    Assertions.assertFalse(gtfsStops.isEmpty());
+    String[] lines = gtfsStops.split("\n");
+    Assertions.assertEquals(7, lines.length);
+  }
 
-        // Populating the stopAreaRepository with stop areas.
-        stopAreaRepositoryFactory.refreshStopAreaRepository(
-                getClass().getResourceAsStream("/Current_latest.zip")
-        );
-
-        context.start();
-        directExportStops.sendBody(null);
-
-        InputStream gtfsExport = mardukInMemoryBlobStoreRepository.getBlob(GTFS_STOP_EXPORT_FILE_NAME);
-        Assertions.assertNotNull(gtfsExport);
-
-        String gtfsStops = extractGtfsStops(gtfsExport);
-        Assertions.assertFalse(gtfsStops.isEmpty());
-        String[] lines = gtfsStops.split("\n");
-        Assertions.assertEquals(7, lines.length);
-    }
-
-    private static String extractGtfsStops(InputStream gtfsArchive) throws IOException {
-        String gtfsStops = "";
-        try (ZipInputStream zis = new ZipInputStream(gtfsArchive)) {
-            ZipEntry zipEntry = zis.getNextEntry();
-            while (zipEntry != null) {
-                if (zipEntry.getName().equals("stops.txt")) {
-                    gtfsStops = new String(zis.readAllBytes());
-                }
-                zipEntry = zis.getNextEntry();
-            }
+  private static String extractGtfsStops(InputStream gtfsArchive)
+    throws IOException {
+    String gtfsStops = "";
+    try (ZipInputStream zis = new ZipInputStream(gtfsArchive)) {
+      ZipEntry zipEntry = zis.getNextEntry();
+      while (zipEntry != null) {
+        if (zipEntry.getName().equals("stops.txt")) {
+          gtfsStops = new String(zis.readAllBytes());
         }
-        return gtfsStops;
+        zipEntry = zis.getNextEntry();
+      }
     }
-
-
+    return gtfsStops;
+  }
 }

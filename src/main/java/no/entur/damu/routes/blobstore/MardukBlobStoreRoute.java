@@ -18,39 +18,49 @@
 
 package no.entur.damu.routes.blobstore;
 
+import static no.entur.damu.Constants.FILE_HANDLE;
+
 import no.entur.damu.routes.BaseRouteBuilder;
 import no.entur.damu.services.MardukBlobStoreService;
 import org.apache.camel.LoggingLevel;
 import org.springframework.stereotype.Component;
 
-import static no.entur.damu.Constants.FILE_HANDLE;
-
-
 @Component
 public class MardukBlobStoreRoute extends BaseRouteBuilder {
 
-    private final MardukBlobStoreService mardukBlobStoreService;
+  private final MardukBlobStoreService mardukBlobStoreService;
 
-    public MardukBlobStoreRoute(MardukBlobStoreService mardukBlobStoreService) {
-        this.mardukBlobStoreService = mardukBlobStoreService;
-    }
+  public MardukBlobStoreRoute(MardukBlobStoreService mardukBlobStoreService) {
+    this.mardukBlobStoreService = mardukBlobStoreService;
+  }
 
-    @Override
-    public void configure() {
+  @Override
+  public void configure() {
+    from("direct:getMardukBlob")
+      .to(logDebugShowAll())
+      .bean(mardukBlobStoreService, "getBlob")
+      .to(logDebugShowAll())
+      .log(
+        LoggingLevel.INFO,
+        correlation() +
+        "Returning from fetching file ${header." +
+        FILE_HANDLE +
+        "} from Marduk bucket."
+      )
+      .routeId("blobstore-marduk-download");
 
-        from("direct:getMardukBlob")
-                .to(logDebugShowAll())
-                .bean(mardukBlobStoreService, "getBlob")
-                .to(logDebugShowAll())
-                .log(LoggingLevel.INFO, correlation() + "Returning from fetching file ${header." + FILE_HANDLE + "} from Marduk bucket.")
-                .routeId("blobstore-marduk-download");
-
-        from("direct:uploadMardukBlob")
-                .to(logDebugShowAll())
-                .bean(mardukBlobStoreService, "uploadBlob")
-                .setBody(simple(""))
-                .to(logDebugShowAll())
-                .log(LoggingLevel.INFO, correlation() + "Stored file ${header." + FILE_HANDLE + "} in Marduk bucket.")
-                .routeId("blobstore-marduk-upload");
-    }
+    from("direct:uploadMardukBlob")
+      .to(logDebugShowAll())
+      .bean(mardukBlobStoreService, "uploadBlob")
+      .setBody(simple(""))
+      .to(logDebugShowAll())
+      .log(
+        LoggingLevel.INFO,
+        correlation() +
+        "Stored file ${header." +
+        FILE_HANDLE +
+        "} in Marduk bucket."
+      )
+      .routeId("blobstore-marduk-upload");
+  }
 }

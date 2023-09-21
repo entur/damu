@@ -34,6 +34,9 @@
 
 package no.entur.damu.routes;
 
+import static no.entur.damu.Constants.BLOBSTORE_PATH_OUTBOUND;
+
+import java.io.InputStream;
 import no.entur.damu.Constants;
 import no.entur.damu.DamuRouteBuilderIntegrationTestBase;
 import no.entur.damu.TestApp;
@@ -47,47 +50,61 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.InputStream;
+@SpringBootTest(
+  webEnvironment = SpringBootTest.WebEnvironment.NONE,
+  classes = TestApp.class
+)
+class GtfsExportQueueRouteBuilderTest
+  extends DamuRouteBuilderIntegrationTestBase {
 
-import static no.entur.damu.Constants.BLOBSTORE_PATH_OUTBOUND;
+  private static final String CODESPACE = "rb_flb";
 
+  @Produce("google-pubsub:{{damu.pubsub.project.id}}:DamuExportGtfsQueue")
+  protected ProducerTemplate gtfsExportQueueProducerTemplate;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = TestApp.class)
-class GtfsExportQueueRouteBuilderTest extends DamuRouteBuilderIntegrationTestBase {
+  @EndpointInject("mock:checkUploadedDataset")
+  protected MockEndpoint checkUploadedDataset;
 
-    private static final String CODESPACE = "rb_flb";
+  @Value("${damu.netex.stop.filename:tiamat/CurrentAndFuture_latest.zip}")
+  private String stopExportFilename;
 
-    @Produce("google-pubsub:{{damu.pubsub.project.id}}:DamuExportGtfsQueue")
-    protected ProducerTemplate gtfsExportQueueProducerTemplate;
+  @Test
+  void testExportGtfs() throws Exception {
+    AdviceWith.adviceWith(
+      context,
+      "upload-gtfs-dataset",
+      a -> a.weaveAddLast().to("mock:checkUploadedDataset")
+    );
+    checkUploadedDataset.expectedMessageCount(1);
+    checkUploadedDataset.setResultWaitTime(200000);
 
-    @EndpointInject("mock:checkUploadedDataset")
-    protected MockEndpoint checkUploadedDataset;
+    mardukInMemoryBlobStoreRepository.uploadBlob(
+      BLOBSTORE_PATH_OUTBOUND +
+      Constants.NETEX_FILENAME_PREFIX +
+      CODESPACE +
+      Constants.NETEX_FILENAME_SUFFIX,
+      getClass().getResourceAsStream("/rb_flb-aggregated-netex.zip"),
+      true
+    );
 
-    @Value("${damu.netex.stop.filename:tiamat/CurrentAndFuture_latest.zip}")
-    private String stopExportFilename;
+    mardukInMemoryBlobStoreRepository.uploadBlob(
+      stopExportFilename,
+      getClass().getResourceAsStream("/RailStations_latest.zip"),
+      true
+    );
 
-    @Test
-    void testExportGtfs() throws Exception {
+    context.start();
+    gtfsExportQueueProducerTemplate.sendBody(CODESPACE);
+    checkUploadedDataset.assertIsSatisfied();
 
-        AdviceWith.adviceWith(context, "upload-gtfs-dataset", a -> a.weaveAddLast().to("mock:checkUploadedDataset"));
-        checkUploadedDataset.expectedMessageCount(1);
-        checkUploadedDataset.setResultWaitTime(200000);
-
-        mardukInMemoryBlobStoreRepository.uploadBlob(BLOBSTORE_PATH_OUTBOUND + Constants.NETEX_FILENAME_PREFIX + CODESPACE + Constants.NETEX_FILENAME_SUFFIX,
-                getClass().getResourceAsStream("/rb_flb-aggregated-netex.zip"), true);
-
-        mardukInMemoryBlobStoreRepository.uploadBlob(stopExportFilename,
-                getClass().getResourceAsStream("/RailStations_latest.zip"), true);
-
-        context.start();
-        gtfsExportQueueProducerTemplate.sendBody(CODESPACE);
-        checkUploadedDataset.assertIsSatisfied();
-
-        InputStream gtfsExport = mardukInMemoryBlobStoreRepository.getBlob("damu/" + Constants.GTFS_FILENAME_PREFIX + CODESPACE + Constants.GTFS_FILENAME_SUFFIX);
-        Assertions.assertNotNull(gtfsExport);
-        byte[] content = gtfsExport.readAllBytes();
-        Assertions.assertTrue(content.length > 0);
-    }
-
-
+    InputStream gtfsExport = mardukInMemoryBlobStoreRepository.getBlob(
+      "damu/" +
+      Constants.GTFS_FILENAME_PREFIX +
+      CODESPACE +
+      Constants.GTFS_FILENAME_SUFFIX
+    );
+    Assertions.assertNotNull(gtfsExport);
+    byte[] content = gtfsExport.readAllBytes();
+    Assertions.assertTrue(content.length > 0);
+  }
 }
