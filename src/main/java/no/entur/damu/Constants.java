@@ -19,31 +19,28 @@
 package no.entur.damu;
 
 public final class Constants {
-    public static final String FILE_HANDLE = "RutebankenFileHandle";
-    public static final String BLOBSTORE_MAKE_BLOB_PUBLIC = "RutebankenBlobstoreMakeBlobPublic";
 
-    public static final String BLOBSTORE_PATH_OUTBOUND = "outbound/";
+  public static final String FILE_HANDLE = "RutebankenFileHandle";
+  public static final String BLOBSTORE_MAKE_BLOB_PUBLIC =
+    "RutebankenBlobstoreMakeBlobPublic";
 
-    public static final String DATASET_REFERENTIAL = "EnturDatasetReferential";
+  public static final String BLOBSTORE_PATH_OUTBOUND = "outbound/";
 
-    /**
-     * Headers originating from Marduk that must be sent back when notifying Marduk
-     */
-    public static final String CORRELATION_ID = "RutebankenCorrelationId";
-    public static final String PROVIDER_ID = "RutebankenProviderId";
-    public static final String ORIGINAL_PROVIDER_ID = "RutebankenOriginalProviderId";
+  public static final String DATASET_REFERENTIAL = "EnturDatasetReferential";
 
+  /**
+   * Headers originating from Marduk that must be sent back when notifying Marduk
+   */
+  public static final String CORRELATION_ID = "RutebankenCorrelationId";
+  public static final String PROVIDER_ID = "RutebankenProviderId";
+  public static final String ORIGINAL_PROVIDER_ID =
+    "RutebankenOriginalProviderId";
 
-    public static final String NETEX_FILENAME_PREFIX = "netex/";
-    public static final String GTFS_FILENAME_PREFIX = "gtfs/";
+  public static final String NETEX_FILENAME_PREFIX = "netex/";
+  public static final String GTFS_FILENAME_PREFIX = "gtfs/";
 
-    public static final String NETEX_FILENAME_SUFFIX = "-aggregated-netex.zip";
-    public static final String GTFS_FILENAME_SUFFIX = "-aggregated-gtfs.zip";
+  public static final String NETEX_FILENAME_SUFFIX = "-aggregated-netex.zip";
+  public static final String GTFS_FILENAME_SUFFIX = "-aggregated-gtfs.zip";
 
-
-
-    private Constants() {
-    }
-
+  private Constants() {}
 }
-

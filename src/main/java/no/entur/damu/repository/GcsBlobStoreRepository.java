@@ -19,12 +19,11 @@
 package no.entur.damu.repository;
 
 import com.google.cloud.storage.Storage;
+import java.io.InputStream;
 import org.rutebanken.helper.gcp.BlobStoreHelper;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Repository;
-
-import java.io.InputStream;
 
 /**
  * Blob store no.entur.damu.repository targeting Google Cloud Storage.
@@ -34,26 +33,35 @@ import java.io.InputStream;
 @Scope("prototype")
 public class GcsBlobStoreRepository implements BlobStoreRepository {
 
-    private final Storage storage;
+  private final Storage storage;
 
-    private String containerName;
+  private String containerName;
 
-    public GcsBlobStoreRepository(Storage storage) {
-        this.storage = storage;
-    }
+  public GcsBlobStoreRepository(Storage storage) {
+    this.storage = storage;
+  }
 
-    public void setContainerName(String containerName) {
-        this.containerName = containerName;
-    }
+  public void setContainerName(String containerName) {
+    this.containerName = containerName;
+  }
 
-    @Override
-    public InputStream getBlob(String name) {
-        return BlobStoreHelper.getBlob(storage, containerName, name);
-    }
+  @Override
+  public InputStream getBlob(String name) {
+    return BlobStoreHelper.getBlob(storage, containerName, name);
+  }
 
-    @Override
-    public void uploadBlob(String name, InputStream inputStream, boolean makePublic) {
-        BlobStoreHelper.createOrReplace(storage, containerName, name, inputStream, makePublic);
-    }
-
+  @Override
+  public void uploadBlob(
+    String name,
+    InputStream inputStream,
+    boolean makePublic
+  ) {
+    BlobStoreHelper.createOrReplace(
+      storage,
+      containerName,
+      name,
+      inputStream,
+      makePublic
+    );
+  }
 }
