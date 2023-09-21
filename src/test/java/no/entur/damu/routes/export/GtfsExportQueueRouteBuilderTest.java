@@ -2,7 +2,7 @@ package no.entur.damu.routes.export;
 
 import no.entur.damu.DamuRouteBuilderIntegrationTestBase;
 import no.entur.damu.TestApp;
-import no.entur.damu.gtfsconverter.QuayFetcher;
+import no.entur.damu.stop.QuayFetcher;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;

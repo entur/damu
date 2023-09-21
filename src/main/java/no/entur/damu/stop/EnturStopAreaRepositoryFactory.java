@@ -1,4 +1,4 @@
-package no.entur.damu.gtfsconverter;
+package no.entur.damu.stop;
 
 import org.entur.netex.gtfs.export.stop.DefaultStopAreaRepository;
 import org.entur.netex.gtfs.export.stop.DefaultStopAreaRepositoryFactory;

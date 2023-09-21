@@ -16,14 +16,14 @@
  *
  */
 
-package no.entur.damu.gtfsconverter;
+package no.entur.damu.stop;
 
 import org.entur.netex.gtfs.export.stop.StopAreaRepositoryFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class GtfsConverterConfig {
+public class StopAreaRepositoryFactoryConfig {
 
     @Bean
     public StopAreaRepositoryFactory stopAreaRepositoryFactory(QuayFetcher quayFetcher,
