@@ -18,6 +18,12 @@
 
 package no.entur.damu.routes.export;
 
+import static no.entur.damu.Constants.BLOBSTORE_MAKE_BLOB_PUBLIC;
+import static no.entur.damu.Constants.BLOBSTORE_PATH_OUTBOUND;
+import static no.entur.damu.Constants.DATASET_REFERENTIAL;
+import static no.entur.damu.Constants.FILE_HANDLE;
+
+import java.io.InputStream;
 import no.entur.damu.Constants;
 import no.entur.damu.netex.EnturGtfsExporter;
 import no.entur.damu.routes.BaseRouteBuilder;
@@ -28,103 +34,143 @@ import org.entur.netex.gtfs.export.stop.StopAreaRepositoryFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.InputStream;
-
-import static no.entur.damu.Constants.BLOBSTORE_MAKE_BLOB_PUBLIC;
-import static no.entur.damu.Constants.BLOBSTORE_PATH_OUTBOUND;
-import static no.entur.damu.Constants.DATASET_REFERENTIAL;
-import static no.entur.damu.Constants.FILE_HANDLE;
-
 /**
  * Receive a notification when a new NeTEx export is available in the blob store and convert it into a GTFS dataset.
  */
 @Component
 public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
 
-    private static final String TIMETABLE_EXPORT_FILE_NAME = BLOBSTORE_PATH_OUTBOUND + Constants.NETEX_FILENAME_PREFIX + "${header." + DATASET_REFERENTIAL + "}" + Constants.NETEX_FILENAME_SUFFIX;
-    private static final String GTFS_EXPORT_FILE_NAME = Constants.GTFS_FILENAME_PREFIX + "${header." + DATASET_REFERENTIAL + "}" + Constants.GTFS_FILENAME_SUFFIX;
+  private static final String TIMETABLE_EXPORT_FILE_NAME =
+    BLOBSTORE_PATH_OUTBOUND +
+    Constants.NETEX_FILENAME_PREFIX +
+    "${header." +
+    DATASET_REFERENTIAL +
+    "}" +
+    Constants.NETEX_FILENAME_SUFFIX;
+  private static final String GTFS_EXPORT_FILE_NAME =
+    Constants.GTFS_FILENAME_PREFIX +
+    "${header." +
+    DATASET_REFERENTIAL +
+    "}" +
+    Constants.GTFS_FILENAME_SUFFIX;
 
-    static final String TIMETABLE_DATASET_FILE = "TIMETABLE_DATASET_FILE";
+  static final String TIMETABLE_DATASET_FILE = "TIMETABLE_DATASET_FILE";
 
-    private static final String STATUS_EXPORT_STARTED = "started";
-    private static final String STATUS_EXPORT_OK = "ok";
-    private static final String STATUS_EXPORT_FAILED = "failed";
-    private final StopAreaRepositoryFactory stopAreaRepositoryFactory;
-    private final String gtfsExportFilePath;
-    private final boolean generateStaySeatedTransfer;
+  private static final String STATUS_EXPORT_STARTED = "started";
+  private static final String STATUS_EXPORT_OK = "ok";
+  private static final String STATUS_EXPORT_FAILED = "failed";
+  private final StopAreaRepositoryFactory stopAreaRepositoryFactory;
+  private final String gtfsExportFilePath;
+  private final boolean generateStaySeatedTransfer;
 
-    public GtfsExportQueueRouteBuilder(StopAreaRepositoryFactory stopAreaRepositoryFactory,
-                                       @Value("${damu.gtfs.export.folder:damu}") String gtfsExportFolder,
-                                       @Value("${damu.gtfs.export.transfer.stayseated:false}") boolean generateStaySeatedTransfer) {
-        super();
-        this.stopAreaRepositoryFactory = stopAreaRepositoryFactory;
-        this.gtfsExportFilePath = gtfsExportFolder + '/' + GTFS_EXPORT_FILE_NAME;
-        this.generateStaySeatedTransfer = generateStaySeatedTransfer;
-    }
+  public GtfsExportQueueRouteBuilder(
+    StopAreaRepositoryFactory stopAreaRepositoryFactory,
+    @Value("${damu.gtfs.export.folder:damu}") String gtfsExportFolder,
+    @Value(
+      "${damu.gtfs.export.transfer.stayseated:false}"
+    ) boolean generateStaySeatedTransfer
+  ) {
+    super();
+    this.stopAreaRepositoryFactory = stopAreaRepositoryFactory;
+    this.gtfsExportFilePath = gtfsExportFolder + '/' + GTFS_EXPORT_FILE_NAME;
+    this.generateStaySeatedTransfer = generateStaySeatedTransfer;
+  }
 
-    @Override
-    public void configure() throws Exception {
-        super.configure();
+  @Override
+  public void configure() throws Exception {
+    super.configure();
 
+    from(
+      "google-pubsub:{{damu.pubsub.project.id}}:DamuExportGtfsQueue?synchronousPull=true"
+    )
+      .process(this::setCorrelationIdIfMissing)
+      .setHeader(DATASET_REFERENTIAL, bodyAs(String.class))
+      .log(LoggingLevel.INFO, correlation() + "Received GTFS export request")
+      .setBody(constant(STATUS_EXPORT_STARTED))
+      .to("direct:notifyMarduk")
+      .doTry()
+      .to("direct:downloadNetexTimetableDataset")
+      .log(LoggingLevel.INFO, correlation() + "NeTEx Timetable file downloaded")
+      .setHeader(TIMETABLE_DATASET_FILE, body())
+      .to("direct:convertToGtfs")
+      .to("direct:uploadGtfsDataset")
+      .setBody(constant(STATUS_EXPORT_OK))
+      .to("direct:notifyMarduk")
+      // catching only GtfsExportException. They are generally not retryable.
+      .doCatch(GtfsExportException.class)
+      .log(
+        LoggingLevel.ERROR,
+        correlation() +
+        "Dataset processing failed: ${exception.message} stacktrace: ${exception.stacktrace}"
+      )
+      .setBody(constant(STATUS_EXPORT_FAILED))
+      .to("direct:notifyMarduk")
+      .routeId("gtfs-export-queue");
 
-        from("google-pubsub:{{damu.pubsub.project.id}}:DamuExportGtfsQueue?synchronousPull=true")
+    from("direct:downloadNetexTimetableDataset")
+      .log(
+        LoggingLevel.INFO,
+        correlation() + "Downloading NeTEx Timetable dataset"
+      )
+      .setHeader(FILE_HANDLE, simple(TIMETABLE_EXPORT_FILE_NAME))
+      .to("direct:getMardukBlob")
+      .filter(body().isNull())
+      .log(LoggingLevel.ERROR, correlation() + "NeTEx Timetable file not found")
+      .stop()
+      //end filter
+      .end()
+      .routeId("download-netex-timetable-dataset");
 
-                .process(this::setCorrelationIdIfMissing)
-                .setHeader(DATASET_REFERENTIAL, bodyAs(String.class))
-                .log(LoggingLevel.INFO, correlation() + "Received GTFS export request")
+    from("direct:convertToGtfs")
+      .log(LoggingLevel.INFO, correlation() + "Converting to GTFS")
+      .process(exchange -> {
+        InputStream timetableDataset = exchange
+          .getIn()
+          .getHeader(TIMETABLE_DATASET_FILE, InputStream.class);
+        String codespace = exchange
+          .getIn()
+          .getHeader(DATASET_REFERENTIAL, String.class)
+          .replace("rb_", "")
+          .toUpperCase();
 
-                .setBody(constant(STATUS_EXPORT_STARTED))
-                .to("direct:notifyMarduk")
+        GtfsExporter gtfsExporter = new EnturGtfsExporter(
+          codespace,
+          stopAreaRepositoryFactory.getStopAreaRepository(),
+          generateStaySeatedTransfer
+        );
+        exchange
+          .getIn()
+          .setBody(gtfsExporter.convertTimetablesToGtfs(timetableDataset));
+      })
+      .log(LoggingLevel.INFO, correlation() + "Dataset processing complete")
+      .routeId("convert-to-gtfs");
 
-                .doTry()
-                .to("direct:downloadNetexTimetableDataset")
-                .log(LoggingLevel.INFO, correlation() + "NeTEx Timetable file downloaded")
-                .setHeader(TIMETABLE_DATASET_FILE, body())
-                .to("direct:convertToGtfs")
-                .to("direct:uploadGtfsDataset")
-                .setBody(constant(STATUS_EXPORT_OK))
-                .to("direct:notifyMarduk")
-                // catching only GtfsExportException. They are generally not retryable.
-                .doCatch(GtfsExportException.class)
-                .log(LoggingLevel.ERROR, correlation() + "Dataset processing failed: ${exception.message} stacktrace: ${exception.stacktrace}")
-                .setBody(constant(STATUS_EXPORT_FAILED))
-                .to("direct:notifyMarduk")
-                .routeId("gtfs-export-queue");
+    from("direct:uploadGtfsDataset")
+      .setHeader(FILE_HANDLE, simple(gtfsExportFilePath))
+      .setHeader(BLOBSTORE_MAKE_BLOB_PUBLIC, simple("true", Boolean.class))
+      .log(
+        LoggingLevel.INFO,
+        correlation() +
+        "Uploading GTFS file " +
+        GTFS_EXPORT_FILE_NAME +
+        " to GCS file ${header." +
+        FILE_HANDLE +
+        "}"
+      )
+      .to("direct:uploadMardukBlob")
+      .log(
+        LoggingLevel.INFO,
+        correlation() +
+        "Uploaded GTFS file " +
+        GTFS_EXPORT_FILE_NAME +
+        " to GCS file ${header." +
+        FILE_HANDLE +
+        "}"
+      )
+      .routeId("upload-gtfs-dataset");
 
-        from("direct:downloadNetexTimetableDataset")
-                .log(LoggingLevel.INFO, correlation() + "Downloading NeTEx Timetable dataset")
-                .setHeader(FILE_HANDLE, simple(TIMETABLE_EXPORT_FILE_NAME))
-                .to("direct:getMardukBlob")
-                .filter(body().isNull())
-                .log(LoggingLevel.ERROR, correlation() + "NeTEx Timetable file not found")
-                .stop()
-                //end filter
-                .end()
-                .routeId("download-netex-timetable-dataset");
-
-
-        from("direct:convertToGtfs")
-                .log(LoggingLevel.INFO, correlation() + "Converting to GTFS")
-                .process(exchange -> {
-                    InputStream timetableDataset = exchange.getIn().getHeader(TIMETABLE_DATASET_FILE, InputStream.class);
-                    String codespace = exchange.getIn().getHeader(DATASET_REFERENTIAL, String.class).replace("rb_", "").toUpperCase();
-
-                    GtfsExporter gtfsExporter = new EnturGtfsExporter(codespace, stopAreaRepositoryFactory.getStopAreaRepository(), generateStaySeatedTransfer);
-                    exchange.getIn().setBody(gtfsExporter.convertTimetablesToGtfs(timetableDataset));
-                })
-                .log(LoggingLevel.INFO, correlation() + "Dataset processing complete")
-                .routeId("convert-to-gtfs");
-
-        from("direct:uploadGtfsDataset")
-                .setHeader(FILE_HANDLE, simple(gtfsExportFilePath))
-                .setHeader(BLOBSTORE_MAKE_BLOB_PUBLIC, simple("true", Boolean.class))
-                .log(LoggingLevel.INFO, correlation() + "Uploading GTFS file " + GTFS_EXPORT_FILE_NAME + " to GCS file ${header." + FILE_HANDLE + "}")
-                .to("direct:uploadMardukBlob")
-                .log(LoggingLevel.INFO, correlation() + "Uploaded GTFS file " + GTFS_EXPORT_FILE_NAME + " to GCS file ${header." + FILE_HANDLE + "}")
-                .routeId("upload-gtfs-dataset");
-
-        from("direct:notifyMarduk")
-                .to("google-pubsub:{{damu.pubsub.project.id}}:DamuExportGtfsStatusQueue")
-                .routeId("notify-marduk");
-    }
+    from("direct:notifyMarduk")
+      .to("google-pubsub:{{damu.pubsub.project.id}}:DamuExportGtfsStatusQueue")
+      .routeId("notify-marduk");
+  }
 }

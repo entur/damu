@@ -25,10 +25,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class StopAreaRepositoryFactoryConfig {
 
-    @Bean
-    public StopAreaRepositoryFactory stopAreaRepositoryFactory(QuayFetcher quayFetcher,
-                                                               StopPlaceFetcher stopPlaceFetcher) {
-        return new EnturStopAreaRepositoryFactory(quayFetcher, stopPlaceFetcher);
-    }
-
+  @Bean
+  public StopAreaRepositoryFactory stopAreaRepositoryFactory(
+    QuayFetcher quayFetcher,
+    StopPlaceFetcher stopPlaceFetcher
+  ) {
+    return new EnturStopAreaRepositoryFactory(quayFetcher, stopPlaceFetcher);
+  }
 }

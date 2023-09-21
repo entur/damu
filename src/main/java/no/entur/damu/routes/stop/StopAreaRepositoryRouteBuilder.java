@@ -15,12 +15,12 @@
 
 package no.entur.damu.routes.stop;
 
+import static no.entur.damu.Constants.FILE_HANDLE;
+
 import no.entur.damu.routes.BaseRouteBuilder;
 import org.apache.camel.LoggingLevel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import static no.entur.damu.Constants.FILE_HANDLE;
 
 /**
  * Refresh the stop area repository.
@@ -28,45 +28,51 @@ import static no.entur.damu.Constants.FILE_HANDLE;
 @Component
 public class StopAreaRepositoryRouteBuilder extends BaseRouteBuilder {
 
-    private final String stopExportFilename;
-    private final String quartzTrigger;
+  private final String stopExportFilename;
+  private final String quartzTrigger;
 
-    public StopAreaRepositoryRouteBuilder(@Value("${damu.netex.stop.full.filename:tiamat/CurrentAndFuture_latest.zip}") String stopExportFilename,
-                                          @Value("${damu.netex.stop.cache.refresh.quartz.trigger:?cron=0+0+03+?+*+*}") String quartzTrigger) {
-        super();
-        this.stopExportFilename = stopExportFilename;
-        this.quartzTrigger = quartzTrigger;
-    }
+  public StopAreaRepositoryRouteBuilder(
+    @Value(
+      "${damu.netex.stop.full.filename:tiamat/CurrentAndFuture_latest.zip}"
+    ) String stopExportFilename,
+    @Value(
+      "${damu.netex.stop.cache.refresh.quartz.trigger:?cron=0+0+03+?+*+*}"
+    ) String quartzTrigger
+  ) {
+    super();
+    this.stopExportFilename = stopExportFilename;
+    this.quartzTrigger = quartzTrigger;
+  }
 
-    @Override
-    public void configure() throws Exception {
-        super.configure();
+  @Override
+  public void configure() throws Exception {
+    super.configure();
 
-        from("quartz://damu/refreshStopsAtStartup?" + "?trigger.repeatCount=0")
-                .to("direct:refreshStops")
-                .routeId("stop-area-refresh-at-startup-quartz");
+    from("quartz://damu/refreshStopsAtStartup?" + "?trigger.repeatCount=0")
+      .to("direct:refreshStops")
+      .routeId("stop-area-refresh-at-startup-quartz");
 
-        from("quartz://damu/refreshStopsPeriodically?" + quartzTrigger)
-                .to("direct:refreshStops")
-                .routeId("stop-area-refresh-periodically-quartz");
+    from("quartz://damu/refreshStopsPeriodically?" + quartzTrigger)
+      .to("direct:refreshStops")
+      .routeId("stop-area-refresh-periodically-quartz");
 
-        from("direct:refreshStops")
-                .process(this::setNewCorrelationId)
-                .log(LoggingLevel.INFO, correlation() + "Refreshing stop areas.")
-                .to("direct:downloadNetexStopDataset")
-                .bean("stopAreaRepositoryFactory", "refreshStopAreaRepository")
-                .log(LoggingLevel.INFO, correlation() + "Refreshed stop areas.")
-                .routeId("stop-area-refresh");
+    from("direct:refreshStops")
+      .process(this::setNewCorrelationId)
+      .log(LoggingLevel.INFO, correlation() + "Refreshing stop areas.")
+      .to("direct:downloadNetexStopDataset")
+      .bean("stopAreaRepositoryFactory", "refreshStopAreaRepository")
+      .log(LoggingLevel.INFO, correlation() + "Refreshed stop areas.")
+      .routeId("stop-area-refresh");
 
-        from("direct:downloadNetexStopDataset")
-                .log(LoggingLevel.INFO, correlation() + "Downloading NeTEx Stop dataset")
-                .setHeader(FILE_HANDLE, constant(stopExportFilename))
-                .to("direct:getMardukBlob")
-                .filter(body().isNull())
-                .log(LoggingLevel.ERROR, correlation() + "NeTEx Stopfile not found")
-                .stop()
-                //end filter
-                .end()
-                .routeId("download-netex-stop-dataset");
-    }
+    from("direct:downloadNetexStopDataset")
+      .log(LoggingLevel.INFO, correlation() + "Downloading NeTEx Stop dataset")
+      .setHeader(FILE_HANDLE, constant(stopExportFilename))
+      .to("direct:getMardukBlob")
+      .filter(body().isNull())
+      .log(LoggingLevel.ERROR, correlation() + "NeTEx Stopfile not found")
+      .stop()
+      //end filter
+      .end()
+      .routeId("download-netex-stop-dataset");
+  }
 }

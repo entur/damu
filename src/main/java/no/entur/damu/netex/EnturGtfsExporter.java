@@ -26,18 +26,25 @@ import org.entur.netex.gtfs.export.stop.StopAreaRepository;
  */
 public class EnturGtfsExporter extends DefaultGtfsExporter {
 
-    public EnturGtfsExporter(String codespace, StopAreaRepository stopAreaRepository) {
-        this(codespace, stopAreaRepository, false);
-    }
+  public EnturGtfsExporter(
+    String codespace,
+    StopAreaRepository stopAreaRepository
+  ) {
+    this(codespace, stopAreaRepository, false);
+  }
 
-    public EnturGtfsExporter(String codespace, StopAreaRepository stopAreaRepository, boolean generateStaySeatedTransfer) {
-        super(codespace, stopAreaRepository);
-        setNetexDatasetLoader(new EnturNetexDatasetLoader());
-        setFeedInfoProducer(new EnturFeedInfoProducer());
-    }
+  public EnturGtfsExporter(
+    String codespace,
+    StopAreaRepository stopAreaRepository,
+    boolean generateStaySeatedTransfer
+  ) {
+    super(codespace, stopAreaRepository);
+    setNetexDatasetLoader(new EnturNetexDatasetLoader());
+    setFeedInfoProducer(new EnturFeedInfoProducer());
+  }
 
-    public EnturGtfsExporter(StopAreaRepository stopAreaRepository) {
-        super(stopAreaRepository);
-        setFeedInfoProducer(new EnturFeedInfoProducer());
-    }
+  public EnturGtfsExporter(StopAreaRepository stopAreaRepository) {
+    super(stopAreaRepository);
+    setFeedInfoProducer(new EnturFeedInfoProducer());
+  }
 }

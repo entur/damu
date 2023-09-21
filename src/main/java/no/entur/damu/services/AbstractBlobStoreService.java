@@ -18,31 +18,37 @@
 
 package no.entur.damu.services;
 
+import java.io.InputStream;
 import no.entur.damu.Constants;
 import no.entur.damu.repository.BlobStoreRepository;
 import org.apache.camel.Exchange;
 import org.apache.camel.Header;
 
-import java.io.InputStream;
-
 public abstract class AbstractBlobStoreService {
 
-    protected final BlobStoreRepository repository;
+  protected final BlobStoreRepository repository;
 
-    protected AbstractBlobStoreService(String containerName, BlobStoreRepository repository) {
-        this.repository = repository;
-        this.repository.setContainerName(containerName);
-    }
+  protected AbstractBlobStoreService(
+    String containerName,
+    BlobStoreRepository repository
+  ) {
+    this.repository = repository;
+    this.repository.setContainerName(containerName);
+  }
 
-    public InputStream getBlob(@Header(value = Constants.FILE_HANDLE) String name, Exchange exchange) {
-        return repository.getBlob(name);
-    }
+  public InputStream getBlob(
+    @Header(value = Constants.FILE_HANDLE) String name,
+    Exchange exchange
+  ) {
+    return repository.getBlob(name);
+  }
 
-
-    public void uploadBlob(@Header(value = Constants.FILE_HANDLE) String name,
-                           @Header(value = Constants.BLOBSTORE_MAKE_BLOB_PUBLIC) boolean makePublic, InputStream inputStream, Exchange exchange) {
-        repository.uploadBlob(name, inputStream, makePublic);
-    }
-
-
+  public void uploadBlob(
+    @Header(value = Constants.FILE_HANDLE) String name,
+    @Header(value = Constants.BLOBSTORE_MAKE_BLOB_PUBLIC) boolean makePublic,
+    InputStream inputStream,
+    Exchange exchange
+  ) {
+    repository.uploadBlob(name, inputStream, makePublic);
+  }
 }

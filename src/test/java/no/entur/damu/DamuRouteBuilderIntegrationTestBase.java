@@ -33,6 +33,7 @@ package no.entur.damu;/*
  */
 
 import com.google.cloud.spring.pubsub.core.PubSubTemplate;
+import javax.annotation.PostConstruct;
 import no.entur.damu.repository.InMemoryBlobStoreRepository;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.component.mock.MockEndpoint;
@@ -44,35 +45,37 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
-import javax.annotation.PostConstruct;
-
 @CamelSpringBootTest
 @UseAdviceWith
-@ActiveProfiles({"test", "default", "in-memory-blobstore", "google-pubsub-emulator", "google-pubsub-autocreate"})
+@ActiveProfiles(
+  {
+    "test",
+    "default",
+    "in-memory-blobstore",
+    "google-pubsub-emulator",
+    "google-pubsub-autocreate",
+  }
+)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public abstract class DamuRouteBuilderIntegrationTestBase {
 
+  @Value("${blobstore.gcs.marduk.container.name}")
+  private String mardukContainerName;
 
-    @Value("${blobstore.gcs.marduk.container.name}")
-    private String mardukContainerName;
+  @Autowired
+  protected ModelCamelContext context;
 
+  @Autowired
+  protected PubSubTemplate pubSubTemplate;
 
-    @Autowired
-    protected ModelCamelContext context;
+  @Autowired
+  protected InMemoryBlobStoreRepository mardukInMemoryBlobStoreRepository;
 
-    @Autowired
-    protected PubSubTemplate pubSubTemplate;
+  @EndpointInject("mock:sink")
+  protected MockEndpoint sink;
 
-    @Autowired
-    protected InMemoryBlobStoreRepository mardukInMemoryBlobStoreRepository;
-
-
-    @EndpointInject("mock:sink")
-    protected MockEndpoint sink;
-
-    @PostConstruct
-    void initInMemoryBlobStoreRepositories() {
-        mardukInMemoryBlobStoreRepository.setContainerName(mardukContainerName);
-    }
-
+  @PostConstruct
+  void initInMemoryBlobStoreRepositories() {
+    mardukInMemoryBlobStoreRepository.setContainerName(mardukContainerName);
+  }
 }
