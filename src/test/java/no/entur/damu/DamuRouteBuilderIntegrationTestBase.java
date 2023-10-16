@@ -33,13 +33,14 @@ package no.entur.damu;/*
  */
 
 import com.google.cloud.spring.pubsub.core.PubSubTemplate;
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import no.entur.damu.repository.InMemoryBlobStoreRepository;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.test.spring.junit5.CamelSpringBootTest;
 import org.apache.camel.test.spring.junit5.UseAdviceWith;
+import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.annotation.DirtiesContext;
@@ -77,5 +78,10 @@ public abstract class DamuRouteBuilderIntegrationTestBase {
   @PostConstruct
   void initInMemoryBlobStoreRepositories() {
     mardukInMemoryBlobStoreRepository.setContainerName(mardukContainerName);
+  }
+
+  @AfterEach
+  void stopContext() {
+    context.stop();
   }
 }
