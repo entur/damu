@@ -28,7 +28,7 @@
         <camel.version>3.21.1</camel.version>
         <entur.helpers.version>1.100</entur.helpers.version>
         <commons-io.version>2.11.0</commons-io.version>
-        <netex-gtfs-converter-java.version>1.25.4</netex-gtfs-converter-java.version>
+        <netex-gtfs-converter-java.version>1.26.0</netex-gtfs-converter-java.version>
         <zt-zip.version>1.16</zt-zip.version>
         <commons-csv.version>1.10.0</commons-csv.version>
         <prettier-java.version>2.1.0</prettier-java.version>
