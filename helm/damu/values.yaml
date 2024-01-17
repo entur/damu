@@ -10,10 +10,9 @@ common:
   container:
     labels: { customLogRetention: enabled }
     forceReplicas: 1
-    image: ${artifact.metadata.image}
+    image: <+artifacts.primary.image>
     cpu: 2
     memory: 12000
-    cpuLimit: 2000m
     memoryLimit: 15000
     probes:
       liveness:
