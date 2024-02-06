@@ -32,7 +32,7 @@
         <zt-zip.version>1.16</zt-zip.version>
         <commons-csv.version>1.10.0</commons-csv.version>
         <prettier-java.version>2.1.0</prettier-java.version>
-        <prettier-maven-plugin.version>0.21</prettier-maven-plugin.version>
+        <prettier-maven-plugin.version>0.22</prettier-maven-plugin.version>
         <plugin.prettier.goal>write</plugin.prettier.goal>
 
         <!-- empty argLine property, the value is set up by Jacoco during unit tests execution -->
