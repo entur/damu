@@ -32,13 +32,8 @@ public interface BlobStoreRepository {
    * Upload a blob.
    * @param objectName the name of the blob in GCS
    * @param inputStream the blob data
-   * @param makePublic makes the blob publicly accessible
    */
-  void uploadBlob(
-    String objectName,
-    InputStream inputStream,
-    boolean makePublic
-  );
+  void uploadBlob(String objectName, InputStream inputStream);
 
   void setContainerName(String containerName);
 }
