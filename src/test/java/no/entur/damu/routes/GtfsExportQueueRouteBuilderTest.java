@@ -83,14 +83,12 @@ class GtfsExportQueueRouteBuilderTest
       Constants.NETEX_FILENAME_PREFIX +
       CODESPACE +
       Constants.NETEX_FILENAME_SUFFIX,
-      getClass().getResourceAsStream("/rb_flb-aggregated-netex.zip"),
-      true
+      getClass().getResourceAsStream("/rb_flb-aggregated-netex.zip")
     );
 
     mardukInMemoryBlobStoreRepository.uploadBlob(
       stopExportFilename,
-      getClass().getResourceAsStream("/RailStations_latest.zip"),
-      true
+      getClass().getResourceAsStream("/RailStations_latest.zip")
     );
 
     context.start();

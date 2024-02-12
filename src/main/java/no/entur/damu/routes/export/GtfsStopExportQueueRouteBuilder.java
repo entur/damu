@@ -16,7 +16,6 @@
 
 package no.entur.damu.routes.export;
 
-import static no.entur.damu.Constants.BLOBSTORE_MAKE_BLOB_PUBLIC;
 import static no.entur.damu.Constants.FILE_HANDLE;
 
 import no.entur.damu.netex.EnturGtfsExporter;
@@ -85,7 +84,6 @@ public class GtfsStopExportQueueRouteBuilder extends BaseRouteBuilder {
 
     from("direct:uploadCurrentStopsGtfsDataset")
       .setHeader(FILE_HANDLE, simple(GTFS_STOP_EXPORT_FILE_NAME))
-      .setHeader(BLOBSTORE_MAKE_BLOB_PUBLIC, simple("true", Boolean.class))
       .log(
         LoggingLevel.INFO,
         correlation() +

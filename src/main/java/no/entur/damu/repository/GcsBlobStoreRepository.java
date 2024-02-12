@@ -51,17 +51,13 @@ public class GcsBlobStoreRepository implements BlobStoreRepository {
   }
 
   @Override
-  public void uploadBlob(
-    String name,
-    InputStream inputStream,
-    boolean makePublic
-  ) {
+  public void uploadBlob(String name, InputStream inputStream) {
     BlobStoreHelper.createOrReplace(
       storage,
       containerName,
       name,
       inputStream,
-      makePublic
+      false
     );
   }
 }

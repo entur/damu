@@ -21,8 +21,6 @@ package no.entur.damu;
 public final class Constants {
 
   public static final String FILE_HANDLE = "RutebankenFileHandle";
-  public static final String BLOBSTORE_MAKE_BLOB_PUBLIC =
-    "RutebankenBlobstoreMakeBlobPublic";
 
   public static final String BLOBSTORE_PATH_OUTBOUND = "outbound/";
 

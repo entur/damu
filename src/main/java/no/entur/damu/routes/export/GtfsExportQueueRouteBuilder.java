@@ -18,7 +18,6 @@
 
 package no.entur.damu.routes.export;
 
-import static no.entur.damu.Constants.BLOBSTORE_MAKE_BLOB_PUBLIC;
 import static no.entur.damu.Constants.BLOBSTORE_PATH_OUTBOUND;
 import static no.entur.damu.Constants.DATASET_REFERENTIAL;
 import static no.entur.damu.Constants.FILE_HANDLE;
@@ -147,7 +146,6 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
 
     from("direct:uploadGtfsDataset")
       .setHeader(FILE_HANDLE, simple(gtfsExportFilePath))
-      .setHeader(BLOBSTORE_MAKE_BLOB_PUBLIC, simple("true", Boolean.class))
       .log(
         LoggingLevel.INFO,
         correlation() +

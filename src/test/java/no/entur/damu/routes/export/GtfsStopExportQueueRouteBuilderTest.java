@@ -89,8 +89,7 @@ class GtfsStopExportQueueRouteBuilderTest
   void testGtfsStopExport() throws Exception {
     mardukInMemoryBlobStoreRepository.uploadBlob(
       stopExportFilename,
-      getClass().getResourceAsStream("/Current_latest.zip"),
-      true
+      getClass().getResourceAsStream("/Current_latest.zip")
     );
 
     // Populating the stopAreaRepository with stop areas.
