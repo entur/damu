@@ -21,7 +21,6 @@ package no.entur.damu.services;
 import java.io.InputStream;
 import no.entur.damu.Constants;
 import no.entur.damu.repository.BlobStoreRepository;
-import org.apache.camel.Exchange;
 import org.apache.camel.Header;
 
 public abstract class AbstractBlobStoreService {
@@ -37,16 +36,14 @@ public abstract class AbstractBlobStoreService {
   }
 
   public InputStream getBlob(
-    @Header(value = Constants.FILE_HANDLE) String name,
-    Exchange exchange
+    @Header(value = Constants.FILE_HANDLE) String name
   ) {
     return repository.getBlob(name);
   }
 
   public void uploadBlob(
     @Header(value = Constants.FILE_HANDLE) String name,
-    InputStream inputStream,
-    Exchange exchange
+    InputStream inputStream
   ) {
     repository.uploadBlob(name, inputStream);
   }
