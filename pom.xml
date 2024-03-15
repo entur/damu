@@ -25,7 +25,7 @@
     <properties>
         <java.version>21</java.version>
         <entur.google.pubsub.emulator.download.skip>false</entur.google.pubsub.emulator.download.skip>
-        <camel.version>4.0.4</camel.version>
+        <camel.version>4.4.1</camel.version>
         <entur.helpers.version>2.10</entur.helpers.version>
         <commons-io.version>2.11.0</commons-io.version>
         <netex-gtfs-converter-java.version>2.1.5</netex-gtfs-converter-java.version>
