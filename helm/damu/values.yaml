@@ -12,8 +12,8 @@ common:
     forceReplicas: 1
     image: <+artifacts.primary.image>
     cpu: 2
-    memory: 14000
-    memoryLimit: 15000
+    memory: 16000
+    memoryLimit: 17000
     probes:
       liveness:
         path: /actuator/health/liveness
@@ -35,7 +35,7 @@ common:
     enabled: false
   configmap:
     data:
-      JDK_JAVA_OPTIONS:  -server -Xmx13000m -Xss512k -XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90
+      JDK_JAVA_OPTIONS:  -server -Xmx15000m -Xss512k -XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90
         -XX:MinHeapFreeRatio=20 -XX:MaxHeapFreeRatio=40
         -Dspring.config.location=/etc/application-config/application.properties
         -Dfile.encoding=UTF-8
