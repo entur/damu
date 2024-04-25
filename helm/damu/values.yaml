@@ -12,8 +12,8 @@ common:
     forceReplicas: 1
     image: <+artifacts.primary.image>
     cpu: 2
-    memory: 16000
-    memoryLimit: 17000
+    memory: 18000
+    memoryLimit: 20000
     probes:
       liveness:
         path: /actuator/health/liveness
