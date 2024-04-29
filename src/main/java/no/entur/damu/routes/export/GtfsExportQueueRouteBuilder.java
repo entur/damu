@@ -91,8 +91,11 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
       .to("direct:downloadNetexTimetableDataset")
       .log(LoggingLevel.INFO, correlation() + "NeTEx Timetable file downloaded")
       .setHeader(TIMETABLE_DATASET_FILE, body())
+      .process(this::extendAckDeadline)
       .to("direct:convertToGtfs")
+      .process(this::extendAckDeadline)
       .to("direct:uploadGtfsDataset")
+      .process(this::extendAckDeadline)
       .setBody(constant(STATUS_EXPORT_OK))
       .to("direct:notifyMarduk")
       // catching only GtfsExportException. They are generally not retryable.

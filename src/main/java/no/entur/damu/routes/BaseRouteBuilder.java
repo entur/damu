@@ -38,8 +38,6 @@ import org.springframework.beans.factory.annotation.Value;
  */
 public abstract class BaseRouteBuilder extends RouteBuilder {
 
-  private static final int ACK_DEADLINE_EXTENSION = 500;
-
   @Value("${quartz.lenient.fire.time.ms:180000}")
   private int lenientFireTimeMs;
 
@@ -51,6 +49,9 @@ public abstract class BaseRouteBuilder extends RouteBuilder {
 
   @Value("${damu.camel.redelivery.backoff.multiplier:3}")
   private int backOffMultiplier;
+
+  @Value("${damu.camel.pubsub.deadline.extension:600}")
+  private int deadlineExtension;
 
   @Override
   public void configure() throws Exception {
@@ -206,7 +207,7 @@ public abstract class BaseRouteBuilder extends RouteBuilder {
       .newBuilder()
       .setSubscription(subscriptionName)
       .addAllAckIds(List.of(ackId))
-      .setAckDeadlineSeconds(ACK_DEADLINE_EXTENSION)
+      .setAckDeadlineSeconds(deadlineExtension)
       .build();
     try (
       SubscriberStub subscriberStub = fromEndpoint
