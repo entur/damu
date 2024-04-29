@@ -84,6 +84,7 @@ class EnturGtfsExportTest {
     );
 
     checkAgency(gtfsFile, codespace);
+    checkTrip(gtfsFile);
 
     IOUtils.closeQuietly(exportedGtfs);
   }
@@ -97,6 +98,13 @@ class EnturGtfsExportTest {
       record.get("agency_id").startsWith(codespace + ':' + "Authority")
     );
     Assertions.assertFalse(records.iterator().hasNext());
+  }
+
+  private void checkTrip(File gtfsFile) throws IOException {
+    Iterable<CSVRecord> records = getCsvRecords(gtfsFile, "trips.txt");
+    Assertions.assertTrue(records.iterator().hasNext());
+    CSVRecord record = records.iterator().next();
+    Assertions.assertNotNull(record.get("trip_id"));
   }
 
   private Iterable<CSVRecord> getCsvRecords(File gtfsFile, String entryName)
