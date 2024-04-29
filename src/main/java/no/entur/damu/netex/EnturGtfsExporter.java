@@ -38,7 +38,7 @@ public class EnturGtfsExporter extends DefaultGtfsExporter {
     StopAreaRepository stopAreaRepository,
     boolean generateStaySeatedTransfer
   ) {
-    super(codespace, stopAreaRepository);
+    super(codespace, stopAreaRepository, generateStaySeatedTransfer);
     setNetexDatasetLoader(new EnturNetexDatasetLoader());
     setFeedInfoProducer(new EnturFeedInfoProducer());
   }
