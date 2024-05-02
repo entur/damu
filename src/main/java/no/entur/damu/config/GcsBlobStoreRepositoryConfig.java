@@ -16,29 +16,24 @@
 
 package no.entur.damu.config;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import org.rutebanken.helper.gcp.repository.BlobStoreRepository;
-import org.rutebanken.helper.gcp.repository.InMemoryBlobStoreRepository;
+import org.rutebanken.helper.gcp.repository.GcsBlobStoreRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
 
 @Configuration
-@Profile("in-memory-blobstore")
-public class InMemoryBlobStoreRepositoryConfig {
-
-  @Bean
-  public Map<String, Map<String, byte[]>> blobsInContainers() {
-    return new ConcurrentHashMap<>();
-  }
+@Profile("gcs-blobstore")
+public class GcsBlobStoreRepositoryConfig {
 
   @Bean
   @Scope("prototype")
   BlobStoreRepository blobStoreRepository(
-    Map<String, Map<String, byte[]>> blobsInContainers
+    @Value("${blobstore.gcs.project.id}") String projectId,
+    @Value("${blobstore.gcs.credential.path:#{null}}") String credentialPath
   ) {
-    return new InMemoryBlobStoreRepository(blobsInContainers);
+    return new GcsBlobStoreRepository(projectId, credentialPath);
   }
 }

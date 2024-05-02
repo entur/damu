@@ -20,8 +20,8 @@ package no.entur.damu.services;
 
 import java.io.InputStream;
 import no.entur.damu.Constants;
-import no.entur.damu.repository.BlobStoreRepository;
 import org.apache.camel.Header;
+import org.rutebanken.helper.gcp.repository.BlobStoreRepository;
 
 public abstract class AbstractBlobStoreService {
 
