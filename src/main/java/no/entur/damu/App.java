@@ -18,7 +18,7 @@
 
 package no.entur.damu;
 
-import no.entur.damu.config.GcsStorageConfig;
+import no.entur.damu.config.GcsBlobStoreRepositoryConfig;
 import org.apache.camel.builder.RouteBuilder;
 import org.entur.pubsub.base.config.GooglePubSubConfig;
 import org.slf4j.Logger;
@@ -33,7 +33,7 @@ import org.springframework.context.annotation.Import;
  * A spring-boot application that includes a Camel route builder to set up the Camel context.
  */
 @SpringBootApplication(exclude = { UserDetailsServiceAutoConfiguration.class })
-@Import({ GcsStorageConfig.class, GooglePubSubConfig.class })
+@Import({ GcsBlobStoreRepositoryConfig.class, GooglePubSubConfig.class })
 public class App extends RouteBuilder {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(App.class);

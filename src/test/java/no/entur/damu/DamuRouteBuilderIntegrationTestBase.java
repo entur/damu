@@ -34,13 +34,13 @@ package no.entur.damu;/*
 
 import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import jakarta.annotation.PostConstruct;
-import no.entur.damu.repository.InMemoryBlobStoreRepository;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.test.spring.junit5.CamelSpringBootTest;
 import org.apache.camel.test.spring.junit5.UseAdviceWith;
 import org.junit.jupiter.api.AfterEach;
+import org.rutebanken.helper.gcp.repository.BlobStoreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.annotation.DirtiesContext;
@@ -70,7 +70,7 @@ public abstract class DamuRouteBuilderIntegrationTestBase {
   protected PubSubTemplate pubSubTemplate;
 
   @Autowired
-  protected InMemoryBlobStoreRepository mardukInMemoryBlobStoreRepository;
+  protected BlobStoreRepository mardukInMemoryBlobStoreRepository;
 
   @EndpointInject("mock:sink")
   protected MockEndpoint sink;
