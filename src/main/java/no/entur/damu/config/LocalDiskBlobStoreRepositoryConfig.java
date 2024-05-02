@@ -16,29 +16,23 @@
 
 package no.entur.damu.config;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import org.rutebanken.helper.gcp.repository.BlobStoreRepository;
-import org.rutebanken.helper.gcp.repository.InMemoryBlobStoreRepository;
+import org.rutebanken.helper.gcp.repository.LocalDiskBlobStoreRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
 
 @Configuration
-@Profile("in-memory-blobstore")
-public class InMemoryBlobStoreRepositoryConfig {
-
-  @Bean
-  public Map<String, Map<String, byte[]>> blobsInContainers() {
-    return new ConcurrentHashMap<>();
-  }
+@Profile("local-disk-blobstore")
+public class LocalDiskBlobStoreRepositoryConfig {
 
   @Bean
   @Scope("prototype")
   BlobStoreRepository blobStoreRepository(
-    Map<String, Map<String, byte[]>> blobsInContainers
+    @Value("${blobstore.local.folder:files/blob}") String baseFolder
   ) {
-    return new InMemoryBlobStoreRepository(blobsInContainers);
+    return new LocalDiskBlobStoreRepository(baseFolder);
   }
 }
