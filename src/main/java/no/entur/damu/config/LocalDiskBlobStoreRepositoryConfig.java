@@ -16,8 +16,8 @@
 
 package no.entur.damu.config;
 
-import org.rutebanken.helper.gcp.repository.BlobStoreRepository;
-import org.rutebanken.helper.gcp.repository.LocalDiskBlobStoreRepository;
+import org.rutebanken.helper.storage.repository.BlobStoreRepository;
+import org.rutebanken.helper.storage.repository.LocalDiskBlobStoreRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
