@@ -18,8 +18,8 @@ package no.entur.damu.config;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.rutebanken.helper.gcp.repository.BlobStoreRepository;
-import org.rutebanken.helper.gcp.repository.InMemoryBlobStoreRepository;
+import org.rutebanken.helper.storage.repository.BlobStoreRepository;
+import org.rutebanken.helper.storage.repository.InMemoryBlobStoreRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
