@@ -16,22 +16,6 @@
  *
  */
 
-/*
- * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
- * the European Commission - subsequent versions of the EUPL (the "Licence");
- * You may not use this work except in compliance with the Licence.
- * You may obtain a copy of the Licence at:
- *
- *   https://joinup.ec.europa.eu/software/page/eupl
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the Licence is distributed on an "AS IS" basis,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the Licence for the specific language governing permissions and
- * limitations under the Licence.
- *
- */
-
 package no.entur.damu.netex;
 
 import java.io.ByteArrayInputStream;
@@ -90,21 +74,21 @@ class EnturGtfsExportTest {
   }
 
   private void checkAgency(File gtfsFile, String codespace) throws IOException {
-    Iterable<CSVRecord> records = getCsvRecords(gtfsFile, "agency.txt");
-    Assertions.assertTrue(records.iterator().hasNext());
-    CSVRecord record = records.iterator().next();
-    Assertions.assertNotNull(record.get("agency_id"));
+    Iterable<CSVRecord> csvRecords = getCsvRecords(gtfsFile, "agency.txt");
+    Assertions.assertTrue(csvRecords.iterator().hasNext());
+    CSVRecord csvRecord = csvRecords.iterator().next();
+    Assertions.assertNotNull(csvRecord.get("agency_id"));
     Assertions.assertTrue(
-      record.get("agency_id").startsWith(codespace + ':' + "Authority")
+      csvRecord.get("agency_id").startsWith(codespace + ':' + "Authority")
     );
-    Assertions.assertFalse(records.iterator().hasNext());
+    Assertions.assertFalse(csvRecords.iterator().hasNext());
   }
 
   private void checkTrip(File gtfsFile) throws IOException {
-    Iterable<CSVRecord> records = getCsvRecords(gtfsFile, "trips.txt");
-    Assertions.assertTrue(records.iterator().hasNext());
-    CSVRecord record = records.iterator().next();
-    Assertions.assertNotNull(record.get("trip_id"));
+    Iterable<CSVRecord> csvRecords = getCsvRecords(gtfsFile, "trips.txt");
+    Assertions.assertTrue(csvRecords.iterator().hasNext());
+    CSVRecord csvRecord = csvRecords.iterator().next();
+    Assertions.assertNotNull(csvRecord.get("trip_id"));
   }
 
   private Iterable<CSVRecord> getCsvRecords(File gtfsFile, String entryName)
