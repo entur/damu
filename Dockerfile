@@ -1,8 +1,8 @@
-FROM bellsoft/liberica-openjdk-alpine:21.0.3-10 AS builder
+FROM bellsoft/liberica-openjdk-alpine:21.0.5-11 AS builder
 COPY target/damu-*-SNAPSHOT.jar application.jar
 RUN java -Djarmode=layertools -jar application.jar extract
 
-FROM bellsoft/liberica-openjdk-alpine:21.0.3-10
+FROM bellsoft/liberica-openjdk-alpine:21.0.5-11
 RUN apk update && apk upgrade && apk add --no-cache tini
 WORKDIR /deployments
 RUN addgroup appuser && adduser --disabled-password appuser --ingroup appuser
