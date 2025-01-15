@@ -16,9 +16,9 @@ data:
     stopplace.registry.url={{ .Values.stopplaceRegistryUrl }}
 
     # Camel
-    camel.springboot.name=damu
-    camel.springboot.streamCachingEnabled=false
-    camel.springboot.streamCachingSpoolEnabled=true
+    camel.main.name=damu
+    camel.main.stream-caching-enabled=false
+    camel.main.stream-caching-spool-enabled=true
     camel.dataformat.jackson.module-refs=jacksonJavaTimeModule
     camel.servlet.mapping.context-path=/services/*
     # the Camel shutdown timeout must be shorter than the Kubernetes terminationGracePeriod
