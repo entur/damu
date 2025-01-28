@@ -19,6 +19,8 @@
 package no.entur.damu.routes;
 
 import static no.entur.damu.Constants.BLOBSTORE_PATH_OUTBOUND;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.InputStream;
 import no.entur.damu.Constants;
@@ -49,6 +51,9 @@ class GtfsExportQueueRouteBuilderTest
   @EndpointInject("mock:checkUploadedDataset")
   protected MockEndpoint checkUploadedDataset;
 
+  @EndpointInject("mock:validateGtfsOutput")
+  private MockEndpoint mockValidateGtfsOutput;
+
   @Value("${damu.netex.stop.filename:tiamat/CurrentAndFuture_latest.zip}")
   private String stopExportFilename;
 
@@ -59,8 +64,17 @@ class GtfsExportQueueRouteBuilderTest
       "upload-gtfs-dataset",
       a -> a.weaveAddLast().to("mock:checkUploadedDataset")
     );
+    AdviceWith.adviceWith(
+      context,
+      "validate-gtfs",
+      routeBuilder -> {
+        routeBuilder.weaveAddLast().to("mock:validateGtfsOutput");
+      }
+    );
     checkUploadedDataset.expectedMessageCount(1);
-    checkUploadedDataset.setResultWaitTime(200000);
+    checkUploadedDataset.setResultWaitTime(200_000);
+    mockValidateGtfsOutput.expectedMessageCount(1);
+    mockValidateGtfsOutput.setResultWaitTime(200_000);
 
     mardukInMemoryBlobStoreRepository.uploadBlob(
       BLOBSTORE_PATH_OUTBOUND +
@@ -78,6 +92,7 @@ class GtfsExportQueueRouteBuilderTest
     context.start();
     gtfsExportQueueProducerTemplate.sendBody(CODESPACE);
     checkUploadedDataset.assertIsSatisfied();
+    mockValidateGtfsOutput.assertIsSatisfied();
 
     InputStream gtfsExport = mardukInMemoryBlobStoreRepository.getBlob(
       "damu/" +
@@ -88,5 +103,24 @@ class GtfsExportQueueRouteBuilderTest
     Assertions.assertNotNull(gtfsExport);
     byte[] content = gtfsExport.readAllBytes();
     Assertions.assertTrue(content.length > 0);
+
+    String expectedPath =
+      Constants.GTFS_VALIDATION_REPORTS_FILENAME_PREFIX +
+      CODESPACE +
+      Constants.GTFS_VALIDATION_REPORTS_FILENAME_SUFFIX;
+    InputStream uploadedReportStream = damuInMemoryBlobStoreRepository.getBlob(
+      expectedPath
+    );
+    assertNotNull(
+      uploadedReportStream,
+      "Validation report should exist in the in-memory blob store at path: " +
+      expectedPath
+    );
+
+    byte[] uploadedBytes = uploadedReportStream.readAllBytes();
+    assertTrue(
+      uploadedBytes.length > 0,
+      "Uploaded validation report must be non-empty"
+    );
   }
 }

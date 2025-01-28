@@ -72,7 +72,7 @@ class GtfsExportQueueRouteBuilderTest
           getClass().getResourceAsStream("/rb_avi-aggregated-netex.zip")
         ),
         DATASET_REFERENTIAL,
-        "rb_flb"
+        "rb_avi"
       )
     );
 
@@ -81,10 +81,6 @@ class GtfsExportQueueRouteBuilderTest
 
     // verifying the tryFetchQuay called 1 time, for the missing quay.
     verify(quayFetcher, times(1)).tryFetch(anyString());
-    // Verify the missing quay exists in the generated gtfs dataset.
-    //        assertNotNull("Stop with given id should be present",
-    //                gtfsExporter.getGtfsDatasetRepository().getStopById("NSR:Quay:1184")
-    //        );
   }
 
   @Test
@@ -126,10 +122,6 @@ class GtfsExportQueueRouteBuilderTest
 
     // verifying the tryFetchQuay called 1 time, for the missing quay.
     verify(quayFetcher, times(2)).tryFetch(anyString());
-    // Verify the missing quay exists in the generated gtfs dataset.
-    //        assertNotNull("Stop with given id should be present",
-    //                gtfsExporter.getGtfsDatasetRepository().getStopById("NSR:Quay:1184")
-    //        );
   }
 
   private void removeAndMockFetchQuayById(String quayId) {
