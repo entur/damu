@@ -33,6 +33,7 @@ data:
     # Blobstore
     blobstore.gcs.project.id={{ .Values.gcp.blobstoreProjectId }}
     blobstore.gcs.marduk.container.name={{ .Values.gcp.marduk.bucketName }}
+    blobstore.gcs.damu.container.name={{ .Values.gcp.damu.bucketName }}
 
     # Actuator
     management.server.port={{ .Values.common.service.internalPort }}

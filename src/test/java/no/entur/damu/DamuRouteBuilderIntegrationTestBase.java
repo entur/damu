@@ -49,6 +49,9 @@ public abstract class DamuRouteBuilderIntegrationTestBase {
   @Value("${blobstore.gcs.marduk.container.name}")
   private String mardukContainerName;
 
+  @Value("${blobstore.gcs.damu.container.name}")
+  private String damuContainerName;
+
   @Autowired
   protected ModelCamelContext context;
 
@@ -58,12 +61,17 @@ public abstract class DamuRouteBuilderIntegrationTestBase {
   @Autowired
   protected BlobStoreRepository mardukInMemoryBlobStoreRepository;
 
+  @Autowired
+  protected BlobStoreRepository damuInMemoryBlobStoreRepository;
+
   @EndpointInject("mock:sink")
   protected MockEndpoint sink;
 
   @PostConstruct
   void initInMemoryBlobStoreRepositories() {
+    context.setStreamCaching(true);
     mardukInMemoryBlobStoreRepository.setContainerName(mardukContainerName);
+    damuInMemoryBlobStoreRepository.setContainerName(damuContainerName);
   }
 
   @AfterEach

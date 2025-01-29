@@ -19,5 +19,7 @@ gcp:
   marduk:
     bucketName: marduk-production
     gtfsFolder: outbound
+  damu:
+    bucketName: damu-production
 
 stopplaceRegistryUrl: https://api.entur.io/stop-places/v1/read
