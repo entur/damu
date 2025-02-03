@@ -20,6 +20,6 @@ gcp:
     bucketName: marduk-dev
     gtfsFolder: outbound
   damu:
-    bucketName: damu-dev
+    bucketName: ror-damu-internal-dev
 
 stopplaceRegistryUrl: https://api.dev.entur.io/stop-places/v1/read
