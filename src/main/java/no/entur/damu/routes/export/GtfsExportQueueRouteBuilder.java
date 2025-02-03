@@ -79,6 +79,16 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
   public void configure() throws Exception {
     super.configure();
 
+    onException(GtfsExportException.class)
+      .log(
+        LoggingLevel.ERROR,
+        correlation() +
+        "Dataset processing failed: ${exception.message} stacktrace: ${exception.stacktrace}"
+      )
+      .setBody(constant(STATUS_EXPORT_FAILED))
+      .to("direct:notifyMarduk")
+      .end();
+
     from(
       "google-pubsub:{{damu.pubsub.project.id}}:DamuExportGtfsQueue?synchronousPull=true"
     )
@@ -87,25 +97,17 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
       .log(LoggingLevel.INFO, correlation() + "Received GTFS export request")
       .setBody(constant(STATUS_EXPORT_STARTED))
       .to("direct:notifyMarduk")
-      .doTry()
       .to("direct:downloadNetexTimetableDataset")
       .log(LoggingLevel.INFO, correlation() + "NeTEx Timetable file downloaded")
       .setHeader(TIMETABLE_DATASET_FILE, body())
       .process(this::extendAckDeadline)
       .to("direct:convertToGtfs")
       .process(this::extendAckDeadline)
-      .to("direct:uploadGtfsDataset")
+      .multicast()
+      .to("direct:validateGtfs", "direct:uploadGtfsDataset")
+      .end()
       .process(this::extendAckDeadline)
       .setBody(constant(STATUS_EXPORT_OK))
-      .to("direct:notifyMarduk")
-      // catching only GtfsExportException. They are generally not retryable.
-      .doCatch(GtfsExportException.class)
-      .log(
-        LoggingLevel.ERROR,
-        correlation() +
-        "Dataset processing failed: ${exception.message} stacktrace: ${exception.stacktrace}"
-      )
-      .setBody(constant(STATUS_EXPORT_FAILED))
       .to("direct:notifyMarduk")
       .routeId("gtfs-export-queue");
 

@@ -36,9 +36,13 @@ public final class Constants {
 
   public static final String NETEX_FILENAME_PREFIX = "netex/";
   public static final String GTFS_FILENAME_PREFIX = "gtfs/";
+  public static final String GTFS_VALIDATION_REPORTS_FILENAME_PREFIX =
+    "gtfsreport.entur.org/";
 
   public static final String NETEX_FILENAME_SUFFIX = "-aggregated-netex.zip";
   public static final String GTFS_FILENAME_SUFFIX = "-aggregated-gtfs.zip";
+  public static final String GTFS_VALIDATION_REPORTS_FILENAME_SUFFIX =
+    "-gtfs-validation-reports.zip";
 
   private Constants() {}
 }
