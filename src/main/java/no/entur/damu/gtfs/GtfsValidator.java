@@ -28,8 +28,20 @@ import org.mobilitydata.gtfsvalidator.runner.ValidationRunner;
 import org.mobilitydata.gtfsvalidator.runner.ValidationRunnerConfig;
 import org.mobilitydata.gtfsvalidator.util.VersionResolver;
 
+/**
+ * Validates a GTFS feed and returns a zip file containing the validation reports.
+ */
 public class GtfsValidator {
 
+  /**
+   * Validates a GTFS feed and returns a zip file containing the validation reports.
+   *
+   * @param datasetReferential typically the NeTEx codespace of the dataset. Used
+   *                           to name temporary files and directories.
+   * @param zippedGtfsContent the zipped GTFS content to validate
+   * @return the validation reports as an InputStream with zipped content
+   * @throws IOException if an I/O error occurs
+   */
   public static InputStream validate(
     String datasetReferential,
     InputStream zippedGtfsContent

@@ -67,14 +67,12 @@ class GtfsExportQueueRouteBuilderTest
     AdviceWith.adviceWith(
       context,
       "validate-gtfs",
-      routeBuilder -> {
-        routeBuilder.weaveAddLast().to("mock:validateGtfsOutput");
-      }
+      routeBuilder -> routeBuilder.weaveAddLast().to("mock:validateGtfsOutput")
     );
     checkUploadedDataset.expectedMessageCount(1);
-    checkUploadedDataset.setResultWaitTime(200_000);
+    checkUploadedDataset.setResultWaitTime(20_000);
     mockValidateGtfsOutput.expectedMessageCount(1);
-    mockValidateGtfsOutput.setResultWaitTime(200_000);
+    mockValidateGtfsOutput.setResultWaitTime(20_000);
 
     mardukInMemoryBlobStoreRepository.uploadBlob(
       BLOBSTORE_PATH_OUTBOUND +

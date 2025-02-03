@@ -104,7 +104,6 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
       .to("direct:convertToGtfs")
       .process(this::extendAckDeadline)
       .multicast()
-      .parallelProcessing()
       .to("direct:validateGtfs", "direct:uploadGtfsDataset")
       .end()
       .process(this::extendAckDeadline)
