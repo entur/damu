@@ -69,7 +69,6 @@ public abstract class DamuRouteBuilderIntegrationTestBase {
 
   @PostConstruct
   void initInMemoryBlobStoreRepositories() {
-    context.setStreamCaching(true);
     mardukInMemoryBlobStoreRepository.setContainerName(mardukContainerName);
     damuInMemoryBlobStoreRepository.setContainerName(damuContainerName);
   }

@@ -92,6 +92,7 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
     from(
       "google-pubsub:{{damu.pubsub.project.id}}:DamuExportGtfsQueue?synchronousPull=true"
     )
+      .streamCache("true")
       .process(this::setCorrelationIdIfMissing)
       .setHeader(DATASET_REFERENTIAL, bodyAs(String.class))
       .log(LoggingLevel.INFO, correlation() + "Received GTFS export request")
