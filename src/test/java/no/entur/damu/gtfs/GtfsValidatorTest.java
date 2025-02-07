@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import no.entur.damu.gtfs.validator.GtfsValidator;
 import org.junit.jupiter.api.Test;
 
 class GtfsValidatorTest {

@@ -23,7 +23,7 @@ import static no.entur.damu.Constants.FILE_HANDLE;
 
 import java.io.InputStream;
 import no.entur.damu.Constants;
-import no.entur.damu.gtfs.GtfsValidator;
+import no.entur.damu.gtfs.validator.GtfsValidator;
 import no.entur.damu.routes.BaseRouteBuilder;
 import org.apache.camel.LoggingLevel;
 import org.springframework.stereotype.Component;

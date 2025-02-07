@@ -16,7 +16,7 @@
  *
  */
 
-package no.entur.damu.gtfs;
+package no.entur.damu.gtfs.validator;
 
 import java.io.*;
 import java.nio.file.*;
