@@ -18,19 +18,25 @@
 
 package no.entur.damu;
 
-import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import jakarta.annotation.PostConstruct;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.test.spring.junit5.CamelSpringBootTest;
 import org.apache.camel.test.spring.junit5.UseAdviceWith;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.rutebanken.helper.storage.repository.BlobStoreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PubSubEmulatorContainer;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 @CamelSpringBootTest
 @UseAdviceWith
@@ -39,27 +45,47 @@ import org.springframework.test.context.ActiveProfiles;
     "test",
     "default",
     "in-memory-blobstore",
-    "google-pubsub-emulator",
     "google-pubsub-autocreate",
   }
 )
+@Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public abstract class DamuRouteBuilderIntegrationTestBase {
 
-  @Value("${blobstore.gcs.marduk.container.name}")
-  private String mardukContainerName;
+  private static PubSubEmulatorContainer pubsubEmulator;
 
+  @BeforeAll
+  public static void init() {
+    pubsubEmulator =
+      new PubSubEmulatorContainer(
+        DockerImageName.parse(
+        "gcr.io/google.com/cloudsdktool/cloud-sdk:emulators"
+        )
+      );
+    pubsubEmulator.start();
+  }
+
+  @DynamicPropertySource
+  static void emulatorProperties(DynamicPropertyRegistry registry) {
+    registry.add(
+      "spring.cloud.gcp.pubsub.emulator-host",
+      pubsubEmulator::getEmulatorEndpoint
+    );
+    registry.add(
+      "camel.component.google-pubsub.endpoint",
+      pubsubEmulator::getEmulatorEndpoint
+    );
+  }
+
+  @AfterAll
+  public static void tearDown() {
+    pubsubEmulator.stop();
+  }
   @Value("${blobstore.gcs.damu.container.name}")
   private String damuContainerName;
 
   @Autowired
   protected ModelCamelContext context;
-
-  @Autowired
-  protected PubSubTemplate pubSubTemplate;
-
-  @Autowired
-  protected BlobStoreRepository mardukInMemoryBlobStoreRepository;
 
   @Autowired
   protected BlobStoreRepository damuInMemoryBlobStoreRepository;
@@ -69,7 +95,6 @@ public abstract class DamuRouteBuilderIntegrationTestBase {
 
   @PostConstruct
   void initInMemoryBlobStoreRepositories() {
-    mardukInMemoryBlobStoreRepository.setContainerName(mardukContainerName);
     damuInMemoryBlobStoreRepository.setContainerName(damuContainerName);
   }
 
