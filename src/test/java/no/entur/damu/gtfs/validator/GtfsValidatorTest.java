@@ -1,4 +1,4 @@
-package no.entur.damu.gtfs;
+package no.entur.damu.gtfs.validator;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import no.entur.damu.gtfs.validator.GtfsValidator;
 import org.junit.jupiter.api.Test;
 
 class GtfsValidatorTest {
