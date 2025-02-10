@@ -161,7 +161,7 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
         FILE_HANDLE +
         "}"
       )
-      .to("direct:uploadMardukBlob")
+      .to("direct:uploadDamuBlob")
       .log(
         LoggingLevel.INFO,
         correlation() +

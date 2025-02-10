@@ -30,7 +30,7 @@ import org.springframework.stereotype.Service;
 public class DamuBlobStoreService extends AbstractBlobStoreService {
 
   public DamuBlobStoreService(
-    @Value("${blobstore.gcs.damu.container.name:damu}") String containerName,
+    @Value("${blobstore.gcs.damu.container.name}") String containerName,
     @Autowired BlobStoreRepository repository
   ) {
     super(containerName, repository);
