@@ -36,9 +36,9 @@ import org.junit.jupiter.api.Test;
 class GtfsFileUtilsTest {
 
   private static final String GTFS_FILE_1 =
-    "src/test/resources/no/rutebanken/marduk/routes/file/beans/gtfs.zip";
+    "src/test/resources/gtfs.zip";
   private static final String GTFS_FILE_2 =
-    "src/test/resources/no/rutebanken/marduk/routes/file/beans/gtfs2.zip";
+    "src/test/resources/gtfs2.zip";
 
   @Test
   void notADirectory() {

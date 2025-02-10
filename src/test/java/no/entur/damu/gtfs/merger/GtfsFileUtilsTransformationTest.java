@@ -40,7 +40,7 @@ public class GtfsFileUtilsTransformationTest {
     Path extendedGTFSFile = Files.createTempFile("extendedGTFSFile", ".zip");
     Files.copy(
       Path.of(
-        "src/test/resources/no/rutebanken/marduk/routes/gtfs/extended_gtfs.zip"
+        "src/test/resources/extended_gtfs.zip"
       ),
       extendedGTFSFile,
       StandardCopyOption.REPLACE_EXISTING
