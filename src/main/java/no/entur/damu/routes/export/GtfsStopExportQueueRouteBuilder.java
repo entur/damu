@@ -93,7 +93,7 @@ public class GtfsStopExportQueueRouteBuilder extends BaseRouteBuilder {
         FILE_HANDLE +
         "}"
       )
-      .to("direct:uploadDamuBlob")
+      .to("direct:uploadMardukBlob")
       .log(
         LoggingLevel.INFO,
         correlation() +

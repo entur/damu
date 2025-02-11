@@ -53,7 +53,7 @@ class GtfsStopExportQueueRouteBuilderTest
 
   @Test
   void testGtfsStopExport() throws Exception {
-    damuInMemoryBlobStoreRepository.uploadBlob(
+    mardukInMemoryBlobStoreRepository.uploadBlob(
       stopExportFilename,
       getClass().getResourceAsStream("/Current_latest.zip")
     );
@@ -66,7 +66,7 @@ class GtfsStopExportQueueRouteBuilderTest
     context.start();
     directExportStops.sendBody(null);
 
-    InputStream gtfsExport = damuInMemoryBlobStoreRepository.getBlob(
+    InputStream gtfsExport = mardukInMemoryBlobStoreRepository.getBlob(
       GTFS_STOP_EXPORT_FILE_NAME
     );
     Assertions.assertNotNull(gtfsExport);

@@ -24,13 +24,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
- * Operations on blobs in Damu.
+ * Operations on blobs in the main damu bucket.
  */
 @Service
-public class DamuBlobStoreService extends AbstractBlobStoreService {
+public class MardukBlobStoreService extends AbstractBlobStoreService {
 
-  public DamuBlobStoreService(
-    @Value("${blobstore.gcs.damu.container.name:damu}") String containerName,
+  public MardukBlobStoreService(
+    @Value("${blobstore.gcs.marduk.container.name}") String containerName,
     @Autowired BlobStoreRepository repository
   ) {
     super(containerName, repository);

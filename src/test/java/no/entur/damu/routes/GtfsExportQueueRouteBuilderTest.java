@@ -74,7 +74,7 @@ class GtfsExportQueueRouteBuilderTest
     mockValidateGtfsOutput.expectedMessageCount(1);
     mockValidateGtfsOutput.setResultWaitTime(20_000);
 
-    damuInMemoryBlobStoreRepository.uploadBlob(
+    mardukInMemoryBlobStoreRepository.uploadBlob(
       BLOBSTORE_PATH_OUTBOUND +
       Constants.NETEX_FILENAME_PREFIX +
       CODESPACE +
@@ -82,7 +82,7 @@ class GtfsExportQueueRouteBuilderTest
       getClass().getResourceAsStream("/rb_flb-aggregated-netex.zip")
     );
 
-    damuInMemoryBlobStoreRepository.uploadBlob(
+    mardukInMemoryBlobStoreRepository.uploadBlob(
       stopExportFilename,
       getClass().getResourceAsStream("/RailStations_latest.zip")
     );
@@ -92,7 +92,7 @@ class GtfsExportQueueRouteBuilderTest
     checkUploadedDataset.assertIsSatisfied();
     mockValidateGtfsOutput.assertIsSatisfied();
 
-    InputStream gtfsExport = damuInMemoryBlobStoreRepository.getBlob(
+    InputStream gtfsExport = mardukInMemoryBlobStoreRepository.getBlob(
       "damu/" +
       Constants.GTFS_FILENAME_PREFIX +
       CODESPACE +

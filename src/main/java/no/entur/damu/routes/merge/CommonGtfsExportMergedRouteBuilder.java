@@ -102,7 +102,7 @@ public class CommonGtfsExportMergedRouteBuilder extends BaseRouteBuilder {
           .mkdirs()
       )
       //               instead of this, we will receieve a list from marduk containing file references to merge
-      //                .process(e -> e.getIn().setBody(getAggregatedGtfsFiles(getProviderBlackList(e), getProviderWhiteList(e))))
+//                      .process(e -> e.getIn().setBody(getAggregatedGtfsFiles(getProviderBlackList(e), getProviderWhiteList(e))))
       .choice()
       .when(simple("${body.empty}"))
       .log(
@@ -200,6 +200,6 @@ public class CommonGtfsExportMergedRouteBuilder extends BaseRouteBuilder {
 
     from("direct:notifyMardukMerge")
       .to("google-pubsub:{{damu.pubsub.project.id}}:DamuMergeGtfsStatusQueue")
-      .routeId("notify-marduk");
+      .routeId("notify-marduk-merge");
   }
 }

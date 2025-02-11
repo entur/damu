@@ -18,6 +18,7 @@
 
 package no.entur.damu;
 
+import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import jakarta.annotation.PostConstruct;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.component.mock.MockEndpoint;
@@ -81,11 +82,21 @@ public abstract class DamuRouteBuilderIntegrationTestBase {
   public static void tearDown() {
     pubsubEmulator.stop();
   }
+
+  @Value("${blobstore.gcs.marduk.container.name}")
+  private String mardukContainerName;
+
   @Value("${blobstore.gcs.damu.container.name}")
   private String damuContainerName;
 
   @Autowired
   protected ModelCamelContext context;
+
+  @Autowired
+  protected PubSubTemplate pubSubTemplate;
+
+  @Autowired
+  protected BlobStoreRepository mardukInMemoryBlobStoreRepository;
 
   @Autowired
   protected BlobStoreRepository damuInMemoryBlobStoreRepository;
@@ -95,6 +106,7 @@ public abstract class DamuRouteBuilderIntegrationTestBase {
 
   @PostConstruct
   void initInMemoryBlobStoreRepositories() {
+    mardukInMemoryBlobStoreRepository.setContainerName(mardukContainerName);
     damuInMemoryBlobStoreRepository.setContainerName(damuContainerName);
   }
 
