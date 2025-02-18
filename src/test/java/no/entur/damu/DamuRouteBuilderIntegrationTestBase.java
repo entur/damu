@@ -21,6 +21,8 @@ package no.entur.damu;
 import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import jakarta.annotation.PostConstruct;
 import org.apache.camel.EndpointInject;
+import org.apache.camel.ProducerTemplate;
+import org.apache.camel.component.google.pubsub.GooglePubsubConstants;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.model.ModelCamelContext;
 import org.apache.camel.test.spring.junit5.CamelSpringBootTest;
@@ -38,6 +40,8 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PubSubEmulatorContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+
+import java.util.Map;
 
 @CamelSpringBootTest
 @UseAdviceWith
@@ -113,5 +117,9 @@ public abstract class DamuRouteBuilderIntegrationTestBase {
   @AfterEach
   void stopContext() {
     context.stop();
+  }
+
+  protected void sendBodyAndHeadersToPubSub(ProducerTemplate producerTemplate, Object body, Map<String, String> headers) {
+    producerTemplate.sendBodyAndHeader(body, GooglePubsubConstants.ATTRIBUTES  ,headers);
   }
 }

@@ -62,5 +62,12 @@ public class MardukBlobStoreRoute extends BaseRouteBuilder {
         "} in Marduk bucket."
       )
       .routeId("blobstore-marduk-upload");
+
+    from("direct:getBlob")
+      .to(logDebugShowAll())
+      .bean(mardukBlobStoreService, "getBlob")
+      .to(logDebugShowAll())
+      .log(LoggingLevel.INFO, correlation() + "Returning from fetching file ${header." + FILE_HANDLE + "} from blob store.")
+      .routeId("blobstore-download");
   }
 }
