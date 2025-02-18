@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import static no.entur.damu.Constants.*;
-import static no.entur.damu.routes.merge.CommonGtfsExportMergedRouteBuilder.ORIGINAL_GTFS_FILES_SUB_FOLDER;
 import static org.apache.camel.Exchange.FILE_PARENT;
 
 /**
@@ -16,6 +15,8 @@ import static org.apache.camel.Exchange.FILE_PARENT;
 @Component
 public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
     private final MardukBlobStoreService mardukPublicBlobStoreService;
+
+    private static final String ORIGINAL_GTFS_FILES_SUB_FOLDER = "/original-gtfs-files";
 
     @Value("${gtfs.export.download.directory:files/gtfs/merged}")
     private String localWorkingDirectory;
