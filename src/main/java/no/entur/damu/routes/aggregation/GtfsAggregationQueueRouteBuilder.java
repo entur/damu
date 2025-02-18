@@ -48,6 +48,7 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
             .setHeader(FILE_HANDLE, simple(BLOBSTORE_PATH_OUTBOUND + "gtfs/${exchangeProperty.fileName}"))
             .setHeader(JOB_ACTION, simple(EXPORT_GTFS_MERGED))
             .to("direct:mergeGtfs")
+            .to("direct:uploadMergedGtfs")
             .routeId("aggregate-gtfs");
 
         from("direct:getGtfsFile")
@@ -75,10 +76,10 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
                         correlation() +
                                 "${exchangeProperty.fileName} was empty when trying to fetch it from blobstore."
                 )
-//            .to(logDebugShowAll())
-//            .bean(mardukPublicBlobStoreService, "getBlob")
-//            .to(logDebugShowAll())
-//            .log(LoggingLevel.INFO, correlation() + "Returning from fetching file ${header." + FILE_HANDLE + "} from blob store.")
+            .to(logDebugShowAll())
+            .bean(mardukPublicBlobStoreService, "getBlob")
+            .to(logDebugShowAll())
+            .log(LoggingLevel.INFO, correlation() + "Returning from fetching file ${header." + FILE_HANDLE + "} from blob store.")
             .routeId("get-gtfs-file");
     }
 }

@@ -101,8 +101,6 @@ public class CommonGtfsExportMergedRouteBuilder extends BaseRouteBuilder {
         )
           .mkdirs()
       )
-      //               instead of this, we will receieve a list from marduk containing file references to merge
-//                      .process(e -> e.getIn().setBody(getAggregatedGtfsFiles(getProviderBlackList(e), getProviderWhiteList(e))))
       .choice()
       .when(simple("${body.empty}"))
       .log(
@@ -183,6 +181,9 @@ public class CommonGtfsExportMergedRouteBuilder extends BaseRouteBuilder {
       .routeId("gtfs-export-merge");
 
     from("direct:uploadMergedGtfs")
+            .process(exchange -> {
+              log.info("Starting to upload merged GTFS files");
+            })
       .setHeader(
         FILE_HANDLE,
         simple(BLOBSTORE_PATH_OUTBOUND + "gtfs/${header." + FILE_NAME + "}")
