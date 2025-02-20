@@ -29,7 +29,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 import org.zeroturnaround.zip.ZipUtil;
@@ -39,9 +38,7 @@ public class GtfsFileUtilsTransformationTest {
   private File getExtendedGtfsTestFile() throws IOException {
     Path extendedGTFSFile = Files.createTempFile("extendedGTFSFile", ".zip");
     Files.copy(
-      Path.of(
-        "src/test/resources/extended_gtfs.zip"
-      ),
+      Path.of("src/test/resources/extended_gtfs.zip"),
       extendedGTFSFile,
       StandardCopyOption.REPLACE_EXISTING
     );
@@ -115,7 +112,9 @@ public class GtfsFileUtilsTransformationTest {
     File out
   ) {
     List<String> stopLines = IOUtils.readLines(
-      new ByteArrayInputStream(ZipUtil.unpackEntry(out, GtfsConstants.STOPS_TXT)),
+      new ByteArrayInputStream(
+        ZipUtil.unpackEntry(out, GtfsConstants.STOPS_TXT)
+      ),
       StandardCharsets.UTF_8
     );
     stopLines.removeFirst(); // remove header
@@ -131,9 +130,7 @@ public class GtfsFileUtilsTransformationTest {
   }
 
   public static void assertShapesAreRemoved(File out) {
-    assertThat(
-      ZipUtil.unpackEntry(out, GtfsConstants.SHAPES_TXT)
-    )
+    assertThat(ZipUtil.unpackEntry(out, GtfsConstants.SHAPES_TXT))
       .as("All Shapes should have been removed")
       .isNull();
 
@@ -153,9 +150,7 @@ public class GtfsFileUtilsTransformationTest {
   }
 
   public static void assertShapesAreIncluded(File out) {
-    assertThat(
-      ZipUtil.unpackEntry(out, GtfsConstants.SHAPES_TXT)
-    )
+    assertThat(ZipUtil.unpackEntry(out, GtfsConstants.SHAPES_TXT))
       .as("All Shapes should be present")
       .isNotNull();
 

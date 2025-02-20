@@ -18,9 +18,9 @@ package no.entur.damu.exception;
 
 public class FileValidationException extends RuntimeException {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    public FileValidationException(Throwable cause) {
-        super(cause);
-    }
+  public FileValidationException(Throwable cause) {
+    super(cause);
+  }
 }

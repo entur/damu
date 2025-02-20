@@ -28,15 +28,21 @@ import java.util.Map;
 import java.util.UUID;
 import no.entur.damu.Constants;
 import org.apache.camel.Exchange;
+import org.apache.camel.Message;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.google.pubsub.GooglePubsubConstants;
 import org.apache.camel.component.google.pubsub.GooglePubsubEndpoint;
+import org.apache.camel.component.google.pubsub.consumer.AcknowledgeCompletion;
+import org.apache.camel.model.RouteDefinition;
+import org.apache.camel.support.DefaultExchange;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
  * Defines common route behavior.
  */
 public abstract class BaseRouteBuilder extends RouteBuilder {
+
+  private static final String SYNCHRONIZATION_HOLDER = "SYNCHRONIZATION_HOLDER";
 
   @Value("${quartz.lenient.fire.time.ms:180000}")
   private int lenientFireTimeMs;

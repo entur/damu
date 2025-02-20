@@ -20,6 +20,7 @@ package no.entur.damu;
 
 import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import jakarta.annotation.PostConstruct;
+import java.util.Map;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.google.pubsub.GooglePubsubConstants;
@@ -41,17 +42,10 @@ import org.testcontainers.containers.PubSubEmulatorContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-import java.util.Map;
-
 @CamelSpringBootTest
 @UseAdviceWith
 @ActiveProfiles(
-  {
-    "test",
-    "default",
-    "in-memory-blobstore",
-    "google-pubsub-autocreate",
-  }
+  { "test", "default", "in-memory-blobstore", "google-pubsub-autocreate" }
 )
 @Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -64,7 +58,7 @@ public abstract class DamuRouteBuilderIntegrationTestBase {
     pubsubEmulator =
       new PubSubEmulatorContainer(
         DockerImageName.parse(
-        "gcr.io/google.com/cloudsdktool/cloud-sdk:emulators"
+          "gcr.io/google.com/cloudsdktool/cloud-sdk:emulators"
         )
       );
     pubsubEmulator.start();
@@ -119,7 +113,15 @@ public abstract class DamuRouteBuilderIntegrationTestBase {
     context.stop();
   }
 
-  protected void sendBodyAndHeadersToPubSub(ProducerTemplate producerTemplate, Object body, Map<String, String> headers) {
-    producerTemplate.sendBodyAndHeader(body, GooglePubsubConstants.ATTRIBUTES  ,headers);
+  protected void sendBodyAndHeadersToPubSub(
+    ProducerTemplate producerTemplate,
+    Object body,
+    Map<String, String> headers
+  ) {
+    producerTemplate.sendBodyAndHeader(
+      body,
+      GooglePubsubConstants.ATTRIBUTES,
+      headers
+    );
   }
 }

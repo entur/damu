@@ -27,7 +27,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
-
 import no.entur.damu.routes.file.ZipFileUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -35,10 +34,8 @@ import org.junit.jupiter.api.Test;
 
 class GtfsFileUtilsTest {
 
-  private static final String GTFS_FILE_1 =
-    "src/test/resources/gtfs.zip";
-  private static final String GTFS_FILE_2 =
-    "src/test/resources/gtfs2.zip";
+  private static final String GTFS_FILE_1 = "src/test/resources/gtfs.zip";
+  private static final String GTFS_FILE_2 = "src/test/resources/gtfs2.zip";
 
   @Test
   void notADirectory() {
