@@ -210,7 +210,7 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
         .routeId("gtfs-export-upload-merged");
 
     from("direct:notifyMardukMerge")
-    .to("google-pubsub:{{damu.pubsub.project.id}}:DamuAggregateGtfsStatusQueue")
+    .to("google-pubsub:{{marduk.pubsub.project.id}}:MardukAggregateGtfsStatusQueue")
     .routeId("notify-marduk-merge");
   }
 }
