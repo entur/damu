@@ -72,7 +72,7 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
           "}/${date:now:yyyyMMddHHmmssSSS}"
         )
       )
-      .split(body().tokenize(","))
+      .split(body().tokenize("DELIMITER"))
       .to("direct:getGtfsFile")
       .end()
       .log(
