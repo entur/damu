@@ -61,8 +61,6 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
         getClass().getName(),
         correlation() + "Starting splitting GTFS files"
       )
-//        .setBody(constant(STATUS_MERGE_STARTED))
-//        .to("direct:notifyMardukMerge")
       .setHeader(
         FILE_PARENT,
         simple(
@@ -85,17 +83,19 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
         simple(BLOBSTORE_PATH_OUTBOUND + "gtfs/${exchangeProperty.fileName}")
       )
       .choice()
-      .when(exchange -> exchange.getIn().getHeader(JOB_ACTION) == null)
-      .log(
-        LoggingLevel.ERROR,
-        getClass().getName(),
-        correlation() + "Missing JOB_ACTION header in pubsub message"
-      )
-      .stop()
-      .when(exchange -> exchange.getIn().getHeader(JOB_ACTION).equals("EXPORT_GTFS_MERGED"))
-      .to("direct:mergeGtfsExtended")
-      .when(exchange -> exchange.getIn().getHeader(JOB_ACTION).equals("EXPORT_GTFS_BASIC_MERGED"))
-      .to("direct:mergeGtfsBasic")
+          .when(exchange -> exchange.getIn().getHeader(JOB_ACTION) == null)
+              .log(
+                LoggingLevel.ERROR,
+                getClass().getName(),
+                correlation() + "Missing JOB_ACTION header in pubsub message"
+              )
+          .stop()
+          .when(exchange -> exchange.getIn().getHeader(JOB_ACTION).equals("EXPORT_GTFS_MERGED"))
+            .log(LoggingLevel.INFO, "Starting merging of GTFS extended")
+            .to("direct:mergeGtfsExtended")
+          .when(exchange -> exchange.getIn().getHeader(JOB_ACTION).equals("EXPORT_GTFS_BASIC_MERGED"))
+            .log(LoggingLevel.INFO, "Starting merging of GTFS basic")
+            .to("direct:mergeGtfsBasic")
       .end()
       .to("direct:uploadMergedGtfs")
       .setBody(constant(STATUS_MERGE_OK))
@@ -108,6 +108,7 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
             getClass().getName(),
             correlation() + "Fetching " + BLOBSTORE_PATH_OUTBOUND + "gtfs/${body}"
         )
+        .process(e -> new File(e.getIn().getHeader(FILE_PARENT, String.class) + ORIGINAL_GTFS_FILES_SUB_FOLDER).mkdirs())
         .setProperty("fileName", body())
         .setHeader(
             FILE_HANDLE,
