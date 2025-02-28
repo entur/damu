@@ -103,6 +103,7 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
       .to("direct:uploadMergedGtfs")
       .log(LoggingLevel.INFO, "Set header to "+ constant(STATUS_MERGE_OK))
       .to("direct:notifyMardukMergeOk")
+      .to("direct:cleanUpLocalDirectory")
       .routeId("aggregate-gtfs");
 
     from("direct:notifyMardukMergeOk")
