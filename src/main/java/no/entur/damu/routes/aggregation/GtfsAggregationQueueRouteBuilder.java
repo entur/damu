@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Receive a notification with a list of GTFS files to aggregate from marduk's blob store
@@ -51,7 +53,7 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
             correlation() +
                 "Dataset processing failed: ${exception.message} stacktrace: ${exception.stacktrace}"
         )
-        .setBody(constant(STATUS_MERGE_FAILED))
+        .setHeader(STATUS_HEADER, constant(STATUS_MERGE_FAILED))
         .to("direct:notifyMardukMerge")
         .end();
 
@@ -61,6 +63,7 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
         getClass().getName(),
         correlation() + "Starting splitting GTFS files"
       )
+      .to("direct:notifyMardukMergeStarted")
       .setHeader(
         FILE_PARENT,
         simple(
@@ -98,9 +101,37 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
             .to("direct:mergeGtfsBasic")
       .end()
       .to("direct:uploadMergedGtfs")
-      .setBody(constant(STATUS_MERGE_OK))
-      .to("direct:notifyMardukMerge")
+      .log(LoggingLevel.INFO, "Set header to "+ constant(STATUS_MERGE_OK))
+      .to("direct:notifyMardukMergeOk")
       .routeId("aggregate-gtfs");
+
+    from("direct:notifyMardukMergeOk")
+        .log(LoggingLevel.INFO, "Notifying marduk merge ok "+ constant(STATUS_MERGE_OK))
+        .removeHeader(STATUS_HEADER)
+        .setHeader(STATUS_HEADER, constant(STATUS_MERGE_OK))
+        .process(exchange -> {
+            Map<String, String> existingAttributes = exchange.getIn().getHeader("CamelGooglePubsubAttributes", Map.class);
+            Map<String, String> nextAttributes = new HashMap<String, String>(existingAttributes);
+            String headerValue = exchange.getIn().getHeader(STATUS_HEADER, String.class);
+            nextAttributes.put(STATUS_HEADER, headerValue);
+            log.info(correlation() + "Notifying marduk of aggregation status " + headerValue);
+            exchange.getIn().setHeader("CamelGooglePubsubAttributes", nextAttributes);
+        })
+        .to("google-pubsub:{{marduk.pubsub.project.id}}:MardukAggregateGtfsStatusQueue");
+
+    from("direct:notifyMardukMergeStarted")
+        .log(LoggingLevel.INFO, "Notifying marduk merge started "+ constant(STATUS_MERGE_STARTED))
+        .removeHeader(STATUS_HEADER)
+        .setHeader(STATUS_HEADER, constant(STATUS_MERGE_STARTED))
+        .process(exchange -> {
+            Map<String, String> existingAttributes = exchange.getIn().getHeader("CamelGooglePubsubAttributes", Map.class);
+            Map<String, String> nextAttributes = new HashMap<String, String>(existingAttributes);
+            String headerValue = exchange.getIn().getHeader(STATUS_HEADER, String.class);
+            nextAttributes.put(STATUS_HEADER, headerValue);
+            log.info(correlation() + "Notifying marduk of aggregation status " + headerValue);
+            exchange.getIn().setHeader("CamelGooglePubsubAttributes", nextAttributes);
+        })
+        .to("google-pubsub:{{marduk.pubsub.project.id}}:MardukAggregateGtfsStatusQueue");
 
     from("direct:getGtfsFile")
         .log(
@@ -211,7 +242,17 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
         .routeId("gtfs-export-upload-merged");
 
     from("direct:notifyMardukMerge")
-    .to("google-pubsub:{{marduk.pubsub.project.id}}:MardukAggregateGtfsStatusQueue")
+      .process(exchange -> {
+          Map<String, String> existingAttributes = exchange.getIn().getHeader("CamelGooglePubsubAttributes", Map.class);
+          Map<String, String> nextAttributes = new HashMap<>(existingAttributes);
+
+          String headerValue = exchange.getIn().getHeader(STATUS_HEADER, String.class);
+          nextAttributes.put(STATUS_HEADER, headerValue);
+          log.info(correlation() + "Notifying marduk of aggregation status " + headerValue);
+          exchange.getIn().setHeader("CamelGooglePubsubAttributes", nextAttributes);
+      })
+     .to("google-pubsub:{{marduk.pubsub.project.id}}:MardukAggregateGtfsStatusQueue")
+     .removeHeader(STATUS_HEADER)
     .routeId("notify-marduk-merge");
   }
 }
