@@ -22,9 +22,6 @@ public class GtfsAggregationStatusProcessorTest extends CamelTestSupport {
             public void configure() {
                 from("direct:testEndpoint")
                     .process(new GtfsAggregationStatusProcessor())
-                        .process(exchange -> {
-                            log.info(exchange.getIn().getBody(String.class));
-                        })
                     .to("mock:result");
             }
         };
