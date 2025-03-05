@@ -1,5 +1,8 @@
 package no.entur.damu.routes.aggregation;
 
+import static no.entur.damu.Constants.INCLUDE_SHAPES;
+import static no.entur.damu.Constants.JOB_ACTION;
+
 import java.util.HashMap;
 import java.util.Map;
 import no.entur.damu.DamuRouteBuilderIntegrationTestBase;
@@ -11,9 +14,6 @@ import org.apache.camel.builder.AdviceWith;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import static no.entur.damu.Constants.INCLUDE_SHAPES;
-import static no.entur.damu.Constants.JOB_ACTION;
 
 @SpringBootTest(
   webEnvironment = SpringBootTest.WebEnvironment.NONE,
@@ -57,18 +57,18 @@ public class GtfsAggregationQueueRouteBuilderTest
   @Test
   public void testRouteForGtfsBasic() throws Exception {
     mardukInMemoryBlobStoreRepository.uploadBlob(
-            "outbound/gtfs/gtfs.zip",
-            getClass().getResourceAsStream("/gtfs.zip")
+      "outbound/gtfs/gtfs.zip",
+      getClass().getResourceAsStream("/gtfs.zip")
     );
     mardukInMemoryBlobStoreRepository.uploadBlob(
-            "outbound/gtfs/gtfs2.zip",
-            getClass().getResourceAsStream("/gtfs2.zip")
+      "outbound/gtfs/gtfs2.zip",
+      getClass().getResourceAsStream("/gtfs2.zip")
     );
 
     AdviceWith.adviceWith(
-            context,
-            "aggregate-gtfs",
-            a -> a.weaveAddLast().to("mock:aggregateGtfsDone")
+      context,
+      "aggregate-gtfs",
+      a -> a.weaveAddLast().to("mock:aggregateGtfsDone")
     );
     aggregateGtfsDone.setExpectedMessageCount(1);
     context.start();

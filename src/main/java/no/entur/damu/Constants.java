@@ -54,7 +54,8 @@ public final class Constants {
   public static final String STATUS_MERGE_OK = "ok";
   public static final String STATUS_MERGE_FAILED = "failed";
 
-  public static final String ORIGINAL_GTFS_FILES_SUB_FOLDER = "/original-gtfs-files";
+  public static final String ORIGINAL_GTFS_FILES_SUB_FOLDER =
+    "/original-gtfs-files";
 
   private Constants() {}
 }
