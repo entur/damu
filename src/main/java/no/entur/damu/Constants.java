@@ -181,5 +181,10 @@ public final class Constants {
 
   public static final String IMPORT_TYPE_UTTU_EXPORT = "ImportType_uttu_export";
 
+  public static final String STATUS_HEADER = "status";
+  public static final String STATUS_MERGE_STARTED = "started";
+  public static final String STATUS_MERGE_OK = "ok";
+  public static final String STATUS_MERGE_FAILED = "failed";
+
   private Constants() {}
 }
