@@ -57,7 +57,7 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
         .to("direct:notifyMardukMerge")
         .end();
 
-    from("google-pubsub:{{damu.pubsub.project.id}}:DamuAggregateGtfsQueue")
+    from("google-pubsub:{{marduk.pubsub.project.id}}:DamuAggregateGtfsQueue")
       .log(
         LoggingLevel.INFO,
         getClass().getName(),
