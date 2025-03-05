@@ -11,6 +11,11 @@
 PUT http://localhost:8085/v1/projects/test/topics/DamuExportGtfsQueue
 ###
 PUT http://localhost:8085/v1/projects/test/topics/DamuExportGtfsStatusQueue
+###
+PUT http://localhost:8085/v1/projects/test/topics/DamuAggregateGtfsQueue
+###
+PUT http://localhost:8085/v1/projects/test/topics/DamuAggregateGtfsStatusQueue
+
 
 ###
 # List topics to make sure they are created.
@@ -31,6 +36,20 @@ Content-Type: application/json
 { "topic": "projects/test/topics/DamuExportGtfsStatusQueue" }
 
 ###
+# Create the subcription named "DamuAggregateGtfsQueue"
+PUT http://localhost:8085/v1/projects/test/subscriptions/DamuAggregateGtfsQueue
+Content-Type: application/json
+
+{ "topic": "projects/test/topics/DamuAggregateGtfsQueue" }
+
+###
+# Create the subcription named "DamuAggregateGtfsStatusQueue"
+PUT http://localhost:8085/v1/projects/test/subscriptions/DamuAggregateGtfsStatusQueue
+Content-Type: application/json
+
+{ "topic": "projects/test/topics/DamuAggregateGtfsStatusQueue" }
+
+###
 # Publish to the "DamuExportGtfsQueue", to start netex to gtfs convertion
 # data is chouette referencial in base64 encoding. (e.g rb_avi = "cmJfYXZp", rb_vyx ="cmJfdnl4", rb_rut="cmJfcnV0", rb_fin= "cmJfZmlu", rb_inn="cmJfaW5u")
 POST http://localhost:8085/v1/projects/test/topics/DamuExportGtfsQueue:publish
@@ -39,9 +58,30 @@ Content-Type: application/json
 {
   "messages": [
     {
-      "data": "cmJfYXZp"
+      "data": "cmJfcnV0"
     }
   ]
 }
 
+###
+# Publish to the "DamuAggregateGtfsQueue", to start gtfs aggregation
+# data is chouette referencial in base64 encoding.
+# cmJfYXZpLWFnZ3JlZ2F0ZWQtZ3Rmcy56aXA= = rb_avi-aggregated-gtfs.zip
+# cmJfcnV0LWFnZ3JlZ2F0ZWQtZ3Rmcy56aXA= = rb_rut-aggregated-gtfs.zip
+# cmJfYXZpLWFnZ3JlZ2F0ZWQtZ3Rmcy56aXAscmJfcnV0LWFnZ3JlZ2F0ZWQtZ3Rmcy56aXA= = rb_avi-aggregated-gtfs.zip,rb_rut-aggregated-gtfs.zip
+POST http://localhost:8085/v1/projects/test/topics/DamuAggregateGtfsQueue:publish
+Content-Type: application/json
+
+{
+  "messages": [
+    {
+      "attributes": {
+        "RutebankenJobAction": "EXPORT_GTFS_BASIC_MERGED",
+        "RutebankenFileName": "merged-gtfs-basic.zip",
+        "IncludeShapes": "false"
+      },
+      "data": "cmJfYXZpLWFnZ3JlZ2F0ZWQtZ3Rmcy56aXAscmJfcnV0LWFnZ3JlZ2F0ZWQtZ3Rmcy56aXA="
+    }
+  ]
+}
 

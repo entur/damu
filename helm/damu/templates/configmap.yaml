@@ -27,6 +27,7 @@ data:
 
     # PubSub
     damu.pubsub.project.id={{ .Values.gcp.pubsubProjectId }}
+    marduk.pubsub.project.id={{ .Values.gcp.pubsubProjectId }}
     spring.cloud.gcp.project-id=${damu.pubsub.project.id}
     camel.component.google-pubsub.synchronous-pull-retryable-codes=DEADLINE_EXCEEDED
 
