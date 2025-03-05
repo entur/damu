@@ -161,21 +161,7 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
             getClass().getName(),
             correlation() + "Merging GTFS extended files for all providers."
         )
-        .process(exchange -> {
-          File sourceDirectory = new File(
-              exchange.getIn().getHeader(FILE_PARENT, String.class) +
-                  ORIGINAL_GTFS_FILES_SUB_FOLDER
-          );
-          exchange
-              .getIn()
-              .setBody(
-                  GtfsFileUtils.mergeGtfsFilesInDirectory(
-                      sourceDirectory,
-                      GtfsExport.GTFS_EXTENDED,
-                      true
-                  )
-              );
-        })
+        .process(new GtfsExtendedAggregationProcessor())
         .routeId("gtfs-export-merge-extended");
 
     from("direct:mergeGtfsBasic")
@@ -184,23 +170,7 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
             getClass().getName(),
             correlation() + "Merging GTFS basic files for all providers."
         )
-        .process(exchange -> {
-          File sourceDirectory = new File(
-              exchange.getIn().getHeader(FILE_PARENT, String.class) +
-                  ORIGINAL_GTFS_FILES_SUB_FOLDER
-          );
-          boolean includeShapes =
-                exchange.getIn().getHeader(Constants.INCLUDE_SHAPES, Boolean.class);
-          exchange
-              .getIn()
-              .setBody(
-                  GtfsFileUtils.mergeGtfsFilesInDirectory(
-                      sourceDirectory,
-                      GtfsExport.GTFS_BASIC,
-                      includeShapes
-                  )
-              );
-        })
+        .process(new GtfsBasicAggregationProcessor())
         .routeId("gtfs-export-merge-basic");
 
     from("direct:uploadMergedGtfs")
