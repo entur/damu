@@ -4,7 +4,6 @@ import static no.entur.damu.Constants.*;
 import static org.apache.camel.Exchange.FILE_PARENT;
 
 import java.io.File;
-
 import no.entur.damu.routes.BaseRouteBuilder;
 import no.entur.damu.services.MardukBlobStoreService;
 import org.apache.camel.LoggingLevel;
