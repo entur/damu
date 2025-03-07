@@ -85,9 +85,9 @@ Content-Type: application/json
   "messages": [
     {
       "attributes": {
-        "RutebankenJobAction": "EXPORT_GTFS_BASIC_MERGED",
-        "RutebankenFileName": "merged-gtfs-basic.zip",
-        "IncludeShapes": "false"
+        "IncludeShapes": "false",
+        "RutebankenCorrelationId": "CorrelationId",
+        "RutebankenJobAction": "EXPORT_GTFS_MERGED"
       },
       "data": "cmJfYXZpLWFnZ3JlZ2F0ZWQtZ3Rmcy56aXAscmJfcnV0LWFnZ3JlZ2F0ZWQtZ3Rmcy56aXA="
     }

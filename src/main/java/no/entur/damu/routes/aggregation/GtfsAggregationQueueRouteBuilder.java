@@ -79,38 +79,26 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
         FILE_HANDLE,
         simple(BLOBSTORE_PATH_OUTBOUND + "gtfs/${exchangeProperty.fileName}")
       )
-      .choice()
-      .when(exchange -> exchange.getIn().getHeader(JOB_ACTION) == null)
-      .log(
-        LoggingLevel.ERROR,
-        getClass().getName(),
-        correlation() + "Missing JOB_ACTION header in pubsub message"
-      )
-      .stop()
-      .when(exchange ->
-          exchange.getIn().getHeader(JOB_ACTION).toString().contains("EXPORT_GTFS_MERGED")
-      )
       .log(LoggingLevel.INFO, "Starting merging of GTFS extended")
       .to("direct:mergeGtfsExtended")
-        .setHeader(FILE_NAME, constant("rb_norway-aggregated-gtfs.zip"))
-      .to("direct:uploadMergedGtfs")
-        .end()
-        .choice()
-      .when(exchange ->
-        exchange
-          .getIn()
-          .getHeader(JOB_ACTION)
-          .toString().contains("EXPORT_GTFS_BASIC_MERGED")
-      )
+      .to("direct:uploadMergedGtfsExtended")
+      .log(LoggingLevel.INFO, "Done merging GTFS extended")
       .log(LoggingLevel.INFO, "Starting merging of GTFS basic")
       .to("direct:mergeGtfsBasic")
-      .end()
-        .setHeader(FILE_NAME, constant("rb_norway-aggregated-gtfs-basic.zip"))
-      .to("direct:uploadMergedGtfs")
+      .to("direct:uploadMergedGtfsBasic")
+      .log(LoggingLevel.INFO, "Done merging GTFS basic")
       .log(LoggingLevel.INFO, "Set header to " + constant(STATUS_MERGE_OK))
       .to("direct:notifyMardukMergeOk")
       .to("direct:cleanUpLocalDirectory")
       .routeId("aggregate-gtfs");
+
+    from("direct:uploadMergedGtfsBasic")
+      .setHeader(FILE_NAME, constant("rb_norway-aggregated-gtfs-basic.zip"))
+      .to("direct:uploadMergedGtfs");
+
+    from("direct:uploadMergedGtfsExtended")
+      .setHeader(FILE_NAME, constant("rb_norway-aggregated-gtfs.zip"))
+      .to("direct:uploadMergedGtfs");
 
     from("direct:notifyMardukMergeOk")
       .log(
