@@ -51,14 +51,23 @@ Content-Type: application/json
 
 ###
 # Publish to the "DamuExportGtfsQueue", to start netex to gtfs convertion
-# data is chouette referencial in base64 encoding. (e.g rb_avi = "cmJfYXZp", rb_vyx ="cmJfdnl4", rb_rut="cmJfcnV0", rb_fin= "cmJfZmlu", rb_inn="cmJfaW5u")
+# data is chouette referential in base64 encoding. (e.g rb_avi = "cmJfYXZp", rb_vyx ="cmJfdnl4", rb_rut="cmJfcnV0", rb_fin= "cmJfZmlu", rb_inn="cmJfaW5u")
 POST http://localhost:8085/v1/projects/test/topics/DamuExportGtfsQueue:publish
 Content-Type: application/json
 
 {
   "messages": [
     {
-      "data": "cmJfcnV0"
+      "attributes": {
+        "RutebankenFileName": "merged-gtfs-basic.zip",
+        "RutebankenProviderId": "101",
+        "RutebankenOriginalProviderId": "1",
+        "RutebankenCorrelationId": "CorrelationId",
+        "RutebankenChouetteJobId": "ChouetteJobId",
+        "EnturDatasetReferential": "rb_avi",
+        "RutebankenUsername": "foobar"
+      },
+      "data": "cmJfYXZp"
     }
   ]
 }

@@ -4,9 +4,7 @@ import static no.entur.damu.Constants.*;
 import static org.apache.camel.Exchange.FILE_PARENT;
 
 import java.io.File;
-import no.entur.damu.Constants;
-import no.entur.damu.gtfs.merger.GtfsExport;
-import no.entur.damu.gtfs.merger.GtfsFileUtils;
+
 import no.entur.damu.routes.BaseRouteBuilder;
 import no.entur.damu.services.MardukBlobStoreService;
 import org.apache.camel.LoggingLevel;
@@ -90,19 +88,24 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
       )
       .stop()
       .when(exchange ->
-        exchange.getIn().getHeader(JOB_ACTION).equals("EXPORT_GTFS_MERGED")
+          exchange.getIn().getHeader(JOB_ACTION).toString().contains("EXPORT_GTFS_MERGED")
       )
       .log(LoggingLevel.INFO, "Starting merging of GTFS extended")
       .to("direct:mergeGtfsExtended")
+        .setHeader(FILE_NAME, constant("rb_norway-aggregated-gtfs.zip"))
+      .to("direct:uploadMergedGtfs")
+        .end()
+        .choice()
       .when(exchange ->
         exchange
           .getIn()
           .getHeader(JOB_ACTION)
-          .equals("EXPORT_GTFS_BASIC_MERGED")
+          .toString().contains("EXPORT_GTFS_BASIC_MERGED")
       )
       .log(LoggingLevel.INFO, "Starting merging of GTFS basic")
       .to("direct:mergeGtfsBasic")
       .end()
+        .setHeader(FILE_NAME, constant("rb_norway-aggregated-gtfs-basic.zip"))
       .to("direct:uploadMergedGtfs")
       .log(LoggingLevel.INFO, "Set header to " + constant(STATUS_MERGE_OK))
       .to("direct:notifyMardukMergeOk")
