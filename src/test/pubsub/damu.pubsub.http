@@ -86,8 +86,7 @@ Content-Type: application/json
     {
       "attributes": {
         "IncludeShapes": "false",
-        "RutebankenCorrelationId": "CorrelationId",
-        "RutebankenJobAction": "EXPORT_GTFS_MERGED"
+        "RutebankenCorrelationId": "CorrelationId"
       },
       "data": "cmJfYXZpLWFnZ3JlZ2F0ZWQtZ3Rmcy56aXAscmJfcnV0LWFnZ3JlZ2F0ZWQtZ3Rmcy56aXA="
     }
