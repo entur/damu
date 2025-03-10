@@ -1,4 +1,4 @@
-package no.entur.damu.gtfs;
+package no.entur.damu.gtfs.validator;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -89,9 +89,7 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
       .to("direct:notifyMarduk")
       .end();
 
-    from(
-      "google-pubsub:{{damu.pubsub.project.id}}:DamuExportGtfsQueue?synchronousPull=true"
-    )
+    from("direct:exportGtfs")
       .streamCache("true")
       .process(this::setCorrelationIdIfMissing)
       .setHeader(DATASET_REFERENTIAL, bodyAs(String.class))
