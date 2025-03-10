@@ -15,7 +15,8 @@ PUT http://localhost:8085/v1/projects/test/topics/DamuExportGtfsStatusQueue
 PUT http://localhost:8085/v1/projects/test/topics/DamuAggregateGtfsQueue
 ###
 PUT http://localhost:8085/v1/projects/test/topics/DamuAggregateGtfsStatusQueue
-
+###
+PUT http://localhost:8085/v1/projects/test/topics/GtfsRouteDispatcherTopic
 
 ###
 # List topics to make sure they are created.
@@ -50,6 +51,13 @@ Content-Type: application/json
 { "topic": "projects/test/topics/DamuAggregateGtfsStatusQueue" }
 
 ###
+# Create the subcription named "GtfsRouteDispatcherTopic"
+PUT http://localhost:8085/v1/projects/test/subscriptions/GtfsRouteDispatcherTopic
+Content-Type: application/json
+
+{ "topic": "projects/test/topics/GtfsRouteDispatcherTopic" }
+
+###
 # Publish to the "DamuExportGtfsQueue", to start netex to gtfs convertion
 # data is chouette referential in base64 encoding. (e.g rb_avi = "cmJfYXZp", rb_vyx ="cmJfdnl4", rb_rut="cmJfcnV0", rb_fin= "cmJfZmlu", rb_inn="cmJfaW5u")
 POST http://localhost:8085/v1/projects/test/topics/DamuExportGtfsQueue:publish
@@ -78,17 +86,19 @@ Content-Type: application/json
 # cmJfYXZpLWFnZ3JlZ2F0ZWQtZ3Rmcy56aXA= = rb_avi-aggregated-gtfs.zip
 # cmJfcnV0LWFnZ3JlZ2F0ZWQtZ3Rmcy56aXA= = rb_rut-aggregated-gtfs.zip
 # cmJfYXZpLWFnZ3JlZ2F0ZWQtZ3Rmcy56aXAscmJfcnV0LWFnZ3JlZ2F0ZWQtZ3Rmcy56aXA= = rb_avi-aggregated-gtfs.zip,rb_rut-aggregated-gtfs.zip
-POST http://localhost:8085/v1/projects/test/topics/DamuAggregateGtfsQueue:publish
+POST http://localhost:8085/v1/projects/test/topics/GtfsRouteDispatcherTopic:publish
 Content-Type: application/json
 
 {
   "messages": [
     {
       "attributes": {
-        "IncludeShapes": "false",
-        "RutebankenCorrelationId": "CorrelationId"
+        "Action": "Export",
+        "RutebankenCorrelationId": "CorrelationId",
+        "RutebankenProviderId": "101",
+        "RutebankenOriginalProviderId": "1"
       },
-      "data": "cmJfYXZpLWFnZ3JlZ2F0ZWQtZ3Rmcy56aXAscmJfcnV0LWFnZ3JlZ2F0ZWQtZ3Rmcy56aXA="
+      "data": "cmJfdnl4"
     }
   ]
 }

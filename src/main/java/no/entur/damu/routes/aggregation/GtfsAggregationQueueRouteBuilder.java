@@ -53,7 +53,7 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
       )
       .end();
 
-    from("google-pubsub:{{marduk.pubsub.project.id}}:DamuAggregateGtfsQueue")
+    from("direct:aggregateGtfs")
       .log(
         LoggingLevel.INFO,
         getClass().getName(),
@@ -70,6 +70,7 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
       .split(body().tokenize(","))
       .to("direct:getGtfsFile")
       .end()
+      .process(this::extendAckDeadline)
       .log(
         LoggingLevel.INFO,
         getClass().getName(),
@@ -81,23 +82,28 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
       )
       .log(LoggingLevel.INFO, "Starting merging of GTFS extended")
       .to("direct:mergeGtfsExtended")
+      .process(this::extendAckDeadline)
       .to("direct:uploadMergedGtfsExtended")
+      .process(this::extendAckDeadline)
       .log(LoggingLevel.INFO, "Done merging GTFS extended")
       .log(LoggingLevel.INFO, "Starting merging of GTFS basic")
       .to("direct:mergeGtfsBasic")
+      .process(this::extendAckDeadline)
       .to("direct:uploadMergedGtfsBasic")
+      .process(this::extendAckDeadline)
       .log(LoggingLevel.INFO, "Done merging GTFS basic")
       .log(LoggingLevel.INFO, "Set header to " + constant(STATUS_MERGE_OK))
       .to("direct:notifyMardukMergeOk")
       .to("direct:cleanUpLocalDirectory")
+      .process(this::extendAckDeadline)
       .routeId("aggregate-gtfs");
 
     from("direct:uploadMergedGtfsBasic")
-      .setHeader(FILE_NAME, simple("rb_norway-aggregated-gtfs-basic.zip"))
+      .setProperty(FILE_NAME, simple("rb_norway-aggregated-gtfs-basic.zip"))
       .to("direct:uploadMergedGtfs");
 
     from("direct:uploadMergedGtfsExtended")
-      .setHeader(FILE_NAME, simple("rb_norway-aggregated-gtfs.zip"))
+      .setProperty(FILE_NAME, simple("rb_norway-aggregated-gtfs.zip"))
       .to("direct:uploadMergedGtfs");
 
     from("direct:notifyMardukMergeOk")
@@ -195,14 +201,16 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
       })
       .setHeader(
         FILE_HANDLE,
-        simple(BLOBSTORE_PATH_OUTBOUND + "gtfs/${header." + FILE_NAME + "}")
+        simple(
+          BLOBSTORE_PATH_OUTBOUND + "gtfs/${exchangeProperty." + FILE_NAME + "}"
+        )
       )
       .to("direct:uploadBlob")
       .log(
         LoggingLevel.INFO,
         getClass().getName(),
         correlation() +
-        "Uploaded new merged GTFS file: ${header." +
+        "Uploaded new merged GTFS file: ${exchangeProperty." +
         FILE_NAME +
         "}"
       )
