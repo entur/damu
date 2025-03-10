@@ -39,7 +39,7 @@ public class GtfsRouteDispatcher extends BaseRouteBuilder {
       .otherwise()
       .log(
         LoggingLevel.INFO,
-        correlation() + " Unknown header value ${header.ACTION}, ending route"
+        correlation() + " Unknown header value ${header.Action}, ending route"
       )
       .routeId("GtfsRouteDispatcher");
   }

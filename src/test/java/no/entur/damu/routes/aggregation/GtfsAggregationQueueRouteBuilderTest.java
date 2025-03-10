@@ -24,7 +24,7 @@ public class GtfsAggregationQueueRouteBuilderTest
   @EndpointInject("mock:aggregateGtfsDone")
   private MockEndpoint aggregateGtfsDone;
 
-  @Produce("google-pubsub:{{marduk.pubsub.project.id}}:DamuAggregateGtfsQueue")
+  @Produce("google-pubsub:{{marduk.pubsub.project.id}}:GtfsRouteDispatcherTopic")
   protected ProducerTemplate producerTemplate;
 
   @Test
@@ -48,6 +48,7 @@ public class GtfsAggregationQueueRouteBuilderTest
 
     Map<String, String> headers = new HashMap<>();
     headers.put(INCLUDE_SHAPES, "true");
+    headers.put("Action", "Aggregation");
     sendBodyAndHeadersToPubSub(producerTemplate, "gtfs.zip,gtfs2.zip", headers);
 
     aggregateGtfsDone.assertIsSatisfied();

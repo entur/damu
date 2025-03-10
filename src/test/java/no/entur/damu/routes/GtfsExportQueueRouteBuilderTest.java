@@ -23,6 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+
 import no.entur.damu.Constants;
 import no.entur.damu.DamuRouteBuilderIntegrationTestBase;
 import no.entur.damu.TestApp;
@@ -45,7 +48,7 @@ class GtfsExportQueueRouteBuilderTest
 
   private static final String CODESPACE = "rb_flb";
 
-  @Produce("google-pubsub:{{damu.pubsub.project.id}}:DamuExportGtfsQueue")
+  @Produce("google-pubsub:{{marduk.pubsub.project.id}}:GtfsRouteDispatcherTopic")
   protected ProducerTemplate gtfsExportQueueProducerTemplate;
 
   @EndpointInject("mock:checkUploadedDataset")
@@ -88,7 +91,9 @@ class GtfsExportQueueRouteBuilderTest
     );
 
     context.start();
-    gtfsExportQueueProducerTemplate.sendBody(CODESPACE);
+    Map<String, Object> headers = new HashMap<>();
+    headers.put("Action", "Export");
+    gtfsExportQueueProducerTemplate.sendBodyAndHeader(CODESPACE, "CamelGooglePubsubAttributes", headers);
     checkUploadedDataset.assertIsSatisfied();
     mockValidateGtfsOutput.assertIsSatisfied();
 
