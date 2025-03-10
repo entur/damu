@@ -61,9 +61,7 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
         FILE_PARENT,
         simple(
           localWorkingDirectory +
-          "/${header." +
-          JOB_ACTION +
-          "}/${date:now:yyyyMMddHHmmssSSS}"
+          "/EXPORT_GTFS_MERGED/${date:now:yyyyMMddHHmmssSSS}"
         )
       )
       .split(body().tokenize(","))
