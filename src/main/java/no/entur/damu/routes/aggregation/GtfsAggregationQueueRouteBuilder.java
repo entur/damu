@@ -48,6 +48,9 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
         "Notifying marduk that aggregation of GTFS has failed"
       )
       .process(new GtfsAggregationStatusProcessor())
+      .to(
+        "google-pubsub:{{marduk.pubsub.project.id}}:MardukAggregateGtfsStatusQueue"
+      )
       .end();
 
     from("google-pubsub:{{marduk.pubsub.project.id}}:DamuAggregateGtfsQueue")
