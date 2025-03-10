@@ -24,7 +24,9 @@ public class GtfsAggregationQueueRouteBuilderTest
   @EndpointInject("mock:aggregateGtfsDone")
   private MockEndpoint aggregateGtfsDone;
 
-  @Produce("google-pubsub:{{marduk.pubsub.project.id}}:GtfsRouteDispatcherTopic")
+  @Produce(
+    "google-pubsub:{{marduk.pubsub.project.id}}:GtfsRouteDispatcherTopic"
+  )
   protected ProducerTemplate producerTemplate;
 
   @Test
