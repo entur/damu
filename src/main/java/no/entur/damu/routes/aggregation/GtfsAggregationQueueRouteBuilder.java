@@ -92,11 +92,11 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
       .routeId("aggregate-gtfs");
 
     from("direct:uploadMergedGtfsBasic")
-      .setHeader(FILE_NAME, constant("rb_norway-aggregated-gtfs-basic.zip"))
+      .setHeader(FILE_NAME, simple("rb_norway-aggregated-gtfs-basic.zip"))
       .to("direct:uploadMergedGtfs");
 
     from("direct:uploadMergedGtfsExtended")
-      .setHeader(FILE_NAME, constant("rb_norway-aggregated-gtfs.zip"))
+      .setHeader(FILE_NAME, simple("rb_norway-aggregated-gtfs.zip"))
       .to("direct:uploadMergedGtfs");
 
     from("direct:notifyMardukMergeOk")
