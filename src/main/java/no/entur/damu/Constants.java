@@ -46,7 +46,6 @@ public final class Constants {
 
   public static final String FILE_NAME = "RutebankenFileName";
 
-  public static final String JOB_ACTION = "RutebankenJobAction";
   public static final String INCLUDE_SHAPES = "IncludeShapes";
 
   public static final String STATUS_HEADER = "status";
@@ -56,6 +55,10 @@ public final class Constants {
 
   public static final String ORIGINAL_GTFS_FILES_SUB_FOLDER =
     "/original-gtfs-files";
+
+  public static final String GTFS_ROUTE_DISPATCHER_HEADER_NAME = "Action";
+  public static final String GTFS_ROUTE_DISPATCHER_AGGREGATION_HEADER_VALUE = "Aggregation";
+  public static final String GTFS_ROUTE_DISPATCHER_EXPORT_HEADER_VALUE = "Export";
 
   private Constants() {}
 }

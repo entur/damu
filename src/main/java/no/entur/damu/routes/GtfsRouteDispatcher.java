@@ -3,12 +3,10 @@ package no.entur.damu.routes;
 import org.apache.camel.LoggingLevel;
 import org.springframework.stereotype.Component;
 
+import static no.entur.damu.Constants.*;
+
 @Component
 public class GtfsRouteDispatcher extends BaseRouteBuilder {
-
-  private final String GTFS_ROUTE_DISPATCHER_HEADER = "Action";
-  private final String GTFS_ROUTE_DISPATCHER_AGGREGATE_HEADER = "Aggregation";
-  private final String GTFS_ROUTE_DISPATCHER_EXPORT_HEADER = "Export";
 
   @Override
   public void configure() throws Exception {
@@ -19,8 +17,8 @@ public class GtfsRouteDispatcher extends BaseRouteBuilder {
     )
       .choice()
       .when(
-        header(GTFS_ROUTE_DISPATCHER_HEADER)
-          .isEqualTo(GTFS_ROUTE_DISPATCHER_EXPORT_HEADER)
+        header(GTFS_ROUTE_DISPATCHER_HEADER_NAME)
+          .isEqualTo(GTFS_ROUTE_DISPATCHER_EXPORT_HEADER_VALUE)
       )
       .log(
         LoggingLevel.INFO,
@@ -28,8 +26,8 @@ public class GtfsRouteDispatcher extends BaseRouteBuilder {
       )
       .to("direct:exportGtfs")
       .when(
-        header(GTFS_ROUTE_DISPATCHER_HEADER)
-          .isEqualTo(GTFS_ROUTE_DISPATCHER_AGGREGATE_HEADER)
+        header(GTFS_ROUTE_DISPATCHER_HEADER_NAME)
+          .isEqualTo(GTFS_ROUTE_DISPATCHER_AGGREGATION_HEADER_VALUE)
       )
       .log(
         LoggingLevel.INFO,
