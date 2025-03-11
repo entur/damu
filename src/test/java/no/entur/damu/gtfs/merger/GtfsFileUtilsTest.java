@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import no.entur.damu.routes.file.ZipFileUtils;
@@ -40,10 +41,11 @@ class GtfsFileUtilsTest {
   @Test
   void notADirectory() {
     File sourceDirectory = new File("/dev/null");
+    List<File> files = new ArrayList<>();
+    files.add(sourceDirectory);
     assertThrows(
       RuntimeException.class,
-      () ->
-        GtfsFileUtils.mergeGtfsFilesInDirectory(sourceDirectory, null, false)
+      () -> GtfsFileUtils.mergeGtfsFilesToInputStream(files, null, false)
     );
   }
 
@@ -52,10 +54,11 @@ class GtfsFileUtilsTest {
     File sourceDirectory = Files
       .createTempDirectory("test-emptyDirectory")
       .toFile();
+    List<File> files = new ArrayList<>();
+    files.add(sourceDirectory);
     assertThrows(
       RuntimeException.class,
-      () ->
-        GtfsFileUtils.mergeGtfsFilesInDirectory(sourceDirectory, null, false)
+      () -> GtfsFileUtils.mergeGtfsFilesToInputStream(files, null, false)
     );
   }
 

@@ -27,7 +27,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.FileSystemUtils;
@@ -50,32 +49,20 @@ public class GtfsFileUtils {
   private GtfsFileUtils() {}
 
   /**
-   * Merge all GTFS files in a given directory.
+   * Merge GTFS files listed by zipFiles.
    * Files are merged in alphabetical order.
    *
-   * @param sourceDirectory the directory containing the GTFS archives.
+   * @param zipFiles        the list of GTFS archives to merge
    * @param gtfsExport      the type of GTFS export.
    * @return a delete-on-close input stream referring to the resulting merged GTFS archive.
    */
-  public static InputStream mergeGtfsFilesInDirectory(
-    File sourceDirectory,
+  public static InputStream mergeGtfsFilesToInputStream(
+    Collection<File> zipFiles,
     GtfsExport gtfsExport,
     boolean includeShapes
   ) {
-    if (sourceDirectory == null || !sourceDirectory.isDirectory()) {
-      throw new RuntimeException(sourceDirectory + " is not a directory");
-    }
-
-    Collection<File> zipFiles = FileUtils.listFiles(
-      sourceDirectory,
-      new String[] { "zip" },
-      false
-    );
-
     if (zipFiles.isEmpty()) {
-      throw new RuntimeException(
-        sourceDirectory + " does not contain any GTFS archive"
-      );
+      throw new RuntimeException("No GTFS archives to merge");
     }
 
     List<File> sortedZipFiles = zipFiles

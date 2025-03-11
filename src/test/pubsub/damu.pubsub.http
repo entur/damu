@@ -81,11 +81,8 @@ Content-Type: application/json
 }
 
 ###
-# Publish to the "DamuAggregateGtfsQueue", to start gtfs aggregation
+# Publish to the "DamuAggregateGtfsQueue", to start gtfs export
 # data is chouette referencial in base64 encoding.
-# cmJfYXZpLWFnZ3JlZ2F0ZWQtZ3Rmcy56aXA= = rb_avi-aggregated-gtfs.zip
-# cmJfcnV0LWFnZ3JlZ2F0ZWQtZ3Rmcy56aXA= = rb_rut-aggregated-gtfs.zip
-# cmJfYXZpLWFnZ3JlZ2F0ZWQtZ3Rmcy56aXAscmJfcnV0LWFnZ3JlZ2F0ZWQtZ3Rmcy56aXA= = rb_avi-aggregated-gtfs.zip,rb_rut-aggregated-gtfs.zip
 POST http://localhost:8085/v1/projects/test/topics/GtfsRouteDispatcherTopic:publish
 Content-Type: application/json
 
@@ -103,3 +100,26 @@ Content-Type: application/json
   ]
 }
 
+###
+# Publish to the "GtfsRouteDispatcherTopic", to start gtfs aggregation
+# data is chouette referencial in base64 encoding.
+# cmJfYXZpLWFnZ3JlZ2F0ZWQtZ3Rmcy56aXA= = rb_avi-aggregated-gtfs.zip
+# cmJfcnV0LWFnZ3JlZ2F0ZWQtZ3Rmcy56aXA= = rb_rut-aggregated-gtfs.zip
+# cmJfYXZpLWFnZ3JlZ2F0ZWQtZ3Rmcy56aXAscmJfcnV0LWFnZ3JlZ2F0ZWQtZ3Rmcy56aXA= = rb_avi-aggregated-gtfs.zip,rb_rut-aggregated-gtfs.zip
+POST http://localhost:8085/v1/projects/test/topics/GtfsRouteDispatcherTopic:publish
+Content-Type: application/json
+
+{
+  "messages": [
+    {
+      "attributes": {
+        "Action": "Aggregation",
+        "RutebankenCorrelationId": "CorrelationId",
+        "RutebankenProviderId": "101",
+        "RutebankenOriginalProviderId": "1",
+        "IncludeShapes": "false"
+      },
+      "data": "cmJfYXZpLWFnZ3JlZ2F0ZWQtZ3Rmcy56aXAscmJfcnV0LWFnZ3JlZ2F0ZWQtZ3Rmcy56aXA="
+    }
+  ]
+}

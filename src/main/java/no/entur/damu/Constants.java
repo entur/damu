@@ -57,8 +57,10 @@ public final class Constants {
     "/original-gtfs-files";
 
   public static final String GTFS_ROUTE_DISPATCHER_HEADER_NAME = "Action";
-  public static final String GTFS_ROUTE_DISPATCHER_AGGREGATION_HEADER_VALUE = "Aggregation";
-  public static final String GTFS_ROUTE_DISPATCHER_EXPORT_HEADER_VALUE = "Export";
+  public static final String GTFS_ROUTE_DISPATCHER_AGGREGATION_HEADER_VALUE =
+    "Aggregation";
+  public static final String GTFS_ROUTE_DISPATCHER_EXPORT_HEADER_VALUE =
+    "Export";
 
   private Constants() {}
 }

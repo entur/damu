@@ -1,9 +1,9 @@
 package no.entur.damu.routes;
 
+import static no.entur.damu.Constants.*;
+
 import org.apache.camel.LoggingLevel;
 import org.springframework.stereotype.Component;
-
-import static no.entur.damu.Constants.*;
 
 @Component
 public class GtfsRouteDispatcher extends BaseRouteBuilder {

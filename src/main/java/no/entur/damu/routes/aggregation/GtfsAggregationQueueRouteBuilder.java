@@ -35,7 +35,6 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
   public void configure() throws Exception {
     super.configure();
 
-    // TODO(eibakke): introduce better exception handling with custom exception types
     onException(Exception.class)
       .log(
         LoggingLevel.ERROR,
@@ -186,7 +185,11 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
         getClass().getName(),
         correlation() + "Merging GTFS basic files for all providers."
       )
-      .process(new GtfsBasicAggregationProcessor())
+      .process(e -> new GtfsBasicAggregationProcessor(e).process(e))
+      .log(
+        LoggingLevel.INFO,
+        "Done merging GTFS basic files for all providers."
+      )
       .routeId("gtfs-export-merge-basic");
 
     from("direct:uploadMergedGtfs")
