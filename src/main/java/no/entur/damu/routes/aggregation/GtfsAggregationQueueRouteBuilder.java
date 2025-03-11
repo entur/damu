@@ -36,6 +36,7 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
     super.configure();
 
     onException(Exception.class)
+      .handled(true)
       .log(
         LoggingLevel.ERROR,
         correlation() +
