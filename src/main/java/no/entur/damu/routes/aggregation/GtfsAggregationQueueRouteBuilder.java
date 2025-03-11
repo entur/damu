@@ -83,13 +83,15 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
       .log(LoggingLevel.INFO, "Starting merging of GTFS extended")
       .to("direct:mergeGtfsExtended")
       .process(this::extendAckDeadline)
-      .to("direct:uploadMergedGtfsExtended")
+      .setProperty(FILE_NAME, simple("rb_norway-aggregated-gtfs.zip"))
+      .to("direct:uploadMergedGtfs")
       .process(this::extendAckDeadline)
       .log(LoggingLevel.INFO, "Done merging GTFS extended")
       .log(LoggingLevel.INFO, "Starting merging of GTFS basic")
       .to("direct:mergeGtfsBasic")
       .process(this::extendAckDeadline)
-      .to("direct:uploadMergedGtfsBasic")
+      .setProperty(FILE_NAME, simple("rb_norway-aggregated-gtfs-basic.zip"))
+      .to("direct:uploadMergedGtfs")
       .process(this::extendAckDeadline)
       .log(LoggingLevel.INFO, "Done merging GTFS basic")
       .log(LoggingLevel.INFO, "Set header to " + constant(STATUS_MERGE_OK))
@@ -97,14 +99,6 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
       .to("direct:cleanUpLocalDirectory")
       .process(this::extendAckDeadline)
       .routeId("aggregate-gtfs");
-
-    from("direct:uploadMergedGtfsBasic")
-      .setProperty(FILE_NAME, simple("rb_norway-aggregated-gtfs-basic.zip"))
-      .to("direct:uploadMergedGtfs");
-
-    from("direct:uploadMergedGtfsExtended")
-      .setProperty(FILE_NAME, simple("rb_norway-aggregated-gtfs.zip"))
-      .to("direct:uploadMergedGtfs");
 
     from("direct:notifyMardukMergeOk")
       .log(
