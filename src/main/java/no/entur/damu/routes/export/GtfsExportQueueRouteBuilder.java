@@ -80,6 +80,7 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
     super.configure();
 
     onException(GtfsExportException.class)
+      .handled(true)
       .log(
         LoggingLevel.ERROR,
         correlation() +
