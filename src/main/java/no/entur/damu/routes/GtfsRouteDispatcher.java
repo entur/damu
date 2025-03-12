@@ -16,7 +16,12 @@ public class GtfsRouteDispatcher extends BaseRouteBuilder {
 
     onException(Exception.class)
       .process(exchange -> {
-        GooglePubsubAcknowledge acknowledge = exchange.getIn().getHeader(GooglePubsubConstants.GOOGLE_PUBSUB_ACKNOWLEDGE, GooglePubsubAcknowledge.class);
+        GooglePubsubAcknowledge acknowledge = exchange
+          .getIn()
+          .getHeader(
+            GooglePubsubConstants.GOOGLE_PUBSUB_ACKNOWLEDGE,
+            GooglePubsubAcknowledge.class
+          );
         acknowledge.ack(exchange);
       })
       .handled(true);
