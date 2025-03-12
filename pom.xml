@@ -33,6 +33,7 @@
         <commons-csv.version>1.13.0</commons-csv.version>
         <prettier-java.version>2.1.0</prettier-java.version>
         <prettier-maven-plugin.version>0.22</prettier-maven-plugin.version>
+        <zt-zip.version>1.17</zt-zip.version>
         <plugin.prettier.goal>write</plugin.prettier.goal>
 
         <!-- empty argLine property, the value is set up by Jacoco during unit tests execution -->
@@ -156,6 +157,13 @@
         </dependency>
 
         <dependency>
+            <groupId>org.zeroturnaround</groupId>
+            <artifactId>zt-zip</artifactId>
+            <version>${zt-zip.version}</version>
+            <type>jar</type>
+        </dependency>
+
+        <dependency>
             <groupId>jakarta.ws.rs</groupId>
             <artifactId>jakarta.ws.rs-api</artifactId>
         </dependency>
@@ -193,6 +201,15 @@
 
         <!-- testing -->
         <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>gcloud</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
@@ -203,16 +220,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.zeroturnaround</groupId>
-            <artifactId>zt-zip</artifactId>
-            <version>${zt-zip.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
             <version>${commons-csv.version}</version>
-            <scope>test</scope>
         </dependency>
 
     </dependencies>

@@ -22,6 +22,8 @@ import com.google.cloud.pubsub.v1.stub.SubscriberStub;
 import com.google.pubsub.v1.ModifyAckDeadlineRequest;
 import com.google.pubsub.v1.ProjectSubscriptionName;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,11 +34,14 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.google.pubsub.GooglePubsubConstants;
 import org.apache.camel.component.google.pubsub.GooglePubsubEndpoint;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.FileSystemUtils;
 
 /**
  * Defines common route behavior.
  */
 public abstract class BaseRouteBuilder extends RouteBuilder {
+
+  private static final String SYNCHRONIZATION_HOLDER = "SYNCHRONIZATION_HOLDER";
 
   @Value("${quartz.lenient.fire.time.ms:180000}")
   private int lenientFireTimeMs;
@@ -215,6 +220,24 @@ public abstract class BaseRouteBuilder extends RouteBuilder {
         .getSubscriberStub(fromEndpoint)
     ) {
       subscriberStub.modifyAckDeadlineCallable().call(modifyAckDeadlineRequest);
+    }
+  }
+
+  protected void deleteDirectoryRecursively(String directory) {
+    log.debug("Deleting local directory {} ...", directory);
+    try {
+      Path pathToDelete = Paths.get(directory);
+      boolean deleted = FileSystemUtils.deleteRecursively(pathToDelete);
+      if (deleted) {
+        log.debug("Local directory {} cleanup done.", directory);
+      } else {
+        log.debug(
+          "The directory {} did not exist, ignoring deletion request",
+          directory
+        );
+      }
+    } catch (IOException e) {
+      log.warn("Failed to delete directory {}", directory, e);
     }
   }
 }
