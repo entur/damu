@@ -16,20 +16,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
 
-  private final MardukBlobStoreService mardukPublicBlobStoreService;
-
   private static final String ORIGINAL_GTFS_FILES_SUB_FOLDER =
     "/original-gtfs-files";
 
   @Value("${gtfs.export.download.directory:files/gtfs/merged}")
   private String localWorkingDirectory;
-
-  public GtfsAggregationQueueRouteBuilder(
-    MardukBlobStoreService mardukPublicBlobStoreService
-  ) {
-    super();
-    this.mardukPublicBlobStoreService = mardukPublicBlobStoreService;
-  }
 
   @Override
   public void configure() throws Exception {
@@ -67,7 +58,13 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
           "/EXPORT_GTFS_MERGED/${date:now:yyyyMMddHHmmssSSS}"
         )
       )
-      .process(e -> new File(e.getIn().getHeader(FILE_PARENT, String.class) + ORIGINAL_GTFS_FILES_SUB_FOLDER).mkdirs())
+      .process(e ->
+        new File(
+          e.getIn().getHeader(FILE_PARENT, String.class) +
+          ORIGINAL_GTFS_FILES_SUB_FOLDER
+        )
+          .mkdirs()
+      )
       .split(body().tokenize(","))
       .to("direct:getGtfsFile")
       .end()
@@ -139,6 +136,12 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
       .to("direct:getBlob")
       .choice()
       .when(body().isNotEqualTo(null))
+      .log(
+        LoggingLevel.INFO,
+        getClass().getName(),
+        correlation() +
+        "Fetched ${exchangeProperty.fileName} from blobstore, storing in local directory."
+      )
       .toD(
         "file:${header." +
         FILE_PARENT +
@@ -152,16 +155,6 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
         getClass().getName(),
         correlation() +
         "${exchangeProperty.fileName} was empty when trying to fetch it from blobstore."
-      )
-      .to(logDebugShowAll())
-      .bean(mardukPublicBlobStoreService, "getBlob")
-      .to(logDebugShowAll())
-      .log(
-        LoggingLevel.INFO,
-        correlation() +
-        "Returning from fetching file ${header." +
-        FILE_HANDLE +
-        "} from blob store."
       )
       .routeId("get-gtfs-file");
 
