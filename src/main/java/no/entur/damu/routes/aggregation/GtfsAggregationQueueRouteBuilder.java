@@ -67,6 +67,7 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
           "/EXPORT_GTFS_MERGED/${date:now:yyyyMMddHHmmssSSS}"
         )
       )
+      .process(e -> new File(e.getIn().getHeader(FILE_PARENT, String.class) + ORIGINAL_GTFS_FILES_SUB_FOLDER).mkdirs())
       .split(body().tokenize(","))
       .to("direct:getGtfsFile")
       .end()
@@ -129,13 +130,6 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
         LoggingLevel.INFO,
         getClass().getName(),
         correlation() + "Fetching " + BLOBSTORE_PATH_OUTBOUND + "gtfs/${body}"
-      )
-      .process(e ->
-        new File(
-          e.getIn().getHeader(FILE_PARENT, String.class) +
-          ORIGINAL_GTFS_FILES_SUB_FOLDER
-        )
-          .mkdirs()
       )
       .setProperty("fileName", body())
       .setHeader(
