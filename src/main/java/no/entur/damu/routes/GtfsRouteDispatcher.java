@@ -3,6 +3,8 @@ package no.entur.damu.routes;
 import static no.entur.damu.Constants.*;
 
 import org.apache.camel.LoggingLevel;
+import org.apache.camel.component.google.pubsub.GooglePubsubConstants;
+import org.apache.camel.component.google.pubsub.consumer.GooglePubsubAcknowledge;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -12,8 +14,15 @@ public class GtfsRouteDispatcher extends BaseRouteBuilder {
   public void configure() throws Exception {
     super.configure();
 
+    onException(Exception.class)
+      .process(exchange -> {
+        GooglePubsubAcknowledge acknowledge = exchange.getIn().getHeader(GooglePubsubConstants.GOOGLE_PUBSUB_ACKNOWLEDGE, GooglePubsubAcknowledge.class);
+        acknowledge.ack(exchange);
+      })
+      .handled(true);
+
     from(
-      "google-pubsub:{{marduk.pubsub.project.id}}:GtfsRouteDispatcherTopic?synchronousPull=true"
+      "google-pubsub:{{marduk.pubsub.project.id}}:GtfsRouteDispatcherTopic?synchronousPull=true&ackMode=AUTO"
     )
       .choice()
       .when(
