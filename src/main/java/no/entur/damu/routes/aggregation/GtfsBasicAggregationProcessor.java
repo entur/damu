@@ -29,6 +29,14 @@ public class GtfsBasicAggregationProcessor implements Processor {
     this.excludedGtfsFiles = Arrays.asList(excluded.split(","));
   }
 
+  private Collection<File> createListOfGtfsFilesToMerge(File sourceDirectory) {
+    return FileUtils
+      .listFiles(sourceDirectory, new String[] { "zip" }, false)
+      .stream()
+      .filter(file -> !excludedGtfsFiles.contains(file.getName()))
+      .collect(Collectors.toList());
+  }
+
   @Override
   public void process(Exchange exchange) throws Exception {
     File sourceDirectory = new File(
@@ -36,15 +44,11 @@ public class GtfsBasicAggregationProcessor implements Processor {
       ORIGINAL_GTFS_FILES_SUB_FOLDER
     );
 
-    if (sourceDirectory == null || !sourceDirectory.isDirectory()) {
+    if (!sourceDirectory.isDirectory()) {
       throw new RuntimeException(sourceDirectory + " is not a directory");
     }
 
-    Collection<File> zipFiles = FileUtils
-      .listFiles(sourceDirectory, new String[] { "zip" }, false)
-      .stream()
-      .filter(file -> !excludedGtfsFiles.contains(file.getName()))
-      .collect(Collectors.toList());
+    Collection<File> zipFiles = createListOfGtfsFilesToMerge(sourceDirectory);
 
     boolean includeShapes = exchange
       .getIn()
