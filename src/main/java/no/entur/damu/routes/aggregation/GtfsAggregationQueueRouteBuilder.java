@@ -5,7 +5,6 @@ import static org.apache.camel.Exchange.FILE_PARENT;
 
 import java.io.File;
 import no.entur.damu.routes.BaseRouteBuilder;
-import no.entur.damu.services.MardukBlobStoreService;
 import org.apache.camel.LoggingLevel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -28,6 +27,7 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
 
     onException(Exception.class)
       .handled(true)
+      .maximumRedeliveries(0)
       .log(
         LoggingLevel.ERROR,
         correlation() +
