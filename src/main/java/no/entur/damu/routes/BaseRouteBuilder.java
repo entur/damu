@@ -47,13 +47,13 @@ public abstract class BaseRouteBuilder extends RouteBuilder {
   private int lenientFireTimeMs;
 
   @Value("${damu.camel.redelivery.max:3}")
-  private int maxRedelivery;
+  protected int maxRedelivery;
 
   @Value("${damu.camel.redelivery.delay:5000}")
-  private int redeliveryDelay;
+  protected int redeliveryDelay;
 
   @Value("${damu.camel.redelivery.backoff.multiplier:3}")
-  private int backOffMultiplier;
+  protected int backOffMultiplier;
 
   @Value("${damu.camel.pubsub.deadline.extension:600}")
   private int deadlineExtension;

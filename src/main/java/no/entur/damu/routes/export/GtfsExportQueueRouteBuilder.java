@@ -79,9 +79,8 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
   public void configure() throws Exception {
     super.configure();
 
-    onException(Exception.class)
+    onException(GtfsExportException.class)
       .handled(true)
-      .maximumRedeliveries(0)
       .log(
         LoggingLevel.ERROR,
         correlation() +
@@ -92,6 +91,7 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
       .end();
 
     from("direct:exportGtfs")
+      .errorHandler(noErrorHandler())
       .streamCache("true")
       .process(this::setCorrelationIdIfMissing)
       .setHeader(DATASET_REFERENTIAL, bodyAs(String.class))

@@ -3,8 +3,6 @@ package no.entur.damu.routes;
 import static no.entur.damu.Constants.*;
 
 import org.apache.camel.LoggingLevel;
-import org.apache.camel.component.google.pubsub.GooglePubsubConstants;
-import org.apache.camel.component.google.pubsub.consumer.GooglePubsubAcknowledge;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -15,19 +13,27 @@ public class GtfsRouteDispatcher extends BaseRouteBuilder {
     super.configure();
 
     onException(Exception.class)
+      .redeliveryDelay(redeliveryDelay)
+      .maximumRedeliveries(maxRedelivery)
+      .onRedelivery(this::logRedelivery)
+      .useExponentialBackOff()
+      .backOffMultiplier(backOffMultiplier)
+      .logRetryStackTrace(true)
+      .logStackTrace(true)
       .process(exchange -> {
-        GooglePubsubAcknowledge acknowledge = exchange
+        log.error("Message exhausted after {} retries", maxRedelivery);
+        String messageId = exchange
           .getIn()
-          .getHeader(
-            GooglePubsubConstants.GOOGLE_PUBSUB_ACKNOWLEDGE,
-            GooglePubsubAcknowledge.class
-          );
-        acknowledge.ack(exchange);
+          .getHeader("CamelGooglePubsubMessageId", String.class);
+        if (messageId != null) {
+          exchange.getIn().setHeader("CamelGooglePubsub.Acknowledge", true);
+        }
       })
-      .handled(true);
+      .handled(true)
+      .end();
 
     from(
-      "google-pubsub:{{marduk.pubsub.project.id}}:GtfsRouteDispatcherTopic?synchronousPull=true&ackMode=AUTO"
+      "google-pubsub:{{marduk.pubsub.project.id}}:GtfsRouteDispatcherTopic?synchronousPull=true"
     )
       .choice()
       .when(
