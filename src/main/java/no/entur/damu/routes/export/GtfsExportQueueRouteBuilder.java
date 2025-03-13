@@ -79,8 +79,9 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
   public void configure() throws Exception {
     super.configure();
 
-    onException(GtfsExportException.class)
+    onException(Exception.class)
       .handled(true)
+      .maximumRedeliveries(0)
       .log(
         LoggingLevel.ERROR,
         correlation() +
