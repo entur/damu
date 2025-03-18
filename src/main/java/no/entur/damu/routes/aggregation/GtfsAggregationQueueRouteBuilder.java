@@ -36,7 +36,7 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
       .setHeader(STATUS_HEADER, constant(STATUS_MERGE_FAILED))
       .log(
         LoggingLevel.INFO,
-        "Notifying marduk that aggregation of GTFS has failed"
+        correlation() + "Notifying marduk that aggregation of GTFS has failed"
       )
       .process(new GtfsAggregationStatusProcessor())
       .to(
@@ -78,21 +78,27 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
         FILE_HANDLE,
         simple(BLOBSTORE_PATH_OUTBOUND + "gtfs/${exchangeProperty.fileName}")
       )
-      .log(LoggingLevel.INFO, "Starting merging of GTFS extended")
+      .log(
+        LoggingLevel.INFO,
+        correlation() + "Starting merging of GTFS extended"
+      )
       .to("direct:mergeGtfsExtended")
       .process(this::extendAckDeadline)
       .setProperty(FILE_NAME, simple("rb_norway-aggregated-gtfs.zip"))
       .to("direct:uploadMergedGtfs")
       .process(this::extendAckDeadline)
-      .log(LoggingLevel.INFO, "Done merging GTFS extended")
-      .log(LoggingLevel.INFO, "Starting merging of GTFS basic")
+      .log(LoggingLevel.INFO, correlation() + "Done merging GTFS extended")
+      .log(LoggingLevel.INFO, correlation() + "Starting merging of GTFS basic")
       .to("direct:mergeGtfsBasic")
       .process(this::extendAckDeadline)
       .setProperty(FILE_NAME, simple("rb_norway-aggregated-gtfs-basic.zip"))
       .to("direct:uploadMergedGtfs")
       .process(this::extendAckDeadline)
-      .log(LoggingLevel.INFO, "Done merging GTFS basic")
-      .log(LoggingLevel.INFO, "Set header to " + constant(STATUS_MERGE_OK))
+      .log(LoggingLevel.INFO, correlation() + "Done merging GTFS basic")
+      .log(
+        LoggingLevel.INFO,
+        correlation() + "Set header to " + constant(STATUS_MERGE_OK)
+      )
       .to("direct:notifyMardukMergeOk")
       .to("direct:cleanUpLocalDirectory")
       .process(this::extendAckDeadline)
@@ -165,6 +171,10 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
         correlation() + "Merging GTFS extended files for all providers."
       )
       .process(new GtfsExtendedAggregationProcessor())
+      .log(
+        LoggingLevel.INFO,
+        correlation() + "Done merging GTFS extended files for all providers."
+      )
       .routeId("gtfs-export-merge-extended");
 
     from("direct:mergeGtfsBasic")
@@ -176,7 +186,7 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
       .process(e -> new GtfsBasicAggregationProcessor(e).process(e))
       .log(
         LoggingLevel.INFO,
-        "Done merging GTFS basic files for all providers."
+        correlation() + "Done merging GTFS basic files for all providers."
       )
       .routeId("gtfs-export-merge-basic");
 

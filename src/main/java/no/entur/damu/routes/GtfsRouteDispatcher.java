@@ -36,7 +36,7 @@ public class GtfsRouteDispatcher extends BaseRouteBuilder {
       )
       .log(
         LoggingLevel.INFO,
-        correlation() + " Dispatching message to GTFS export route"
+        correlation() + "Dispatching message to GTFS export route"
       )
       .to("direct:exportGtfs")
       .when(
@@ -45,13 +45,13 @@ public class GtfsRouteDispatcher extends BaseRouteBuilder {
       )
       .log(
         LoggingLevel.INFO,
-        correlation() + " Dispatching message to GTFS aggregation route"
+        correlation() + "Dispatching message to GTFS aggregation route"
       )
       .to("direct:aggregateGtfs")
       .otherwise()
       .log(
         LoggingLevel.INFO,
-        correlation() + " Unknown header value ${header.Action}, ending route"
+        correlation() + "Unknown header value ${header.Action}, ending route"
       )
       .routeId("GtfsRouteDispatcher");
   }
