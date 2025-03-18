@@ -280,9 +280,14 @@ public class GtfsFileMerger {
         LOGGER.warn("Invalid route type {}", value);
         return value;
       }
-      return Integer.toString(
-        BasicRouteTypeCode.convertRouteType(routeTypeCode)
-      );
+      try {
+        return Integer.toString(
+                BasicRouteTypeCode.convertRouteType(routeTypeCode)
+        );
+      } catch (IllegalArgumentException e) {
+        LOGGER.warn("Detected CSV record {} with unmappable route type {}. Converting to bus type by default.", csvRecord, routeTypeCode);
+        return Integer.toString(BasicRouteTypeCode.BUS.getCode());
+      }
     }
 
     if ("shape_id".equals(header) && !includeShapes) {
