@@ -87,7 +87,9 @@ public enum BasicRouteTypeCode {
         "Attempted to map unsupported extended route type to basic GTFS route type: {}. Mapping to bus as default. ",
         extendedType
       );
-      throw new IllegalArgumentException("Attempted to map unsupported extended route type to basic GTFS route type. Mapping to bus as default.");
+      throw new IllegalArgumentException(
+        "Attempted to map unsupported extended route type to basic GTFS route type."
+      );
     }
     return BasicRouteTypeCode.BUS.code;
   }

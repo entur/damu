@@ -5,10 +5,19 @@ import org.junit.jupiter.api.Test;
 
 class BasicRouteTypeCodeTest {
 
-    @Test
-    void convertRouteType() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            BasicRouteTypeCode.convertRouteType(1100);
-        });
-    }
+  @Test
+  void convertRouteTypeThrowsWhenUnknownRouteTypeCode() {
+    Assertions.assertThrows(
+      IllegalArgumentException.class,
+      () -> {
+        BasicRouteTypeCode.convertRouteType(1100);
+      }
+    );
+  }
+
+  @Test
+  void convertTaxiRouteTypeToBus() {
+    Integer routeType = BasicRouteTypeCode.convertRouteType(1501);
+    Assertions.assertEquals(BasicRouteTypeCode.BUS.getCode(), routeType);
+  }
 }
