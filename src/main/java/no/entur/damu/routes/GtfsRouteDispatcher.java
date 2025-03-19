@@ -54,5 +54,15 @@ public class GtfsRouteDispatcher extends BaseRouteBuilder {
         correlation() + "Unknown header value ${header.Action}, ending route"
       )
       .routeId("GtfsRouteDispatcher");
+
+    from(
+      "google-pubsub:{{damu.pubsub.project.id}}:DamuExportGtfsQueue?synchronousPull=true"
+    )
+      .log(
+        LoggingLevel.INFO,
+        correlation() + "GTFS export triggered from DamuExportGtfsQueue"
+      )
+      .to("direct:exportGtfs")
+      .routeId("old-gtfs-export-queue");
   }
 }
