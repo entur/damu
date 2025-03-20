@@ -107,10 +107,17 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
     from("direct:notifyMardukMergeOk")
       .log(
         LoggingLevel.INFO,
+        correlation() +
         "Notifying marduk that aggregation of GTFS has finished OK"
       )
       .removeHeader(STATUS_HEADER)
       .setHeader(STATUS_HEADER, constant(STATUS_MERGE_OK))
+      .log(
+        LoggingLevel.INFO,
+        correlation() +
+        "Notifying marduk of aggregation status " +
+        constant(STATUS_MERGE_OK)
+      )
       .process(new GtfsAggregationStatusProcessor())
       .to(
         "google-pubsub:{{marduk.pubsub.project.id}}:MardukAggregateGtfsStatusQueue"
@@ -119,10 +126,16 @@ public class GtfsAggregationQueueRouteBuilder extends BaseRouteBuilder {
     from("direct:notifyMardukMergeStarted")
       .log(
         LoggingLevel.INFO,
-        "Notifying marduk that aggregation of GTFS has started"
+        correlation() + "Notifying marduk that aggregation of GTFS has started"
       )
       .removeHeader(STATUS_HEADER)
       .setHeader(STATUS_HEADER, constant(STATUS_MERGE_STARTED))
+      .log(
+        LoggingLevel.INFO,
+        correlation() +
+        "Notifying marduk of aggregation status " +
+        constant(STATUS_MERGE_STARTED)
+      )
       .process(new GtfsAggregationStatusProcessor())
       .to(
         "google-pubsub:{{marduk.pubsub.project.id}}:MardukAggregateGtfsStatusQueue"
