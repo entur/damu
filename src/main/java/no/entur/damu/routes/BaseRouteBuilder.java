@@ -41,11 +41,6 @@ import org.springframework.util.FileSystemUtils;
  */
 public abstract class BaseRouteBuilder extends RouteBuilder {
 
-  private static final String SYNCHRONIZATION_HOLDER = "SYNCHRONIZATION_HOLDER";
-
-  @Value("${quartz.lenient.fire.time.ms:180000}")
-  private int lenientFireTimeMs;
-
   @Value("${damu.camel.redelivery.max:3}")
   private int maxRedelivery;
 

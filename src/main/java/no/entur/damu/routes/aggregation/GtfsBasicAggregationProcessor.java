@@ -4,12 +4,10 @@ import static no.entur.damu.Constants.ORIGINAL_GTFS_FILES_SUB_FOLDER;
 import static org.apache.camel.Exchange.FILE_PARENT;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import no.entur.damu.Constants;
 import no.entur.damu.gtfs.merger.GtfsExport;
 import no.entur.damu.gtfs.merger.GtfsFileUtils;
 import org.apache.camel.Exchange;
@@ -50,17 +48,13 @@ public class GtfsBasicAggregationProcessor implements Processor {
 
     Collection<File> zipFiles = createListOfGtfsFilesToMerge(sourceDirectory);
 
-    boolean includeShapes = exchange
-      .getIn()
-      .getHeader(Constants.INCLUDE_SHAPES, Boolean.class);
-
     exchange
       .getIn()
       .setBody(
         GtfsFileUtils.mergeGtfsFilesToInputStream(
           zipFiles,
           GtfsExport.GTFS_BASIC,
-          includeShapes
+          false
         )
       );
   }
