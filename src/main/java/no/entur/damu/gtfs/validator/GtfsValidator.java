@@ -71,9 +71,11 @@ public class GtfsValidator {
       "gtfs-validation-output-" + datasetReferential
     );
 
-    ValidationRunnerConfig.Builder builder = ValidationRunnerConfig.builder();
-    builder.setGtfsSource(tempGtfsFile.toUri());
-    builder.setOutputDirectory(gtfsValidationReportsDirectory);
+    ValidationRunnerConfig.Builder builder = ValidationRunnerConfig
+      .builder()
+      .setGtfsSource(tempGtfsFile.toUri())
+      .setOutputDirectory(gtfsValidationReportsDirectory)
+      .setSkipValidatorUpdate(true);
     ValidationRunner runner = new ValidationRunner(
       new VersionResolver(ApplicationType.WEB)
     );
