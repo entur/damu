@@ -36,7 +36,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 /**
- * The main purpose of this
+ * The main purpose of this test is to check that the HTTP server is up and running.
  */
 @SpringBootTest(
   classes = TestApp.class,
