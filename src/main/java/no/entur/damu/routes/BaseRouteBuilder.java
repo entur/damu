@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import no.entur.damu.Constants;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
@@ -86,9 +85,6 @@ public abstract class BaseRouteBuilder extends RouteBuilder {
           );
       });
 
-    // Copy only the correlationId and codespace headers from the Camel message into the PubSub message by default.
-    // In Camel 4.14+, all headers are automatically converted to PubSub attributes,
-    // so we use a whitelist approach: remove all headers except the ones we explicitly want to send.
     interceptSendToEndpoint("google-pubsub:*")
       .process(exchange -> {
         Map<String, String> pubSubAttributes = new HashMap<>(
@@ -138,25 +134,7 @@ public abstract class BaseRouteBuilder extends RouteBuilder {
           .getIn()
           .setHeader(GooglePubsubConstants.ATTRIBUTES, pubSubAttributes);
 
-        // Remove all headers except the whitelisted ones and internal Camel headers
-        // to prevent them from being automatically converted to PubSub attributes.
-        List<String> headersToRemove = exchange
-          .getIn()
-          .getHeaders()
-          .keySet()
-          .stream()
-          .filter(headerName ->
-            !headerName.equals(Constants.CORRELATION_ID) &&
-            !headerName.equals(Constants.DATASET_REFERENTIAL) &&
-            !headerName.equals(Constants.PROVIDER_ID) &&
-            !headerName.equals(Constants.ORIGINAL_PROVIDER_ID) &&
-            !headerName.startsWith("Camel") &&
-            !headerName.equals(GooglePubsubConstants.ATTRIBUTES)
-          )
-          .collect(Collectors.toList());
-        headersToRemove.forEach(headerName ->
-          exchange.getIn().removeHeader(headerName)
-        );
+        filterHeaders(exchange);
       });
   }
 
@@ -257,5 +235,31 @@ public abstract class BaseRouteBuilder extends RouteBuilder {
     } catch (IOException e) {
       log.warn("Failed to delete directory {}", directory, e);
     }
+  }
+
+  /**
+   * Remove all headers except the whitelisted ones and internal Camel headers
+   * to prevent them from being automatically converted to PubSub attributes.
+   * In Camel 4.14.1+, all headers are automatically converted to PubSub attributes.
+   * This should ideally be implemented as a HeaderFilterStrategy, which is not supported by the Camel PubSub component.
+   */
+  private static void filterHeaders(Exchange exchange) {
+    exchange
+      .getIn()
+      .getHeaders()
+      .keySet()
+      .stream()
+      .filter(BaseRouteBuilder::filterHeaders)
+      .forEach(headerName -> exchange.getIn().removeHeader(headerName));
+  }
+
+  private static boolean filterHeaders(String headerName) {
+    return (
+      !headerName.equals(Constants.CORRELATION_ID) &&
+      !headerName.equals(Constants.DATASET_REFERENTIAL) &&
+      !headerName.equals(Constants.PROVIDER_ID) &&
+      !headerName.equals(Constants.ORIGINAL_PROVIDER_ID) &&
+      !headerName.startsWith("Camel")
+    );
   }
 }
