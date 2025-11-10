@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.camel.RoutesBuilder;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.google.pubsub.GooglePubsubConstants;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.junit5.CamelTestSupport;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,13 +39,13 @@ public class GtfsAggregationStatusProcessorTest extends CamelTestSupport {
     Map<String, Object> expectedCamelHeaderValue = new HashMap<>();
     expectedCamelHeaderValue.put(STATUS_HEADER, STATUS_MERGE_OK);
     mockResult.expectedHeaderReceived(
-      "CamelGooglePubsubAttributes",
+      GooglePubsubConstants.ATTRIBUTES,
       expectedCamelHeaderValue
     );
 
     Map<String, Object> headers = new HashMap<>();
     headers.put(STATUS_HEADER, STATUS_MERGE_OK);
-    headers.put("CamelGooglePubsubAttributes", new HashMap<>());
+    headers.put(GooglePubsubConstants.ATTRIBUTES, new HashMap<>());
     template.sendBodyAndHeaders("", headers);
     mockResult.assertIsSatisfied();
   }
@@ -56,13 +57,13 @@ public class GtfsAggregationStatusProcessorTest extends CamelTestSupport {
     Map<String, Object> expectedCamelHeaderValue = new HashMap<>();
     expectedCamelHeaderValue.put(STATUS_HEADER, STATUS_MERGE_STARTED);
     mockResult.expectedHeaderReceived(
-      "CamelGooglePubsubAttributes",
+      GooglePubsubConstants.ATTRIBUTES,
       expectedCamelHeaderValue
     );
 
     Map<String, Object> headers = new HashMap<>();
     headers.put(STATUS_HEADER, STATUS_MERGE_STARTED);
-    headers.put("CamelGooglePubsubAttributes", new HashMap<>());
+    headers.put(GooglePubsubConstants.ATTRIBUTES, new HashMap<>());
     template.sendBodyAndHeaders("", headers);
     mockResult.assertIsSatisfied();
   }
@@ -74,13 +75,13 @@ public class GtfsAggregationStatusProcessorTest extends CamelTestSupport {
     Map<String, Object> expectedCamelHeaderValue = new HashMap<>();
     expectedCamelHeaderValue.put(STATUS_HEADER, STATUS_MERGE_FAILED);
     mockResult.expectedHeaderReceived(
-      "CamelGooglePubsubAttributes",
+      GooglePubsubConstants.ATTRIBUTES,
       expectedCamelHeaderValue
     );
 
     Map<String, Object> headers = new HashMap<>();
     headers.put(STATUS_HEADER, STATUS_MERGE_FAILED);
-    headers.put("CamelGooglePubsubAttributes", new HashMap<>());
+    headers.put(GooglePubsubConstants.ATTRIBUTES, new HashMap<>());
     template.sendBodyAndHeaders("", headers);
     mockResult.assertIsSatisfied();
   }

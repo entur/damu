@@ -18,7 +18,7 @@
 
 package no.entur.damu.routes;
 
-import static no.entur.damu.Constants.BLOBSTORE_PATH_OUTBOUND;
+import static no.entur.damu.Constants.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -32,6 +32,7 @@ import org.apache.camel.EndpointInject;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.AdviceWith;
+import org.apache.camel.component.google.pubsub.GooglePubsubConstants;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -93,10 +94,13 @@ class GtfsExportQueueRouteBuilderTest
 
     context.start();
     Map<String, Object> headers = new HashMap<>();
-    headers.put("Action", "Export");
+    headers.put(
+      GTFS_ROUTE_DISPATCHER_HEADER_NAME,
+      GTFS_ROUTE_DISPATCHER_EXPORT_HEADER_VALUE
+    );
     gtfsExportQueueProducerTemplate.sendBodyAndHeader(
       CODESPACE,
-      "CamelGooglePubsubAttributes",
+      GooglePubsubConstants.ATTRIBUTES,
       headers
     );
     checkUploadedDataset.assertIsSatisfied();

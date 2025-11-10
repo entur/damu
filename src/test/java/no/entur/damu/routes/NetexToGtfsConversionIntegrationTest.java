@@ -18,11 +18,7 @@
 
 package no.entur.damu.routes;
 
-import static no.entur.damu.Constants.BLOBSTORE_PATH_OUTBOUND;
-import static no.entur.damu.Constants.CORRELATION_ID;
-import static no.entur.damu.Constants.DATASET_REFERENTIAL;
-import static no.entur.damu.Constants.ORIGINAL_PROVIDER_ID;
-import static no.entur.damu.Constants.PROVIDER_ID;
+import static no.entur.damu.Constants.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -76,6 +72,9 @@ class NetexToGtfsConversionIntegrationTest
   @EndpointInject("mock:checkUploadedGtfsDataset")
   protected MockEndpoint checkUploadedGtfsDataset;
 
+  @EndpointInject("mock:checkNotifyMarduk")
+  protected MockEndpoint checkNotifyMarduk;
+
   @EndpointInject("mock:validateGtfsOutput")
   private MockEndpoint mockValidateGtfsOutput;
 
@@ -111,11 +110,19 @@ class NetexToGtfsConversionIntegrationTest
       routeBuilder -> routeBuilder.weaveAddLast().to("mock:validateGtfsOutput")
     );
 
+    AdviceWith.adviceWith(
+      context,
+      "notify-marduk",
+      routeBuilder -> routeBuilder.weaveAddLast().to("mock:checkNotifyMarduk")
+    );
+
     // Set expectations for export workflow
     checkUploadedGtfsDataset.expectedMessageCount(1);
     checkUploadedGtfsDataset.setResultWaitTime(60_000);
     mockValidateGtfsOutput.expectedMessageCount(1);
     mockValidateGtfsOutput.setResultWaitTime(60_000);
+    checkNotifyMarduk.expectedMessageCount(2);
+    checkNotifyMarduk.setResultWaitTime(60_000);
 
     // Upload NeTEx dataset to blob store (as Marduk would)
     mardukInMemoryBlobStoreRepository.uploadBlob(
@@ -176,7 +183,10 @@ class NetexToGtfsConversionIntegrationTest
 
     // Send PubSub message to trigger GTFS export
     Map<String, Object> exportHeaders = new HashMap<>();
-    exportHeaders.put("Action", "Export");
+    exportHeaders.put(
+      GTFS_ROUTE_DISPATCHER_HEADER_NAME,
+      GTFS_ROUTE_DISPATCHER_EXPORT_HEADER_VALUE
+    );
     exportHeaders.put(CORRELATION_ID, TEST_CORRELATION_ID);
     exportHeaders.put(PROVIDER_ID, TEST_PROVIDER_ID);
     exportHeaders.put(ORIGINAL_PROVIDER_ID, TEST_ORIGINAL_PROVIDER_ID);
@@ -190,6 +200,7 @@ class NetexToGtfsConversionIntegrationTest
     // Wait for export to complete
     checkUploadedGtfsDataset.assertIsSatisfied();
     mockValidateGtfsOutput.assertIsSatisfied();
+    checkNotifyMarduk.assertIsSatisfied();
 
     // Verify GTFS file was created
     String gtfsFilePath =
@@ -208,79 +219,45 @@ class NetexToGtfsConversionIntegrationTest
     assertTrue(gtfsContent.length > 0, "GTFS file must be non-empty");
 
     // Pull and verify PubSub status messages sent to Marduk
-    // Should get at minimum the "started" message
     List<PubsubMessage> statusMessages = pubSubTemplate.pullAndAck(
       "DamuExportGtfsStatusQueue",
       100,
       true
     );
 
-    assertFalse(
-      statusMessages.isEmpty(),
-      "Should receive at least the 'started' status message, got: " +
-      statusMessages.size()
+    assertEquals(2, statusMessages.size());
+
+    assertEquals(
+      List.of("started", "ok"),
+      statusMessages
+        .stream()
+        .map(pubsubMessage -> pubsubMessage.getData().toStringUtf8())
+        .toList()
     );
 
-    // Find the "started" message
-    PubsubMessage startedMessage = statusMessages
-      .stream()
-      .filter(msg -> "started".equals(msg.getData().toStringUtf8()))
-      .findFirst()
-      .orElseThrow(() ->
-        new AssertionError("Should have received 'started' message")
+    for (PubsubMessage message : statusMessages) {
+      Map<String, String> headers = message.getAttributesMap();
+      assertEquals(
+        TEST_CORRELATION_ID,
+        headers.get(CORRELATION_ID),
+        "Correlation ID should be preserved in message"
       );
-
-    // Verify "started" message headers
-    Map<String, String> startedHeaders = startedMessage.getAttributesMap();
-    assertEquals(
-      TEST_CORRELATION_ID,
-      startedHeaders.get(CORRELATION_ID),
-      "Correlation ID should be preserved in started message"
-    );
-    assertEquals(
-      TEST_PROVIDER_ID,
-      startedHeaders.get(PROVIDER_ID),
-      "Provider ID should be preserved in started message"
-    );
-    assertEquals(
-      TEST_ORIGINAL_PROVIDER_ID,
-      startedHeaders.get(ORIGINAL_PROVIDER_ID),
-      "Original Provider ID should be preserved in started message"
-    );
-    assertEquals(
-      CODESPACE,
-      startedHeaders.get(DATASET_REFERENTIAL),
-      "Dataset referential should be present in started message"
-    );
-
-    //TODO: investigate why "ok" message is not available
-    statusMessages
-      .stream()
-      .filter(msg -> "ok".equals(msg.getData().toStringUtf8()))
-      .findFirst()
-      .ifPresent(okMessage -> {
-        Map<String, String> okHeaders = okMessage.getAttributesMap();
-        assertEquals(
-          TEST_CORRELATION_ID,
-          okHeaders.get(CORRELATION_ID),
-          "Correlation ID should be preserved in ok message"
-        );
-        assertEquals(
-          TEST_PROVIDER_ID,
-          okHeaders.get(PROVIDER_ID),
-          "Provider ID should be preserved in ok message"
-        );
-        assertEquals(
-          TEST_ORIGINAL_PROVIDER_ID,
-          okHeaders.get(ORIGINAL_PROVIDER_ID),
-          "Original Provider ID should be preserved in ok message"
-        );
-        assertEquals(
-          CODESPACE,
-          okHeaders.get(DATASET_REFERENTIAL),
-          "Dataset referential should be present in ok message"
-        );
-      });
+      assertEquals(
+        TEST_PROVIDER_ID,
+        headers.get(PROVIDER_ID),
+        "Provider ID should be preserved in message"
+      );
+      assertEquals(
+        TEST_ORIGINAL_PROVIDER_ID,
+        headers.get(ORIGINAL_PROVIDER_ID),
+        "Original Provider ID should be preserved in message"
+      );
+      assertEquals(
+        CODESPACE,
+        headers.get(DATASET_REFERENTIAL),
+        "Dataset referential should be present in message"
+      );
+    }
   }
 
   @Test
@@ -309,7 +286,10 @@ class NetexToGtfsConversionIntegrationTest
 
     // Send aggregation request
     Map<String, String> aggregationHeaders = new HashMap<>();
-    aggregationHeaders.put("Action", "Aggregation");
+    aggregationHeaders.put(
+      GTFS_ROUTE_DISPATCHER_HEADER_NAME,
+      GTFS_ROUTE_DISPATCHER_AGGREGATION_HEADER_VALUE
+    );
     aggregationHeaders.put(CORRELATION_ID, TEST_CORRELATION_ID);
 
     sendBodyAndHeadersToPubSub(
