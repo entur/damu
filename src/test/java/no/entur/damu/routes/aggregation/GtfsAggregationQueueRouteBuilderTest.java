@@ -1,6 +1,6 @@
 package no.entur.damu.routes.aggregation;
 
-import static no.entur.damu.Constants.INCLUDE_SHAPES;
+import static no.entur.damu.Constants.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,7 +50,10 @@ public class GtfsAggregationQueueRouteBuilderTest
 
     Map<String, String> headers = new HashMap<>();
     headers.put(INCLUDE_SHAPES, "true");
-    headers.put("Action", "Aggregation");
+    headers.put(
+      GTFS_ROUTE_DISPATCHER_HEADER_NAME,
+      GTFS_ROUTE_DISPATCHER_AGGREGATION_HEADER_VALUE
+    );
     sendBodyAndHeadersToPubSub(producerTemplate, "gtfs.zip,gtfs2.zip", headers);
 
     aggregateGtfsDone.assertIsSatisfied();

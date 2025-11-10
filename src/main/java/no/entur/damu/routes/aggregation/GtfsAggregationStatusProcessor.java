@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.camel.component.google.pubsub.GooglePubsubConstants;
 
 public class GtfsAggregationStatusProcessor implements Processor {
 
@@ -13,12 +14,14 @@ public class GtfsAggregationStatusProcessor implements Processor {
   public void process(Exchange exchange) throws Exception {
     Map<String, String> existingAttributes = exchange
       .getIn()
-      .getHeader("CamelGooglePubsubAttributes", Map.class);
+      .getHeader(GooglePubsubConstants.ATTRIBUTES, Map.class);
     Map<String, String> nextAttributes = new HashMap<>(existingAttributes);
     String headerValue = exchange
       .getIn()
       .getHeader(STATUS_HEADER, String.class);
     nextAttributes.put(STATUS_HEADER, headerValue);
-    exchange.getIn().setHeader("CamelGooglePubsubAttributes", nextAttributes);
+    exchange
+      .getIn()
+      .setHeader(GooglePubsubConstants.ATTRIBUTES, nextAttributes);
   }
 }
