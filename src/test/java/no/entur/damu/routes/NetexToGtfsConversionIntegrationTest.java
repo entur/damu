@@ -26,9 +26,12 @@ import static org.mockito.Mockito.when;
 import com.google.pubsub.v1.PubsubMessage;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import no.entur.damu.Constants;
 import no.entur.damu.DamuRouteBuilderIntegrationTestBase;
 import no.entur.damu.TestApp;
@@ -256,6 +259,22 @@ class NetexToGtfsConversionIntegrationTest
         CODESPACE,
         headers.get(DATASET_REFERENTIAL),
         "Dataset referential should be present in message"
+      );
+
+      Set<String> nonWhiteListedHeaderNames = new HashSet<>(headers.keySet());
+      nonWhiteListedHeaderNames.removeAll(BaseRouteBuilder.WHITELISTED_HEADERS);
+      assertTrue(
+        nonWhiteListedHeaderNames.isEmpty(),
+        "Non-whitelisted headers should not be present in message: " +
+        nonWhiteListedHeaderNames
+      );
+
+      // the PubSub emulator does not enforce the maximum length of a header value, this must be checked in unit test.
+      headers.forEach((key, value) ->
+        assertTrue(
+          value.getBytes(StandardCharsets.UTF_8).length <= 1024,
+          "The value of header " + key + " should not be longer than 1024 bytes"
+        )
       );
     }
   }

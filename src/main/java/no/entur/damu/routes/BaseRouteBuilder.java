@@ -41,6 +41,17 @@ import org.springframework.util.FileSystemUtils;
  */
 public abstract class BaseRouteBuilder extends RouteBuilder {
 
+  public static final List<String> WHITELISTED_HEADERS = List.of(
+    Constants.CORRELATION_ID,
+    Constants.DATASET_REFERENTIAL,
+    Constants.DATASET_REFERENTIAL,
+    Constants.PROVIDER_ID,
+    Constants.ORIGINAL_PROVIDER_ID,
+    Constants.STATUS_HEADER,
+    Constants.GTFS_ROUTE_DISPATCHER_HEADER_NAME,
+    Exchange.BREADCRUMB_ID
+  );
+
   @Value("${damu.camel.redelivery.max:3}")
   private int maxRedelivery;
 
@@ -98,37 +109,13 @@ public abstract class BaseRouteBuilder extends RouteBuilder {
             )
         );
 
-        if (exchange.getIn().getHeader(Constants.CORRELATION_ID) != null) {
-          pubSubAttributes.put(
-            Constants.CORRELATION_ID,
-            exchange.getIn().getHeader(Constants.CORRELATION_ID, String.class)
-          );
-        }
-        if (exchange.getIn().getHeader(Constants.DATASET_REFERENTIAL) != null) {
-          pubSubAttributes.put(
-            Constants.DATASET_REFERENTIAL,
-            exchange
-              .getIn()
-              .getHeader(Constants.DATASET_REFERENTIAL, String.class)
-          );
-        }
-
-        if (exchange.getIn().getHeader(Constants.PROVIDER_ID) != null) {
-          pubSubAttributes.put(
-            Constants.PROVIDER_ID,
-            exchange.getIn().getHeader(Constants.PROVIDER_ID, String.class)
-          );
-        }
-
-        if (
-          exchange.getIn().getHeader(Constants.ORIGINAL_PROVIDER_ID) != null
-        ) {
-          pubSubAttributes.put(
-            Constants.ORIGINAL_PROVIDER_ID,
-            exchange
-              .getIn()
-              .getHeader(Constants.ORIGINAL_PROVIDER_ID, String.class)
-          );
+        for (String header : WHITELISTED_HEADERS) {
+          if (exchange.getIn().getHeader(header) != null) {
+            pubSubAttributes.put(
+              header,
+              exchange.getIn().getHeader(header, String.class)
+            );
+          }
         }
 
         exchange
