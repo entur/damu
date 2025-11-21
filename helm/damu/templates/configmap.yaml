@@ -21,7 +21,6 @@ data:
     camel.main.stream-caching-enabled=false
     camel.main.stream-caching-spool-enabled=true
     camel.dataformat.jackson.module-refs=jacksonJavaTimeModule
-    camel.servlet.mapping.context-path=/services/*
     # the Camel shutdown timeout must be shorter than the Kubernetes terminationGracePeriod
     damu.shutdown.timeout=25
     damu.camel.redelivery.max=0
