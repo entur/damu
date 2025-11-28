@@ -104,7 +104,7 @@ class EnturGtfsExportTest {
       .builder()
       .setHeader()
       .setSkipHeaderRecord(true)
-      .build();
+      .get();
     return csvFormat.parse(
       new InputStreamReader(new ByteArrayInputStream(zipEntry))
     );

@@ -22,7 +22,7 @@ import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.SimplePoint_VersionStructure;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest(
   webEnvironment = SpringBootTest.WebEnvironment.NONE,
@@ -40,7 +40,7 @@ class GtfsExportQueueRouteBuilderTest
   @Autowired
   private StopAreaRepositoryFactory stopAreaRepositoryFactory;
 
-  @MockBean
+  @MockitoBean
   private QuayFetcher quayFetcher;
 
   @Test

@@ -6,7 +6,6 @@ import static org.apache.camel.Exchange.FILE_PARENT;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.stream.Collectors;
 import no.entur.damu.gtfs.merger.GtfsExport;
 import no.entur.damu.gtfs.merger.GtfsFileUtils;
 import org.apache.camel.Exchange;
