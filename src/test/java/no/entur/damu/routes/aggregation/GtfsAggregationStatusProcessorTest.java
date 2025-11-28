@@ -1,7 +1,6 @@
 package no.entur.damu.routes.aggregation;
 
 import static no.entur.damu.Constants.*;
-import static no.entur.damu.Constants.STATUS_MERGE_STARTED;
 
 import java.util.HashMap;
 import java.util.Map;
