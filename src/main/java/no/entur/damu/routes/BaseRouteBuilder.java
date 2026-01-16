@@ -24,9 +24,7 @@ import com.google.pubsub.v1.ProjectSubscriptionName;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import no.entur.damu.Constants;
 import org.apache.camel.Exchange;
@@ -40,17 +38,6 @@ import org.springframework.util.FileSystemUtils;
  * Defines common route behavior.
  */
 public abstract class BaseRouteBuilder extends RouteBuilder {
-
-  public static final List<String> WHITELISTED_HEADERS = List.of(
-    Constants.CORRELATION_ID,
-    Constants.DATASET_REFERENTIAL,
-    Constants.DATASET_REFERENTIAL,
-    Constants.PROVIDER_ID,
-    Constants.ORIGINAL_PROVIDER_ID,
-    Constants.STATUS_HEADER,
-    Constants.GTFS_ROUTE_DISPATCHER_HEADER_NAME,
-    Exchange.BREADCRUMB_ID
-  );
 
   @Value("${damu.camel.redelivery.max:3}")
   private int maxRedelivery;
@@ -76,52 +63,6 @@ public abstract class BaseRouteBuilder extends RouteBuilder {
         .logExhausted(true)
         .logRetryStackTrace(true)
     );
-
-    // Copy all PubSub headers except the internal Camel PubSub headers from the PubSub message into the Camel message headers.
-
-    interceptFrom("*")
-      .filter(exchange ->
-        exchange.getFromEndpoint() instanceof GooglePubsubEndpoint
-      )
-      .process(exchange -> {
-        Map<String, String> pubSubAttributes = exchange
-          .getIn()
-          .getHeader(GooglePubsubConstants.ATTRIBUTES, Map.class);
-        pubSubAttributes
-          .entrySet()
-          .stream()
-          .filter(entry -> !entry.getKey().startsWith("CamelGooglePubsub"))
-          .forEach(entry ->
-            exchange.getIn().setHeader(entry.getKey(), entry.getValue())
-          );
-      });
-
-    // Copy only the correlationId and codespace headers from the Camel message into the PubSub message by default.
-    interceptSendToEndpoint("google-pubsub:*")
-      .process(exchange -> {
-        Map<String, String> pubSubAttributes = new HashMap<>(
-          exchange
-            .getIn()
-            .getHeader(
-              GooglePubsubConstants.ATTRIBUTES,
-              new HashMap<>(),
-              Map.class
-            )
-        );
-
-        for (String header : WHITELISTED_HEADERS) {
-          if (exchange.getIn().getHeader(header) != null) {
-            pubSubAttributes.put(
-              header,
-              exchange.getIn().getHeader(header, String.class)
-            );
-          }
-        }
-
-        exchange
-          .getIn()
-          .setHeader(GooglePubsubConstants.ATTRIBUTES, pubSubAttributes);
-      });
   }
 
   protected void logRedelivery(Exchange exchange) {
