@@ -171,7 +171,7 @@ class NetexToGtfsConversionIntegrationTest
         String stopPlaceId = "NSR:StopPlace:" + quayId.replaceAll("[^0-9]", "");
         return new StopPlace()
           .withId(stopPlaceId)
-          .withName(new MultilingualString().withValue("Test Stop Place"))
+          .withName(new MultilingualString().withContent("Test Stop Place"))
           .withCentroid(
             new SimplePoint_VersionStructure()
               .withLocation(
