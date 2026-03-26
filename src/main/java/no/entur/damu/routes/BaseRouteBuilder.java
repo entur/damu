@@ -33,6 +33,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.google.pubsub.GooglePubsubConstants;
 import org.apache.camel.component.google.pubsub.GooglePubsubEndpoint;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.FileSystemUtils;
 
@@ -94,6 +95,29 @@ public abstract class BaseRouteBuilder extends RouteBuilder {
           .forEach(entry ->
             exchange.getIn().setHeader(entry.getKey(), entry.getValue())
           );
+      });
+
+    // Copy correlation ID and codespace into SLF4J MDC for structured logging.
+    interceptFrom("*")
+      .process(exchange -> {
+        String correlationId = exchange
+          .getIn()
+          .getHeader(Constants.CORRELATION_ID, String.class);
+        if (correlationId != null && !correlationId.isEmpty()) {
+          MDC.put("correlationId", correlationId);
+        }
+        String codespace = exchange
+          .getIn()
+          .getHeader(Constants.DATASET_REFERENTIAL, String.class);
+        if (codespace != null && !codespace.isEmpty()) {
+          MDC.put("codespace", codespace);
+        }
+      });
+
+    onCompletion()
+      .process(exchange -> {
+        MDC.remove("correlationId");
+        MDC.remove("codespace");
       });
 
     // Copy only the correlationId and codespace headers from the Camel message into the PubSub message by default.

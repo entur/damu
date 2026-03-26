@@ -30,6 +30,8 @@
                             "serviceContext": {
                                 "no.damu.service": "damu"
                             },
+                            "correlationId": "%X{correlationId:-}",
+                            "codespace": "%X{codespace:-}",
                             "message": "%message\n%ex{full}",
                             "severity": "%level",
                             "breadcrumb": "%X{camel.breadcrumbId}",
