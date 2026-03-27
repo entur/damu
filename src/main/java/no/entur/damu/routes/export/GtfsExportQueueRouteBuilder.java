@@ -94,7 +94,7 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
       .streamCache("true")
       .process(this::setCorrelationIdIfMissing)
       .setHeader(DATASET_REFERENTIAL, bodyAs(String.class))
-      .process(this::setMdcFromHeaders)
+      .process(this::updateMdcFromHeaders)
       .log(LoggingLevel.INFO, correlation() + "Received GTFS export request")
       .setBody(constant(STATUS_EXPORT_STARTED))
       .to("direct:notifyMarduk")

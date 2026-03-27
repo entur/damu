@@ -35,7 +35,9 @@ public class DamuBlobStoreRoute extends BaseRouteBuilder {
   }
 
   @Override
-  public void configure() {
+  public void configure() throws Exception {
+    super.configure();
+
     from("direct:uploadDamuBlob")
       .to(logDebugShowAll())
       .bean(damuBlobStoreService, "uploadBlob")

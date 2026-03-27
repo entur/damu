@@ -35,7 +35,9 @@ public class MardukBlobStoreRoute extends BaseRouteBuilder {
   }
 
   @Override
-  public void configure() {
+  public void configure() throws Exception {
+    super.configure();
+
     from("direct:getMardukBlob")
       .to(logDebugShowAll())
       .bean(mardukBlobStoreService, "getBlob")

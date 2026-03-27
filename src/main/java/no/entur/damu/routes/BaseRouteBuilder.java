@@ -45,7 +45,6 @@ public abstract class BaseRouteBuilder extends RouteBuilder {
   public static final List<String> WHITELISTED_HEADERS = List.of(
     Constants.CORRELATION_ID,
     Constants.DATASET_REFERENTIAL,
-    Constants.DATASET_REFERENTIAL,
     Constants.PROVIDER_ID,
     Constants.ORIGINAL_PROVIDER_ID,
     Constants.STATUS_HEADER,
@@ -78,16 +77,25 @@ public abstract class BaseRouteBuilder extends RouteBuilder {
         .logRetryStackTrace(true)
     );
 
-    // Copy all PubSub headers except the internal Camel PubSub headers from the PubSub message into the Camel message headers.
+    configurePubSubInterceptor();
+    configureMdcInterceptor();
+    configureOutboundPubSubInterceptor();
+    configureMdcLogging();
+  }
 
-    interceptFrom("*")
-      .filter(exchange ->
-        exchange.getFromEndpoint() instanceof GooglePubsubEndpoint
-      )
+  /** Copy PubSub attributes into Camel headers. */
+  protected void configurePubSubInterceptor() {
+    interceptFrom(".*google-pubsub:.*")
       .process(exchange -> {
         Map<String, String> pubSubAttributes = exchange
           .getIn()
           .getHeader(GooglePubsubConstants.ATTRIBUTES, Map.class);
+        if (pubSubAttributes == null) {
+          log.warn(
+            "Missing PubSub attribute map in Exchange, skipping header copy"
+          );
+          return;
+        }
         pubSubAttributes
           .entrySet()
           .stream()
@@ -96,31 +104,15 @@ public abstract class BaseRouteBuilder extends RouteBuilder {
             exchange.getIn().setHeader(entry.getKey(), entry.getValue())
           );
       });
+  }
 
-    // Copy correlation ID and codespace into SLF4J MDC for structured logging.
-    interceptFrom("*")
-      .process(exchange -> {
-        String correlationId = exchange
-          .getIn()
-          .getHeader(Constants.CORRELATION_ID, String.class);
-        if (correlationId != null && !correlationId.isEmpty()) {
-          MDC.put("correlationId", correlationId);
-        }
-        String codespace = exchange
-          .getIn()
-          .getHeader(Constants.DATASET_REFERENTIAL, String.class);
-        if (codespace != null && !codespace.isEmpty()) {
-          MDC.put("codespace", codespace);
-        }
-      });
+  /** Copy correlation ID and codespace into SLF4J MDC for structured logging. */
+  protected void configureMdcInterceptor() {
+    interceptFrom(".*").process(this::updateMdcFromHeaders);
+  }
 
-    onCompletion()
-      .process(exchange -> {
-        MDC.remove("correlationId");
-        MDC.remove("codespace");
-      });
-
-    // Copy only the correlationId and codespace headers from the Camel message into the PubSub message by default.
+  /** Copy whitelisted Camel headers into outbound PubSub message attributes. */
+  protected void configureOutboundPubSubInterceptor() {
     interceptSendToEndpoint("google-pubsub:*")
       .process(exchange -> {
         Map<String, String> pubSubAttributes = new HashMap<>(
@@ -145,6 +137,15 @@ public abstract class BaseRouteBuilder extends RouteBuilder {
         exchange
           .getIn()
           .setHeader(GooglePubsubConstants.ATTRIBUTES, pubSubAttributes);
+      });
+  }
+
+  /** Clean up MDC when the exchange completes. */
+  protected void configureMdcLogging() {
+    onCompletion()
+      .process(exchange -> {
+        MDC.remove("correlationId");
+        MDC.remove("codespace");
       });
   }
 
@@ -179,7 +180,15 @@ public abstract class BaseRouteBuilder extends RouteBuilder {
     );
   }
 
-  protected void setMdcFromHeaders(Exchange e) {
+  /**
+   * Update MDC from current exchange headers.
+   * Called automatically by the MDC interceptor at route entry, and can be called
+   * explicitly via {@code .process(this::updateMdcFromHeaders)} after setting headers mid-route.
+   */
+  protected void updateMdcFromHeaders(Exchange e) {
+    MDC.remove("correlationId");
+    MDC.remove("codespace");
+
     String correlationId = e
       .getIn()
       .getHeader(Constants.CORRELATION_ID, String.class);
