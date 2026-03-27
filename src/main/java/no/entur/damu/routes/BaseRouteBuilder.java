@@ -179,6 +179,21 @@ public abstract class BaseRouteBuilder extends RouteBuilder {
     );
   }
 
+  protected void setMdcFromHeaders(Exchange e) {
+    String correlationId = e
+      .getIn()
+      .getHeader(Constants.CORRELATION_ID, String.class);
+    if (correlationId != null && !correlationId.isEmpty()) {
+      MDC.put("correlationId", correlationId);
+    }
+    String codespace = e
+      .getIn()
+      .getHeader(Constants.DATASET_REFERENTIAL, String.class);
+    if (codespace != null && !codespace.isEmpty()) {
+      MDC.put("codespace", codespace);
+    }
+  }
+
   protected void setNewCorrelationId(Exchange e) {
     e.getIn().setHeader(Constants.CORRELATION_ID, UUID.randomUUID().toString());
   }
