@@ -20,7 +20,6 @@ data:
     camel.main.name=damu
     camel.main.stream-caching-enabled=false
     camel.main.stream-caching-spool-enabled=true
-    camel.dataformat.jackson.module-refs=jacksonJavaTimeModule
     # the Camel shutdown timeout must be shorter than the Kubernetes terminationGracePeriod
     damu.shutdown.timeout=25
     damu.camel.redelivery.max=0
@@ -51,7 +50,6 @@ data:
     logging.level.no.entur=INFO
     logging.level.no.entur.damu=INFO
     logging.level.org.apache=INFO
-    logging.level.org.apache.camel.component.http.HttpComponent=WARN
 
 
 kind: ConfigMap
