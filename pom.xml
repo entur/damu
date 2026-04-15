@@ -26,13 +26,11 @@
         <java.version>21</java.version>
         <camel.version>4.8.9</camel.version>
         <entur.helpers.version>5.50.0</entur.helpers.version>
-        <commons-io.version>2.11.0</commons-io.version>
         <netex-gtfs-converter-java.version>3.0.0</netex-gtfs-converter-java.version>
         <zt-zip.version>1.17</zt-zip.version>
         <commons-csv.version>1.14.1</commons-csv.version>
         <prettier-java.version>2.1.0</prettier-java.version>
         <prettier-maven-plugin.version>0.22</prettier-maven-plugin.version>
-        <zt-zip.version>1.17</zt-zip.version>
         <plugin.prettier.goal>write</plugin.prettier.goal>
 
         <!-- empty argLine property, the value is set up by Jacoco during unit tests execution -->
@@ -122,27 +120,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.camel.springboot</groupId>
-            <artifactId>camel-zipfile-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel.springboot</groupId>
             <artifactId>camel-file-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel.springboot</groupId>
-            <artifactId>camel-jaxb-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel.springboot</groupId>
-            <artifactId>camel-platform-http-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel.springboot</groupId>
-            <artifactId>camel-http-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.camel.springboot</groupId>
-            <artifactId>camel-openapi-java-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.camel.springboot</groupId>
@@ -151,20 +129,10 @@
 
         <!-- Other -->
         <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.zeroturnaround</groupId>
             <artifactId>zt-zip</artifactId>
             <version>${zt-zip.version}</version>
             <type>jar</type>
-        </dependency>
-
-        <dependency>
-            <groupId>jakarta.ws.rs</groupId>
-            <artifactId>jakarta.ws.rs-api</artifactId>
         </dependency>
 
         <dependency>
