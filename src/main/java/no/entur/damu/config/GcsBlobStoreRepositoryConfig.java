@@ -16,8 +16,14 @@
 
 package no.entur.damu.config;
 
+import com.google.cloud.NoCredentials;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
+import org.rutebanken.helper.gcp.BlobStoreHelper;
 import org.rutebanken.helper.gcp.repository.GcsBlobStoreRepository;
 import org.rutebanken.helper.storage.repository.BlobStoreRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,12 +34,43 @@ import org.springframework.context.annotation.Scope;
 @Profile("gcs-blobstore")
 public class GcsBlobStoreRepositoryConfig {
 
+  private static final Logger LOG = LoggerFactory.getLogger(
+    GcsBlobStoreRepositoryConfig.class
+  );
+
+  @Value("${blobstore.gcs.credential.path:#{null}}")
+  private String credentialPath;
+
+  @Value("${blobstore.gcs.project.id}")
+  private String projectId;
+
+  @Bean
+  public Storage storage() {
+    String emulatorHost = System.getenv("STORAGE_EMULATOR_HOST");
+    if (emulatorHost != null && !emulatorHost.isBlank()) {
+      LOG.info(
+        "Using GCS emulator at {} for project {}",
+        emulatorHost,
+        projectId
+      );
+      return StorageOptions
+        .newBuilder()
+        .setHost(emulatorHost)
+        .setProjectId(projectId)
+        .setCredentials(NoCredentials.getInstance())
+        .build()
+        .getService();
+    }
+    if (credentialPath == null || credentialPath.isEmpty()) {
+      return BlobStoreHelper.getStorage(projectId);
+    } else {
+      return BlobStoreHelper.getStorage(credentialPath, projectId);
+    }
+  }
+
   @Bean
   @Scope("prototype")
-  BlobStoreRepository blobStoreRepository(
-    @Value("${blobstore.gcs.project.id}") String projectId,
-    @Value("${blobstore.gcs.credential.path:#{null}}") String credentialPath
-  ) {
-    return new GcsBlobStoreRepository(projectId, credentialPath);
+  BlobStoreRepository blobStoreRepository(Storage storage) {
+    return new GcsBlobStoreRepository(storage);
   }
 }
