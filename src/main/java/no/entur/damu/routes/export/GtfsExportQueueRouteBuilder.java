@@ -145,7 +145,7 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
         );
         exchange
           .getIn()
-          .setBody(gtfsExporter.convertTimetablesToGtfs(timetableDataset));
+          .setBody(convertToGtfs(gtfsExporter, timetableDataset, codespace));
       })
       .log(LoggingLevel.INFO, correlation() + "Dataset processing complete")
       .routeId("convert-to-gtfs");
@@ -176,5 +176,34 @@ public class GtfsExportQueueRouteBuilder extends BaseRouteBuilder {
     from("direct:notifyMarduk")
       .to("google-pubsub:{{damu.pubsub.project.id}}:DamuExportGtfsStatusQueue")
       .routeId("notify-marduk");
+  }
+
+  /**
+   * Run the NeTEx-to-GTFS conversion, ensuring any failure surfaces as a
+   * {@link GtfsExportException}.
+   * <p>
+   * A failure inside the converter is deterministic for a given dataset (e.g. the
+   * {@code IndexOutOfBoundsException} thrown for journey patterns whose stop-point
+   * {@code order} values are not a dense {@code 1..N} sequence): retrying cannot help.
+   * Wrapping it as a {@link GtfsExportException} routes it through the
+   * {@code onException(GtfsExportException.class)} handler, which marks the export failed and
+   * lets the Pub/Sub message be acknowledged, instead of letting an unexpected exception
+   * escape unhandled and have the message redelivered until retention expires.
+   */
+  static InputStream convertToGtfs(
+    GtfsExporter gtfsExporter,
+    InputStream timetableDataset,
+    String codespace
+  ) {
+    try {
+      return gtfsExporter.convertTimetablesToGtfs(timetableDataset);
+    } catch (GtfsExportException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new GtfsExportException(
+        "GTFS conversion failed for codespace " + codespace,
+        e
+      );
+    }
   }
 }
