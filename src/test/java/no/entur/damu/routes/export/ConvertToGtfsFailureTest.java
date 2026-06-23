@@ -30,13 +30,14 @@ class ConvertToGtfsFailureTest {
       "Index 5 out of bounds for length 5"
     );
     when(exporter.convertTimetablesToGtfs(any())).thenThrow(cause);
+    InputStream timetableDataset = InputStream.nullInputStream();
 
     GtfsExportException thrown = assertThrows(
       GtfsExportException.class,
       () ->
         GtfsExportQueueRouteBuilder.convertToGtfs(
           exporter,
-          InputStream.nullInputStream(),
+          timetableDataset,
           "FLT"
         )
     );
@@ -49,13 +50,14 @@ class ConvertToGtfsFailureTest {
     GtfsExporter exporter = mock(GtfsExporter.class);
     GtfsExportException original = new GtfsExportException("boom");
     when(exporter.convertTimetablesToGtfs(any())).thenThrow(original);
+    InputStream timetableDataset = InputStream.nullInputStream();
 
     GtfsExportException thrown = assertThrows(
       GtfsExportException.class,
       () ->
         GtfsExportQueueRouteBuilder.convertToGtfs(
           exporter,
-          InputStream.nullInputStream(),
+          timetableDataset,
           "FLT"
         )
     );
