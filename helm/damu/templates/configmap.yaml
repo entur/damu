@@ -58,3 +58,5 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
   {{- include "damu.common.labels" . | indent 4 }}
+  annotations:
+  {{- include "damu.common.annotations" . | indent 4 }}

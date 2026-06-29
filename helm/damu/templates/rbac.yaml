@@ -5,6 +5,8 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
   {{- include "damu.common.labels" . | indent 4 }}
+  annotations:
+  {{- include "damu.common.annotations" . | indent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -21,6 +23,8 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
   {{- include "damu.common.labels" . | indent 4 }}
+  annotations:
+  {{- include "damu.common.annotations" . | indent 4 }}
 rules:
   - apiGroups: [""]
     resources: ["services", "pods", "endpoints"]
