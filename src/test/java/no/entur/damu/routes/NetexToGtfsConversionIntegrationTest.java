@@ -40,8 +40,10 @@ import no.entur.damu.stop.StopPlaceFetcher;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
+import org.apache.camel.Route;
 import org.apache.camel.builder.AdviceWith;
 import org.apache.camel.component.google.pubsub.GooglePubsubConstants;
+import org.apache.camel.component.google.pubsub.GooglePubsubEndpoint;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.entur.netex.gtfs.export.stop.StopAreaRepositoryFactory;
 import org.junit.jupiter.api.Test;
@@ -351,6 +353,34 @@ class NetexToGtfsConversionIntegrationTest
     assertTrue(
       aggregatedBasicContent.length > 0,
       "Basic aggregated GTFS file must be non-empty"
+    );
+  }
+
+  /**
+   * Pins the explicit maxDeliveryAttempts on the consumer endpoint. Without
+   * it, Camel 4.18 auto-fetches the value from the subscription at startup,
+   * which fails with PERMISSION_DENIED in real environments (the emulator
+   * allows it, so removal would pass CI silently).
+   */
+  @Test
+  void gtfsRouteDispatcherConsumerHasExplicitMaxDeliveryAttempts() {
+    context.start();
+
+    GooglePubsubEndpoint endpoint = context
+      .getRoutes()
+      .stream()
+      .map(Route::getEndpoint)
+      .filter(GooglePubsubEndpoint.class::isInstance)
+      .map(GooglePubsubEndpoint.class::cast)
+      .filter(e -> "GtfsRouteDispatcherTopic".equals(e.getDestinationName()))
+      .findFirst()
+      .orElseThrow();
+
+    assertTrue(endpoint.isMaxDeliveryAttemptsExplicitlySet());
+    assertEquals(
+      5,
+      endpoint.getMaxDeliveryAttempts(),
+      "must match dead_letter_policy.max_delivery_attempts in marduk terraform/pubsub.tf"
     );
   }
 }
