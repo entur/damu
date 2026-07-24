@@ -9,17 +9,19 @@ Damu is a Spring Boot application that converts NeTEx (Network Timetable Exchang
 ### Technology Stack
 - **Java 21** - Core language
 - **Spring Boot** - Application framework
-- **Apache Camel 4.8.9** - Integration framework and routing
+- **Apache Camel 4.18.2** - Integration framework and routing (see pom.xml for the current version)
 - **Google Cloud Platform**:
   - Cloud Storage (GCS) - File storage
   - Pub/Sub - Messaging
 - **Maven** - Build tool
 
 ### Key Dependencies
-- `netex-gtfs-converter-java` (v2.1.105) - Core NeTEx to GTFS conversion
-- `gtfs-validator-main` (v6.0.0) - GTFS validation
-- `entur-helpers` (v5.47.0) - Google Cloud integration utilities
-- `zt-zip` (v1.17) - ZIP file handling
+- `netex-gtfs-converter-java` - Core NeTEx to GTFS conversion
+- `gtfs-validator-main` - GTFS validation
+- `entur-helpers` - Google Cloud integration utilities
+- `zt-zip` - ZIP file handling
+
+Versions live in pom.xml; do not trust versions written in this file.
 
 ### Integration Flow
 1. **Trigger**: Chouette or Uttu completes a NeTEx export
@@ -233,4 +235,4 @@ Licensed under EUPL-1.2 (see LICENSE.txt)
 
 - **Repository**: https://github.com/entur/damu
 - **CI**: https://circleci.com/gh/entur/damu/tree/master
-- **Parent POM**: org.entur.ror:superpom:4.9.0
+- **Parent POM**: org.entur.ror:superpom (version in pom.xml)
