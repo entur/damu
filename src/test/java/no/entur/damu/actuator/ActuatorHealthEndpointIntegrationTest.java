@@ -20,28 +20,46 @@ package no.entur.damu.actuator;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Map;
 import no.entur.damu.TestApp;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PubSubEmulatorContainer;
+import org.testcontainers.gcloud.PubSubEmulatorContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 /**
- * The main purpose of this test is to check that the HTTP server is up and running.
+ * Verifies that the actuator endpoints exposed in production are reachable without
+ * authentication, so that the Kubernetes probes and the Prometheus scrape keep working.
  */
 @SpringBootTest(
   classes = TestApp.class,
-  webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+  webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+  // mirrors the actuator configuration in helm/damu/templates/configmap.yaml
+  properties = {
+    "management.endpoints.access.default=none",
+    "management.endpoint.info.access=unrestricted",
+    "management.endpoint.health.access=unrestricted",
+    "management.endpoint.health.group.readiness.include=readinessState",
+    "management.endpoint.prometheus.access=unrestricted",
+    "management.endpoints.web.exposure.include=info,health,prometheus",
+    "management.endpoints.web.exposure.exclude=",
+  }
 )
+@AutoConfigureTestRestTemplate
 @ActiveProfiles(
   { "test", "default", "in-memory-blobstore", "google-pubsub-autocreate" }
 )
@@ -66,19 +84,24 @@ class ActuatorHealthEndpointIntegrationTest {
       "camel.component.google-pubsub.endpoint",
       pubsubEmulator::getEmulatorEndpoint
     );
-    registry.add("management.endpoints.web.exposure.include", () -> "health");
-    registry.add("management.endpoints.web.exposure.exclude", () -> "");
-    registry.add("management.endpoint.health.enabled", () -> "true");
-    registry.add("management.endpoint.health.show-details", () -> "always");
   }
 
   @Autowired
   private TestRestTemplate restTemplate;
 
-  @Test
-  void testHealthEndpointIsAccessible() {
-    ResponseEntity<String> response = restTemplate.getForEntity(
+  @ParameterizedTest
+  @ValueSource(
+    strings = {
+      "/actuator/info",
       "/actuator/health",
+      "/actuator/health/liveness",
+      "/actuator/health/readiness",
+      "/actuator/prometheus",
+    }
+  )
+  void testExposedEndpointIsAccessible(String path) {
+    ResponseEntity<String> response = restTemplate.getForEntity(
+      path,
       String.class
     );
 
@@ -86,16 +109,38 @@ class ActuatorHealthEndpointIntegrationTest {
     assertNotNull(response.getBody());
   }
 
-  @Test
-  void testHealthEndpointReturnsUpStatus() {
-    ResponseEntity<String> response = restTemplate.getForEntity(
+  @ParameterizedTest
+  @ValueSource(
+    strings = {
       "/actuator/health",
+      "/actuator/health/liveness",
+      "/actuator/health/readiness",
+    }
+  )
+  void testHealthEndpointReturnsUpStatus(String path) {
+    ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+      path,
+      HttpMethod.GET,
+      null,
+      new ParameterizedTypeReference<>() {}
+    );
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    Map<String, Object> body = response.getBody();
+    assertNotNull(body);
+    assertEquals("UP", body.get("status"));
+  }
+
+  @Test
+  void testPrometheusEndpointReturnsMetrics() {
+    ResponseEntity<String> response = restTemplate.getForEntity(
+      "/actuator/prometheus",
       String.class
     );
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     String body = response.getBody();
     assertNotNull(body);
-    assertTrue(body.contains("\"status\":\"UP\""));
+    assertTrue(body.contains("# HELP"), body);
   }
 }

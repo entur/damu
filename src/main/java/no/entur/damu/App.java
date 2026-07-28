@@ -26,13 +26,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.context.annotation.Import;
 
 /**
  * A spring-boot application that includes a Camel route builder to set up the Camel context.
  */
-@SpringBootApplication(exclude = { UserDetailsServiceAutoConfiguration.class })
+@SpringBootApplication
 @Import({ GcsBlobStoreRepositoryConfig.class, GooglePubSubConfig.class })
 public class App extends RouteBuilder {
 
