@@ -9,7 +9,7 @@ Damu is a Spring Boot application that converts NeTEx (Network Timetable Exchang
 ### Technology Stack
 - **Java 21** - Core language
 - **Spring Boot** - Application framework
-- **Apache Camel 4.18.2** - Integration framework and routing (see pom.xml for the current version)
+- **Apache Camel** - Integration framework and routing (see pom.xml for the current version)
 - **Google Cloud Platform**:
   - Cloud Storage (GCS) - File storage
   - Pub/Sub - Messaging
@@ -179,7 +179,6 @@ Spring Boot Actuator provides health checks and metrics:
 Workflow defined in `.github/workflows/push.yml`:
 - Build and test on push
 - Code formatting validation
-- CircleCI integration (legacy)
 
 ## Code Quality
 
@@ -190,7 +189,6 @@ Workflow defined in `.github/workflows/push.yml`:
 
 ### Security
 - OWASP Dependency Check suppression configuration
-- CodeQL security scanning support
 
 ## Related Projects
 
@@ -234,5 +232,4 @@ Licensed under EUPL-1.2 (see LICENSE.txt)
 ## Links
 
 - **Repository**: https://github.com/entur/damu
-- **CI**: https://circleci.com/gh/entur/damu/tree/master
 - **Parent POM**: org.entur.ror:superpom (version in pom.xml)

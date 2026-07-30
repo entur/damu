@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -32,6 +33,7 @@ import org.entur.netex.gtfs.export.GtfsExporter;
 import org.entur.netex.gtfs.export.stop.DefaultStopAreaRepositoryFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.zeroturnaround.zip.ZipUtil;
 
 /**
@@ -40,7 +42,7 @@ import org.zeroturnaround.zip.ZipUtil;
 class EnturGtfsExportTest {
 
   @Test
-  void testEnturExport() throws IOException {
+  void testEnturExport(@TempDir Path tempDir) throws IOException {
     DefaultStopAreaRepositoryFactory factory =
       new DefaultStopAreaRepositoryFactory();
     factory.refreshStopAreaRepository(
@@ -60,7 +62,7 @@ class EnturGtfsExportTest {
       netexTimetableDataset
     );
 
-    File gtfsFile = new File("export-gtfs.zip");
+    File gtfsFile = tempDir.resolve("export-gtfs.zip").toFile();
     java.nio.file.Files.copy(
       exportedGtfs,
       gtfsFile.toPath(),
