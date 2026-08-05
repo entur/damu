@@ -27,7 +27,7 @@
         <entur.helpers.version>7.2.0</entur.helpers.version>
         <spring-cloud-gcp-dependencies.version>8.1.0</spring-cloud-gcp-dependencies.version>
         <netex-gtfs-converter-java.version>3.0.4</netex-gtfs-converter-java.version>
-        <zt-zip.version>1.17</zt-zip.version>
+        <zt-zip.version>1.18.2</zt-zip.version>
         <commons-csv.version>1.14.1</commons-csv.version>
         <prettier-java.version>2.1.0</prettier-java.version>
         <prettier-maven-plugin.version>0.22</prettier-maven-plugin.version>
@@ -157,7 +157,7 @@
         <dependency>
             <groupId>com.google.flogger</groupId>
             <artifactId>flogger-system-backend</artifactId>
-            <version>0.6</version>
+            <version>0.9</version>
             <scope>runtime</scope>
         </dependency>
 
