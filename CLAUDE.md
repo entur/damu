@@ -7,7 +7,7 @@ Damu is a Spring Boot application that converts NeTEx (Network Timetable Exchang
 ## Architecture
 
 ### Technology Stack
-- **Java 21** - Core language
+- **Java 25** - Core language
 - **Spring Boot** - Application framework
 - **Apache Camel** - Integration framework and routing (see pom.xml for the current version)
 - **Google Cloud Platform**:
@@ -88,7 +88,7 @@ Multiple blob store configurations support different environments:
 ## Development Setup
 
 ### Prerequisites
-- Java 21 JDK
+- Java 25 JDK
 - Maven 3.6+
 - Docker (optional, for containerized deployment)
 - Google Cloud SDK (for GCS/Pub/Sub integration)
