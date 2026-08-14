@@ -11,9 +11,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
  * <p>Spring Boot would normally contribute this, but its auto-configuration backs off when another
  * {@code TaskScheduler} bean already exists, and spring-cloud-gcp registers two of them
  * ({@code pubsubPublisherThreadPool} and {@code globalPubSubSubscriberThreadPoolScheduler}). Without a
- * bean named {@code taskScheduler}, {@code @Scheduled} logs an ambiguity warning on every boot and
- * falls back to a single-threaded executor of its own, which silently ignores
- * {@code spring.task.scheduling.pool.size}.
+ * bean named {@code taskScheduler}, {@code @Scheduled} falls back to a single-threaded executor of its own and
+ * silently ignores {@code spring.task.scheduling.pool.size}. It says so once per boot, at INFO, from
+ * {@code TaskSchedulerRouter}, which is why this is easy to miss.
  */
 @Configuration
 public class SchedulingConfig {
