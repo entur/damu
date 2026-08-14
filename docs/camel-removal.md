@@ -148,13 +148,27 @@ the exporter hands back a stream over a temp file it deletes on close and can on
 
 ## Shutdown
 
-No drain. `terminationGracePeriodSeconds` is the chart default of 30s and `damu.shutdown.timeout` was 25,
-so Camel could not finish a multi-minute export either: in-flight work was abandoned and redelivered.
-That is unchanged. What did need fixing is the publisher: its thread pool stops accepting work on
-`ContextClosedEvent`, which also stops the subscribers, so a job still running would finish and then be
-unable to tell marduk how it went. `spring.cloud.gcp.pubsub.publisher.executor-accept-tasks-after-context-close=true`
-in the ConfigMap covers that. Camel was not exposed to it, because its google-pubsub component built its
-own publishers outside the Spring lifecycle.
+No drain, and the window for in-flight work got **shorter**, from 25s to 10s.
+
+Camel bounded it with `damu.shutdown.timeout=25`, against a `terminationGracePeriodSeconds` of 30 (the
+chart default). Now the bound comes from `AbstractEnturGooglePubSubConsumer`, whose `ContextClosedEvent`
+listener calls `stopAsync().awaitTerminated(10, SECONDS)` per subscriber. gax will not terminate while a
+callback is running, so for a job still in progress that wait always expires, and the context proceeds to
+destroy beans underneath it.
+
+That matters because `CachingPublisherFactory.shutdown()` is `@PreDestroy` and shuts every cached
+`Publisher`. A job that finishes after the 10s therefore cannot publish its terminal status: marduk is
+left with a `started`, the message is nacked, and the whole export runs again.
+`spring.cloud.gcp.pubsub.publisher.executor-accept-tasks-after-context-close=true` narrows this but does
+not close it, because it only keeps the publisher's *thread pool* accepting work; the `Publisher` itself
+is still shut down with the bean. Camel was not exposed to any of this, because its google-pubsub
+component built its own publishers outside the Spring lifecycle.
+
+In practice neither 25s nor 10s finishes a real export, so both versions abandon and redeliver it. What
+changed is the band of jobs that used to complete in 10-25s and now do not. Closing it properly means an
+`InFlightMessages`-style `SmartLifecycle` drain like antu's, sized against the 30s grace period, which
+would buy back about 15 seconds. That has not been done: it is a real gap, deliberately left open, and
+the argument for filling it gets stronger if exports get faster or the grace period gets longer.
 
 ## Scheduling
 
@@ -220,7 +234,7 @@ pod is replaced and kubelet re-syncs it into pods still running the old jar. The
 `damu.netex.stop.cache.refresh.quartz.trigger`: dropping it would not fail the old code, it would move
 the stop place cache refresh from 01:00 and 14:00 to 03:00 with nothing saying so.
 
-Delete that block, and the `stopPlaceCacheRefreshQuartzTrigger` value feeding it, in a later release.
+Delete that block in a later release. The values it renders are literals in the ConfigMap, so there is nothing in `values.yaml` to delete with it.
 
 Rollback: `git revert` plus a full redeploy, or `helm rollback`. An image-only rollback
 (`kubectl rollout undo`) restores the pod template but not the ConfigMap, which is a separate unversioned

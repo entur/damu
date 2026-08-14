@@ -16,10 +16,15 @@ import org.springframework.stereotype.Service;
 /**
  * Keeps the stop area repository current.
  *
- * <p>The startup refresh blocks {@code ApplicationReadyEvent}, so the pod does not report ready until
- * it can actually convert a dataset. Liveness is already UP by then. The PubSub consumer starts earlier,
- * on {@code ContextRefreshedEvent}, so a request arriving during the load still finds an unloaded
- * repository.
+ * <p>The startup refresh blocks {@code ApplicationReadyEvent}, so the pod does not report ready while
+ * the stop areas are still loading. Liveness is already UP by then, so this cannot restart the pod.
+ *
+ * <p>Readiness is not conditional on the load having <em>succeeded</em>: a missing or unreadable stop
+ * file is logged and the pod goes ready anyway, with an empty repository, until the next scheduled
+ * refresh. That matches the Camel version, whose quartz route logged and moved on, and it is the reason
+ * the pod does not CrashLoop when the file is absent. Exports in that window fail on
+ * {@code getStopAreaRepository()}. The PubSub consumer also starts earlier, on
+ * {@code ContextRefreshedEvent}, so a request arriving mid-load hits the same thing.
  */
 @Service
 public class StopAreaRefreshService {

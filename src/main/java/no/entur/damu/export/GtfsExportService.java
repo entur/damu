@@ -157,7 +157,14 @@ public class GtfsExportService {
       )
     ) {
       Path gtfsDataset = Files.createTempFile("damu-gtfs-", ".zip", OWNER_ONLY);
-      Files.copy(gtfs, gtfsDataset, StandardCopyOption.REPLACE_EXISTING);
+      try {
+        Files.copy(gtfs, gtfsDataset, StandardCopyOption.REPLACE_EXISTING);
+      } catch (IOException | RuntimeException e) {
+        // The caller only deletes what this method returns, so a half-written file would stay in
+        // java.io.tmpdir. A full disk fails here every time and would fill it further.
+        deleteQuietly(gtfsDataset);
+        throw e;
+      }
       LOGGER.info("Dataset processing complete");
       return gtfsDataset;
     } catch (IOException e) {
