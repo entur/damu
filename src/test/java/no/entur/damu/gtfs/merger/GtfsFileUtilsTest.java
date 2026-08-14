@@ -28,7 +28,6 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import no.entur.damu.routes.file.ZipFileUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
@@ -96,7 +95,7 @@ class GtfsFileUtilsTest {
 
     assertTrue(
       ZipFileUtils
-        .listFilesInZip(data)
+        .listFilesInZip(merged)
         .stream()
         .anyMatch(ze -> GtfsFileUtils.FEED_INFO_FILE_NAME.equals(ze.getName()))
     );

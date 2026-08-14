@@ -1,88 +1,47 @@
 ### PubSub Configuration in application.properties
 # damu.pubsub.project.id=test
 # logging.level.io.grpc.internal.ManagedChannelOrphanWrapper=OFF
-# camel.component.google-pubsub.endpoint=localhost:8085
-# camel.component.google-pubsub.authenticate=false
-# camel.component.google-pubsub.synchronous-pull-retryable-codes=DEADLINE_EXCEEDED
+# spring.cloud.gcp.pubsub.emulator-host=localhost:8085
 
 # Start PubSub emulator at PORT 8085
 
-# Create the topic named "DamuExportGtfsQueue" under project "test"
-PUT http://localhost:8085/v1/projects/test/topics/DamuExportGtfsQueue
+# Create the topic damu consumes from
+PUT http://localhost:8085/v1/projects/test/topics/GtfsRouteDispatcherTopic
 ###
+# ... and the two it publishes to
 PUT http://localhost:8085/v1/projects/test/topics/DamuExportGtfsStatusQueue
 ###
-PUT http://localhost:8085/v1/projects/test/topics/DamuAggregateGtfsQueue
-###
-PUT http://localhost:8085/v1/projects/test/topics/DamuAggregateGtfsStatusQueue
-###
-PUT http://localhost:8085/v1/projects/test/topics/GtfsRouteDispatcherTopic
+PUT http://localhost:8085/v1/projects/test/topics/MardukAggregateGtfsStatusQueue
 
 ###
 # List topics to make sure they are created.
 GET http://localhost:8085/v1/projects/test/topics
 
 ###
-# Create the subcription named "DamuExportGtfsQueue"
-PUT http://localhost:8085/v1/projects/test/subscriptions/DamuExportGtfsQueue
-Content-Type: application/json
-
-{ "topic": "projects/test/topics/DamuExportGtfsQueue" }
-
-###
-# Create the subcription named "DamuExportGtfsStatusQueue"
-PUT http://localhost:8085/v1/projects/test/subscriptions/DamuExportGtfsStatusQueue
-Content-Type: application/json
-
-{ "topic": "projects/test/topics/DamuExportGtfsStatusQueue" }
-
-###
-# Create the subcription named "DamuAggregateGtfsQueue"
-PUT http://localhost:8085/v1/projects/test/subscriptions/DamuAggregateGtfsQueue
-Content-Type: application/json
-
-{ "topic": "projects/test/topics/DamuAggregateGtfsQueue" }
-
-###
-# Create the subcription named "DamuAggregateGtfsStatusQueue"
-PUT http://localhost:8085/v1/projects/test/subscriptions/DamuAggregateGtfsStatusQueue
-Content-Type: application/json
-
-{ "topic": "projects/test/topics/DamuAggregateGtfsStatusQueue" }
-
-###
-# Create the subcription named "GtfsRouteDispatcherTopic"
+# Create the subscription named "GtfsRouteDispatcherTopic"
 PUT http://localhost:8085/v1/projects/test/subscriptions/GtfsRouteDispatcherTopic
 Content-Type: application/json
 
 { "topic": "projects/test/topics/GtfsRouteDispatcherTopic" }
 
 ###
-# Publish to the "DamuExportGtfsQueue", to start netex to gtfs convertion
-# data is chouette referential in base64 encoding. (e.g rb_avi = "cmJfYXZp", rb_vyx ="cmJfdnl4", rb_rut="cmJfcnV0", rb_fin= "cmJfZmlu", rb_inn="cmJfaW5u")
-POST http://localhost:8085/v1/projects/test/topics/DamuExportGtfsQueue:publish
+# Create the subscription named "DamuExportGtfsStatusQueue"
+PUT http://localhost:8085/v1/projects/test/subscriptions/DamuExportGtfsStatusQueue
 Content-Type: application/json
 
-{
-  "messages": [
-    {
-      "attributes": {
-        "RutebankenFileName": "merged-gtfs-basic.zip",
-        "RutebankenProviderId": "101",
-        "RutebankenOriginalProviderId": "1",
-        "RutebankenCorrelationId": "CorrelationId",
-        "RutebankenChouetteJobId": "ChouetteJobId",
-        "EnturDatasetReferential": "rb_avi",
-        "RutebankenUsername": "foobar"
-      },
-      "data": "cmJfYXZp"
-    }
-  ]
-}
+{ "topic": "projects/test/topics/DamuExportGtfsStatusQueue" }
 
 ###
-# Publish to the "DamuAggregateGtfsQueue", to start gtfs export
-# data is chouette referencial in base64 encoding.
+# Create the subscription named "MardukAggregateGtfsStatusQueue"
+PUT http://localhost:8085/v1/projects/test/subscriptions/MardukAggregateGtfsStatusQueue
+Content-Type: application/json
+
+{ "topic": "projects/test/topics/MardukAggregateGtfsStatusQueue" }
+
+###
+# Start a NeTEx to GTFS conversion.
+# data is the chouette referential in base64 encoding. (e.g rb_avi = "cmJfYXZp", rb_vyx ="cmJfdnl4",
+# rb_rut="cmJfcnV0", rb_fin= "cmJfZmlu", rb_inn="cmJfaW5u")
 POST http://localhost:8085/v1/projects/test/topics/GtfsRouteDispatcherTopic:publish
 Content-Type: application/json
 
@@ -101,8 +60,8 @@ Content-Type: application/json
 }
 
 ###
-# Publish to the "GtfsRouteDispatcherTopic", to start gtfs aggregation
-# data is chouette referencial in base64 encoding.
+# Start a GTFS aggregation.
+# data is the comma-separated file list in base64 encoding.
 # cmJfYXZpLWFnZ3JlZ2F0ZWQtZ3Rmcy56aXA= = rb_avi-aggregated-gtfs.zip
 # cmJfcnV0LWFnZ3JlZ2F0ZWQtZ3Rmcy56aXA= = rb_rut-aggregated-gtfs.zip
 # cmJfYXZpLWFnZ3JlZ2F0ZWQtZ3Rmcy56aXAscmJfcnV0LWFnZ3JlZ2F0ZWQtZ3Rmcy56aXA= = rb_avi-aggregated-gtfs.zip,rb_rut-aggregated-gtfs.zip
@@ -116,8 +75,7 @@ Content-Type: application/json
         "Action": "Aggregation",
         "RutebankenCorrelationId": "CorrelationId",
         "RutebankenProviderId": "101",
-        "RutebankenOriginalProviderId": "1",
-        "IncludeShapes": "false"
+        "RutebankenOriginalProviderId": "1"
       },
       "data": "cmJfYXZpLWFnZ3JlZ2F0ZWQtZ3Rmcy56aXAscmJfcnV0LWFnZ3JlZ2F0ZWQtZ3Rmcy56aXA="
     }

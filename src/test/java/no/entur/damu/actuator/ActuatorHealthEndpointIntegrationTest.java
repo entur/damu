@@ -34,12 +34,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.gcloud.PubSubEmulatorContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
 /**
  * Verifies that the actuator endpoints exposed in production are reachable without
@@ -60,31 +54,8 @@ import org.testcontainers.utility.DockerImageName;
   }
 )
 @AutoConfigureTestRestTemplate
-@ActiveProfiles(
-  { "test", "default", "in-memory-blobstore", "google-pubsub-autocreate" }
-)
-@Testcontainers
+@ActiveProfiles({ "test", "default", "in-memory-blobstore" })
 class ActuatorHealthEndpointIntegrationTest {
-
-  @Container
-  private static final PubSubEmulatorContainer pubsubEmulator =
-    new PubSubEmulatorContainer(
-      DockerImageName.parse(
-        "gcr.io/google.com/cloudsdktool/cloud-sdk:emulators"
-      )
-    );
-
-  @DynamicPropertySource
-  static void emulatorProperties(DynamicPropertyRegistry registry) {
-    registry.add(
-      "spring.cloud.gcp.pubsub.emulator-host",
-      pubsubEmulator::getEmulatorEndpoint
-    );
-    registry.add(
-      "camel.component.google-pubsub.endpoint",
-      pubsubEmulator::getEmulatorEndpoint
-    );
-  }
 
   @Autowired
   private TestRestTemplate restTemplate;

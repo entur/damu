@@ -2,234 +2,138 @@
 
 ## Project Overview
 
-Damu is a Spring Boot application that converts NeTEx (Network Timetable Exchange) datasets into GTFS (General Transit Feed Specification) datasets. It serves as a critical integration component in the Entur public transport data pipeline, handling conversion, validation, and aggregation of transit data.
+Damu converts NeTEx datasets into GTFS datasets for the Entur public transport data pipeline. It also
+merges the per-provider GTFS exports into the national datasets, validates GTFS, and publishes a GTFS
+export of the stop places.
 
 ## Architecture
 
 ### Technology Stack
-- **Java 25** - Core language
-- **Spring Boot** - Application framework
-- **Apache Camel** - Integration framework and routing (see pom.xml for the current version)
-- **Google Cloud Platform**:
-  - Cloud Storage (GCS) - File storage
-  - Pub/Sub - Messaging
-- **Maven** - Build tool
+- **Java 25**
+- **Spring Boot** (no integration framework; PubSub consumers come from `entur-google-pubsub`)
+- **Google Cloud Platform**: Cloud Storage for files, Pub/Sub for messaging
+- **Maven**, parent `org.entur.ror:superpom`
 
 ### Key Dependencies
-- `netex-gtfs-converter-java` - Core NeTEx to GTFS conversion
-- `gtfs-validator-main` - GTFS validation
-- `entur-helpers` - Google Cloud integration utilities
-- `zt-zip` - ZIP file handling
+- `netex-gtfs-converter-java` - the NeTEx to GTFS conversion itself
+- `gtfs-validator-main` - MobilityData GTFS validation
+- `entur-helpers` - `AbstractEnturGooglePubSubConsumer`, GCS blob store
+- `zt-zip` - ZIP handling
 
 Versions live in pom.xml; do not trust versions written in this file.
-
-### Integration Flow
-1. **Trigger**: Chouette or Uttu completes a NeTEx export
-2. **Notification**: Marduk notifies Damu via Google Pub/Sub
-3. **Download**: Damu downloads NeTEx dataset from GCS
-4. **Convert**: NeTEx is converted to GTFS
-5. **Validate**: GTFS is validated using MobilityData validator
-6. **Upload**: GTFS dataset is uploaded to GCS
-7. **Notify**: Marduk is notified of completion
 
 ## Project Structure
 
 ```
-damu2/
+damu/
 ├── src/main/java/no/entur/damu/
-│   ├── App.java                      # Main Spring Boot application
-│   ├── Constants.java                 # Application constants
-│   ├── config/                        # Configuration classes
-│   │   ├── GcsBlobStoreRepositoryConfig.java
-│   │   ├── LocalDiskBlobStoreRepositoryConfig.java
-│   │   └── InMemoryBlobStoreRepositoryConfig.java
-│   ├── routes/                        # Apache Camel routes
-│   │   ├── aggregation/               # GTFS aggregation logic
-│   │   ├── export/                    # GTFS export handling
-│   │   ├── validation/                # GTFS validation
-│   │   ├── stop/                      # Stop area processing
-│   │   ├── file/                      # File operations
-│   │   └── blobstore/                 # Cloud storage operations
-│   ├── netex/                         # NeTEx processing
-│   ├── gtfs/                          # GTFS handling and utilities
-│   ├── pubsub/                        # Pub/Sub integration
-│   └── stop/                          # Stop area handling
-├── src/main/resources/
-│   └── logback.xml                    # Logging configuration
-├── src/test/                          # Test suite
-├── helm/                              # Kubernetes Helm charts
-├── terraform/                         # Infrastructure as Code
-├── Dockerfile                         # Container image definition
-└── pom.xml                            # Maven build configuration
+│   ├── App.java              # Spring Boot application
+│   ├── Constants.java        # Wire names and blob path fragments
+│   ├── DamuMdc.java          # correlationId and codespace for structured logging
+│   ├── pubsub/               # Consumer, publisher, attribute handling, destination names
+│   ├── export/               # GTFS export and stop place GTFS export
+│   ├── aggregation/          # National GTFS merge
+│   ├── validation/           # GTFS validation and report upload
+│   ├── stop/                 # Stop area repository, registry fetchers, refresh job
+│   ├── gtfs/                 # GTFS merging and validation helpers
+│   ├── netex/                # Entur customisations of the converter library
+│   ├── services/             # Blob store access
+│   └── config/               # Blob store profiles
+├── helm/                     # Kubernetes deployment configs
+├── terraform/                # Infrastructure as code
+└── pom.xml
 ```
 
-## Key Components
+### How a request runs
 
-### Routes (Apache Camel)
-Damu uses Apache Camel for integration patterns and routing:
+`GtfsRouteDispatcherConsumer` reads a message off `GtfsRouteDispatcherTopic` and switches on its
+`Action` attribute:
 
-- **GtfsExportQueueRouteBuilder** - Handles GTFS export queue processing
-- **GtfsAggregationQueueRouteBuilder** - Manages GTFS aggregation across datasets
-- **GtfsValidationQueueRouteBuilder** - Validates GTFS feeds
-- **StopAreaRepositoryRouteBuilder** - Manages stop area data
-- **BlobStore Routes** - Handle cloud storage operations
+| `Action` | Body | Job |
+| --- | --- | --- |
+| `Export` | codespace | `GtfsExportService` - download the NeTEx export, convert, validate, upload both, notify marduk on `DamuExportGtfsStatusQueue` |
+| `Aggregation` | comma-separated GTFS file names | `GtfsAggregationService` - download each, merge into the extended and basic national datasets, upload both, notify marduk on `MardukAggregateGtfsStatusQueue` |
 
-### Configuration
-Multiple blob store configurations support different environments:
-- **GCS** (Production) - Google Cloud Storage
-- **Local Disk** (Development) - File system storage
-- **In-Memory** (Testing) - Memory-based storage
+Two jobs run on a schedule instead:
 
-### Processing Modes
-- **Basic Aggregation** - Simple GTFS feed merging
-- **Extended Aggregation** - Advanced GTFS feed merging with transformations
-- **Validation** - GTFS feed validation using industry standards
+| When | Job |
+| --- | --- |
+| startup, then 01:00 and 14:00 | `StopAreaRefreshService` - reload the stop area repository from `tiamat/CurrentAndFuture_latest.zip` |
+| 03:30 | `GtfsStopExportService` - export the stop places to `tiamat/Current_latest-gtfs.zip` |
 
-## Development Setup
+The ack deadline is managed by the PubSub streaming pull client, which extends it for up to an hour
+while a message is being processed. Nothing in the application touches it.
 
-### Prerequisites
-- Java 25 JDK
-- Maven 3.6+
-- Docker (optional, for containerized deployment)
-- Google Cloud SDK (for GCS/Pub/Sub integration)
+## Common Tasks
 
-### Build Commands
-
+### Building
+Requires JDK 25; the enforcer fails the build on anything older.
 ```bash
-# Clean and compile
-mvn clean compile
-
-# Run tests
-mvn test
-
-# Package application
-mvn package
-
-# Run with Spring Boot
-mvn spring-boot:run
-
-# Format code (Prettier)
-mvn prettier:write
-
-# Check code formatting
-mvn prettier:check -PprettierCheck
-
-# Skip formatting
-mvn clean install -PprettierSkip
+mvn clean package
 ```
 
-### Testing
-- **Unit Tests**: Standard JUnit 5 tests
-- **Integration Tests**: Using Testcontainers for GCloud emulation
-- **Camel Tests**: Apache Camel test framework for route testing
+### Running tests
+```bash
+mvn test
+```
+Use `clean` after changing a `static final` constant: those inline into call sites and an incremental
+build can pass against the old value.
 
-Test configuration:
-- Memory: `-Xms500m -Xmx7000m -Xss512k`
-- Testcontainers used for GCloud Pub/Sub and Storage emulation
+Only `PubSubWiringTest` needs Docker; everything else runs in one JVM.
+
+### Formatting
+Prettier runs in `validate` and gates the build.
+```bash
+mvn prettier:write
+mvn prettier:check -PprettierCheck
+```
+
+### Running locally
+Use the compose stack in the parent `marduk-pipeline` repository, which brings up the PubSub and GCS
+emulators and creates the topics.
 
 ## Configuration
 
-### Application Properties
-Configuration is managed through Spring Boot properties and environment variables. Key areas:
-- Google Cloud project ID and credentials
-- Pub/Sub topics and subscriptions
-- GCS bucket names
-- Camel route configurations
-- Logging levels
+- `helm/damu/templates/configmap.yaml` is the production configuration.
+- `src/test/resources/application.properties` is the test configuration.
+- Profiles: `gcs-blobstore` (deployed), `local-disk-blobstore`, `in-memory-blobstore` (tests).
 
-### Profiles
-- **Default** - Development mode with local storage
-- **gcs** - Production mode with Google Cloud Storage
-- **prettierCheck** - CI mode with code formatting validation
-- **prettierSkip** - Skip code formatting
+## Key Files to Review
 
-## Deployment
+- `docs/camel-removal.md`: what the move off Camel changed, and the behaviour differences it
+  introduced. Read the *Wire contract*, *Retries and failure handling* and *The release* sections before
+  changing anything under `pubsub/`, `export/` or `aggregation/`.
+- `pom.xml`: dependencies and build configuration
+- `README.md`: user-facing documentation
 
-### Docker
-```bash
-# Build image
-docker build -t damu:latest .
+## Common Pitfalls
 
-# Run container
-docker run -p 8080:8080 damu:latest
-```
+1. **JDK 25 is required**: the Maven enforcer rejects anything older, and the failure at `validate`
+   names the JDK range rather than the cause. Set `JAVA_HOME` before `mvn`.
+2. **Message attributes are a wire format.** Damu echoes the whole request attribute map back to marduk
+   on every status notification, and marduk matches its pending job on what comes back. `WireContractTest`
+   pins the names and values against hard-coded strings; if it fails, check marduk before changing it.
+3. **`maxDeliveryAttempts=5` is duplicated in marduk's `terraform/pubsub.tf`.** Change them together.
+4. **The exporter's output stream can only be read once**: it is a stream over a temp file that is
+   deleted on close. `GtfsExportService` copies it to a file of its own because validation and upload
+   both need it.
+5. **A missing NeTEx export leaves the job with no terminal status.** Preserved from the Camel version
+   on purpose, and pinned by a test. Changing it changes what marduk records for the provider.
+6. **Removing a ConfigMap key is a rollout hazard**, not a cleanup: helm applies the ConfigMap before the
+   first pod is replaced, and kubelet re-syncs it into pods still running the old image.
 
-### Kubernetes (Helm)
-Helm charts are provided in the `helm/` directory for Kubernetes deployment.
+## Making Changes
 
-### Terraform
-Infrastructure as Code is available in the `terraform/` directory for provisioning cloud resources.
-
-## Monitoring & Observability
-
-### Actuator Endpoints
-Spring Boot Actuator provides health checks and metrics:
-- `/actuator/health` - Application health
-- `/actuator/prometheus` - Prometheus metrics
-- `/actuator/info` - Application information
-
-### Logging
-- Structured logging with Logback
-- Logstash encoder for JSON logging
-- SLF4J API with multiple backend support
-
-## CI/CD
-
-### GitHub Actions
-Workflow defined in `.github/workflows/push.yml`:
-- Build and test on push
-- Code formatting validation
-
-## Code Quality
-
-### Code Formatting
-- **Prettier Java** (v2.1.0) for consistent code formatting
-- Automatic formatting on build (validate phase)
-- CI enforcement with `prettierCheck` profile
-
-### Security
-- OWASP Dependency Check suppression configuration
+- Run the tests first, so a failure afterwards is attributable.
+- Prettier runs in `validate` and gates the build; let `mvn prettier:write` do the formatting.
+- Update this file when the architecture moves, and `docs/camel-removal.md` when the behaviour does.
 
 ## Related Projects
 
-- **[netex-gtfs-converter-java](https://github.com/entur/netex-gtfs-converter-java)** - Core conversion library
-- **[Marduk](https://github.com/entur/marduk)** - Orchestration service
-- **[Chouette](https://github.com/entur/chouette)** - NeTEx export source
-- **[Uttu](https://github.com/entur/uttu)** - NeTEx export source
-
-## Working with Claude
-
-### Common Tasks
-
-**Adding a new route:**
-Look at existing routes in `src/main/java/no/entur/damu/routes/` for patterns. Routes typically extend `RouteBuilder` and configure Camel DSL endpoints.
-
-**Modifying conversion logic:**
-The actual NeTEx to GTFS conversion is handled by the external library. Damu focuses on orchestration, file handling, and validation.
-
-**Testing changes:**
-Integration tests use Testcontainers to emulate GCloud services. Tests are in `src/test/java/` mirroring the main package structure.
-
-**Configuration changes:**
-Check `src/main/resources/application.properties` or environment-specific property files for runtime configuration.
-
-### Important Notes
-
-1. **Memory Requirements**: Tests require significant memory (7GB heap). Adjust `-Xmx` if needed.
-
-2. **Code Formatting**: Always run `mvn prettier:write` before committing to ensure consistent formatting.
-
-3. **External Dependencies**: The project depends heavily on Entur's ecosystem. Some libraries may require access to Entur's Maven repository.
-
-4. **Cloud Integration**: Full functionality requires GCP credentials and properly configured Pub/Sub topics and GCS buckets.
-
-5. **Large Files**: GTFS and NeTEx datasets can be large. Consider file size limits and memory constraints when processing.
+- **[netex-gtfs-converter-java](https://github.com/entur/netex-gtfs-converter-java)** - the conversion library
+- **[Marduk](https://github.com/entur/marduk)** - orchestration service, and damu's only client
+- **[Chouette](https://github.com/entur/chouette)** / **[Uttu](https://github.com/entur/uttu)** - NeTEx export sources
 
 ## License
 
 Licensed under EUPL-1.2 (see LICENSE.txt)
-
-## Links
-
-- **Repository**: https://github.com/entur/damu
-- **Parent POM**: org.entur.ror:superpom (version in pom.xml)
