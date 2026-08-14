@@ -209,6 +209,7 @@ public class GtfsExportService {
   }
 
   private void notifyMarduk(String status, Map<String, String> attributes) {
+    LOGGER.info("Notifying marduk of export status {}", status);
     pubSubPublisher.publish(
       DamuQueues.DAMU_EXPORT_GTFS_STATUS_QUEUE,
       status,
