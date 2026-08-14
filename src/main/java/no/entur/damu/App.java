@@ -19,38 +19,23 @@
 package no.entur.damu;
 
 import no.entur.damu.config.GcsBlobStoreRepositoryConfig;
-import org.apache.camel.builder.RouteBuilder;
 import org.entur.pubsub.base.config.GooglePubSubConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
-/**
- * A spring-boot application that includes a Camel route builder to set up the Camel context.
- */
 @SpringBootApplication
+@EnableScheduling
 @Import({ GcsBlobStoreRepositoryConfig.class, GooglePubSubConfig.class })
-public class App extends RouteBuilder {
+public class App {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
 
-  @Value("${damu.shutdown.timeout:300}")
-  private Long shutdownTimeout;
-
-  // must have a main method spring-boot can run
   public static void main(String[] args) {
     LOGGER.info("Starting damu...");
     SpringApplication.run(App.class, args);
-  }
-
-  @Override
-  public void configure() {
-    getContext().getShutdownStrategy().setTimeout(shutdownTimeout);
-    getContext().setUseMDCLogging(true);
-    getContext().setUseBreadcrumb(true);
-    getContext().setMessageHistory(true);
   }
 }

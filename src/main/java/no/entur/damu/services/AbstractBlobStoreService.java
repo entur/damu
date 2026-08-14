@@ -19,8 +19,6 @@
 package no.entur.damu.services;
 
 import java.io.InputStream;
-import no.entur.damu.Constants;
-import org.apache.camel.Header;
 import org.rutebanken.helper.storage.repository.BlobStoreRepository;
 
 public abstract class AbstractBlobStoreService {
@@ -35,16 +33,19 @@ public abstract class AbstractBlobStoreService {
     this.repository.setContainerName(containerName);
   }
 
-  public InputStream getBlob(
-    @Header(value = Constants.FILE_HANDLE) String name
-  ) {
+  public InputStream getBlob(String name) {
     return repository.getBlob(name);
   }
 
-  public void uploadBlob(
-    @Header(value = Constants.FILE_HANDLE) String name,
-    InputStream inputStream
-  ) {
+  /**
+   * A metadata lookup. {@link #getBlob} downloads the whole object, and the GCS implementation reads it
+   * twice: once to checksum it and once to hand it back.
+   */
+  public boolean exists(String name) {
+    return repository.exist(name);
+  }
+
+  public void uploadBlob(String name, InputStream inputStream) {
     repository.uploadBlob(name, inputStream);
   }
 }

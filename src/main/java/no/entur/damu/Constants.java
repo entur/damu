@@ -20,8 +20,6 @@ package no.entur.damu;
 
 public final class Constants {
 
-  public static final String FILE_HANDLE = "RutebankenFileHandle";
-
   public static final String BLOBSTORE_PATH_OUTBOUND = "outbound/";
 
   public static final String DATASET_REFERENTIAL = "EnturDatasetReferential";
@@ -44,17 +42,23 @@ public final class Constants {
   public static final String GTFS_VALIDATION_REPORTS_FILENAME_SUFFIX =
     "-gtfs-validation-reports.zip";
 
-  public static final String FILE_NAME = "RutebankenFileName";
-
-  public static final String INCLUDE_SHAPES = "IncludeShapes";
-
+  /**
+   * Aggregation status, sent as a message attribute on MardukAggregateGtfsStatusQueue.
+   */
   public static final String STATUS_HEADER = "status";
   public static final String STATUS_MERGE_STARTED = "started";
   public static final String STATUS_MERGE_OK = "ok";
   public static final String STATUS_MERGE_FAILED = "failed";
 
+  /**
+   * Export status, sent as the message body on DamuExportGtfsStatusQueue.
+   */
+  public static final String STATUS_EXPORT_STARTED = "started";
+  public static final String STATUS_EXPORT_OK = "ok";
+  public static final String STATUS_EXPORT_FAILED = "failed";
+
   public static final String ORIGINAL_GTFS_FILES_SUB_FOLDER =
-    "/original-gtfs-files";
+    "original-gtfs-files";
 
   public static final String GTFS_ROUTE_DISPATCHER_HEADER_NAME = "Action";
   public static final String GTFS_ROUTE_DISPATCHER_AGGREGATION_HEADER_VALUE =

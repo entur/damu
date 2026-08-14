@@ -8,27 +8,39 @@ data:
     server.port={{ .Values.common.service.internalPort }}
 
     # Damu
-    # Refresh stop place cache at 01:00 and 14:00 every day
-    damu.netex.stop.cache.refresh.quartz.trigger=?cron=0+0+01,14+?+*+*
+    # Refresh stop place cache at 01:00 and 14:00 every day.
+    # Spring cron: second minute hour day-of-month month day-of-week. Unquoted on purpose: this renders
+    # into a properties file, where quotes would become part of the value and the cron parser would
+    # reject it at startup.
+    damu.netex.stop.cache.refresh.cron=0 0 1,14 * * *
+    # Export the stop places to GTFS at 03:30 every day
+    damu.netex.stop.export.cron=0 30 3 * * *
     damu.netex.stop.full.filename=tiamat/CurrentAndFuture_latest.zip
     damu.gtfs.export.folder={{ .Values.gcp.marduk.gtfsFolder }}
     damu.gtfs.export.transfer.stayseated={{ .Values.damu.gtfs.export.stayseated }}
     gtfs.export.download.directory=/tmp/damu/files/gtfs/merged
     stopplace.registry.url={{ .Values.stopplaceRegistryUrl }}
-
-    # Camel
-    camel.main.name=damu
-    camel.main.stream-caching-enabled=false
-    camel.main.stream-caching-spool-enabled=true
-    # the Camel shutdown timeout must be shorter than the Kubernetes terminationGracePeriod
-    damu.shutdown.timeout=25
-    damu.camel.redelivery.max=0
+    # Two @Scheduled methods, the stop place cache refresh and the stop GTFS export. Both do blocking
+    # network work and the schedules are close enough to coincide after a slow run.
+    spring.task.scheduling.pool.size=2
 
     # PubSub
     damu.pubsub.project.id={{ .Values.gcp.pubsubProjectId }}
-    marduk.pubsub.project.id={{ .Values.gcp.pubsubProjectId }}
     spring.cloud.gcp.project-id=${damu.pubsub.project.id}
-    camel.component.google-pubsub.synchronous-pull-retryable-codes=DEADLINE_EXCEEDED
+    # One request at a time, which is what the Camel consumer's synchronousPull with the default
+    # maxMessagesPerPoll=1 gave. The client defaults are 4 threads and 1000 outstanding messages, and an
+    # export or an aggregation is expensive enough in heap and disk that several at once is a real risk.
+    spring.cloud.gcp.pubsub.subscriber.executor-threads=1
+    spring.cloud.gcp.pubsub.subscriber.flow-control.max-outstanding-element-count=1
+    # The publisher's thread pool stops accepting work on ContextClosedEvent by default. That event also
+    # stops the subscribers, but a job already running keeps going, so without this it finishes and then
+    # cannot tell marduk how it went.
+    spring.cloud.gcp.pubsub.publisher.executor-accept-tasks-after-context-close=true
+    # Topics and subscriptions are terraformed, so the pods must not try to create them.
+    entur.pubsub.subscriber.autocreate=false
+    # Slept inline on the callback thread after a nack, and with one consumer thread that is how long the
+    # pod stops working. The subscription's own retry_policy.minimum_backoff already spaces redeliveries.
+    entur.pubsub.consumer.retry.delay=1000
 
     # Blobstore
     blobstore.gcs.project.id={{ .Values.gcp.blobstoreProjectId }}
@@ -50,6 +62,29 @@ data:
     logging.level.no.entur=INFO
     logging.level.no.entur.damu=INFO
     logging.level.org.apache=INFO
+
+    # ----------------------------------------------------------------------------------------------
+    # Camel-era keys. Delete these in a later release, once the Camel version can no longer come back.
+    #
+    # Nothing here is read by this version: no property below matches anything it binds, and Spring
+    # ignores the rest. They are here for the version being replaced.
+    #
+    # helm applies this ConfigMap before the first pod is replaced, and kubelet re-syncs the mounted
+    # volume into pods that are still running the old jar. Any old pod that restarts during the rollout,
+    # or any rollback that swaps the image without also rolling back this ConfigMap, boots the old code
+    # against whatever is in this file. damu.netex.stop.cache.refresh.quartz.trigger is the one that
+    # matters most: its code default is a cron, but dropping the key from a running old pod would move
+    # the stop place cache refresh from 01:00 and 14:00 to 03:00 without anything saying so.
+    marduk.pubsub.project.id={{ .Values.gcp.pubsubProjectId }}
+    camel.main.name=damu
+    camel.main.stream-caching-enabled=false
+    camel.main.stream-caching-spool-enabled=true
+    camel.component.google-pubsub.synchronous-pull-retryable-codes=DEADLINE_EXCEEDED
+    # the Camel shutdown timeout must be shorter than the Kubernetes terminationGracePeriod
+    damu.shutdown.timeout=25
+    damu.camel.redelivery.max=0
+    damu.netex.stop.cache.refresh.quartz.trigger=?cron=0+0+01,14+?+*+*
+    # ----------------------------------------------------------------------------------------------
 
 
 kind: ConfigMap
