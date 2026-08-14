@@ -76,18 +76,17 @@ class GtfsRouteDispatcherConsumerTest {
    */
   @Test
   void lastDeliveryAttemptIsNackedWithoutRunningTheJob() {
+    byte[] body = "rb_flb".getBytes(StandardCharsets.UTF_8);
+    Map<String, String> attributes = Map.of(
+      GTFS_ROUTE_DISPATCHER_HEADER_NAME,
+      GTFS_ROUTE_DISPATCHER_EXPORT_HEADER_VALUE,
+      PubSubAttributes.DELIVERY_ATTEMPT,
+      String.valueOf(GtfsRouteDispatcherConsumer.MAX_DELIVERY_ATTEMPTS)
+    );
+
     assertThrows(
       DamuException.class,
-      () ->
-        consumer.onMessage(
-          "rb_flb".getBytes(StandardCharsets.UTF_8),
-          Map.of(
-            GTFS_ROUTE_DISPATCHER_HEADER_NAME,
-            GTFS_ROUTE_DISPATCHER_EXPORT_HEADER_VALUE,
-            PubSubAttributes.DELIVERY_ATTEMPT,
-            String.valueOf(GtfsRouteDispatcherConsumer.MAX_DELIVERY_ATTEMPTS)
-          )
-        )
+      () -> consumer.onMessage(body, attributes)
     );
 
     verifyNoInteractions(exportService, aggregationService);

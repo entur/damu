@@ -1,6 +1,5 @@
 package no.entur.damu;
 
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.AutoConfigurationExcludeFilter;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.TypeExcludeFilter;
@@ -29,9 +28,4 @@ import org.springframework.context.annotation.FilterType;
     ),
   }
 )
-public class TestApp extends App {
-
-  public static void main(String[] args) {
-    SpringApplication.run(TestApp.class, args);
-  }
-}
+public class TestApp extends App {}

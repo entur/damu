@@ -16,8 +16,12 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import no.entur.damu.DamuMdc;
 import no.entur.damu.exception.DamuException;
@@ -44,6 +48,16 @@ public class GtfsExportService {
   private static final Logger LOGGER = LoggerFactory.getLogger(
     GtfsExportService.class
   );
+
+  /**
+   * java.io.tmpdir is world-writable, so the GTFS dataset is created owner-only rather than with the
+   * platform default. The codespace is deliberately not part of the name: it comes off the message and
+   * a temp file prefix is not the place to sanitise it.
+   */
+  private static final FileAttribute<Set<PosixFilePermission>> OWNER_ONLY =
+    PosixFilePermissions.asFileAttribute(
+      PosixFilePermissions.fromString("rw-------")
+    );
 
   private final MardukBlobStoreService mardukBlobStoreService;
   private final GtfsValidationService gtfsValidationService;
@@ -142,7 +156,7 @@ public class GtfsExportService {
         netexTimetableDataset
       )
     ) {
-      Path gtfsDataset = Files.createTempFile("damu-gtfs-" + codespace, ".zip");
+      Path gtfsDataset = Files.createTempFile("damu-gtfs-", ".zip", OWNER_ONLY);
       Files.copy(gtfs, gtfsDataset, StandardCopyOption.REPLACE_EXISTING);
       LOGGER.info("Dataset processing complete");
       return gtfsDataset;

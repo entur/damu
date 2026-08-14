@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
@@ -98,7 +99,9 @@ public class GtfsAggregationService {
       Path workingDirectory = Path.of(
         localWorkingDirectory,
         "EXPORT_GTFS_MERGED",
-        LocalDateTime.now().format(WORKING_DIRECTORY_TIMESTAMP)
+        LocalDateTime
+          .now(ZoneId.systemDefault())
+          .format(WORKING_DIRECTORY_TIMESTAMP)
       );
       Path originalGtfsFiles = downloadGtfsFiles(
         gtfsFileNames,
@@ -139,9 +142,9 @@ public class GtfsAggregationService {
    * @return the directory the archives were downloaded into.
    */
   private Path downloadGtfsFiles(String gtfsFileNames, Path workingDirectory) {
-    Path originalGtfsFiles = workingDirectory.resolve(
-      ORIGINAL_GTFS_FILES_SUB_FOLDER
-    );
+    Path originalGtfsFiles = workingDirectory
+      .resolve(ORIGINAL_GTFS_FILES_SUB_FOLDER)
+      .normalize();
     try {
       Files.createDirectories(originalGtfsFiles);
     } catch (IOException e) {
@@ -152,6 +155,7 @@ public class GtfsAggregationService {
     }
 
     for (String gtfsFileName : gtfsFileNames.split(",")) {
+      Path destination = destinationWithin(originalGtfsFiles, gtfsFileName);
       String fileHandle = BLOBSTORE_PATH_OUTBOUND + "gtfs/" + gtfsFileName;
       LOGGER.info("Fetching {}", fileHandle);
       InputStream gtfsFile = mardukBlobStoreService.getBlob(fileHandle);
@@ -167,16 +171,27 @@ public class GtfsAggregationService {
         gtfsFileName
       );
       try (InputStream in = gtfsFile) {
-        Files.copy(
-          in,
-          originalGtfsFiles.resolve(gtfsFileName),
-          StandardCopyOption.REPLACE_EXISTING
-        );
+        Files.copy(in, destination, StandardCopyOption.REPLACE_EXISTING);
       } catch (IOException e) {
         throw new DamuException("Failed to store " + gtfsFileName, e);
       }
     }
     return originalGtfsFiles;
+  }
+
+  /**
+   * The file names come off the message body, and {@code resolve} honours both absolute paths and
+   * {@code ..}. Checked before the blob is fetched, so a crafted name cannot read an arbitrary object
+   * out of the bucket either.
+   */
+  static Path destinationWithin(Path directory, String fileName) {
+    Path destination = directory.resolve(fileName).normalize();
+    if (!directory.equals(destination.getParent())) {
+      throw new DamuException(
+        "Refusing GTFS file name '" + fileName + "': it escapes " + directory
+      );
+    }
+    return destination;
   }
 
   private void mergeAndUpload(
