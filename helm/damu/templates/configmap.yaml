@@ -41,6 +41,9 @@ data:
     # Slept inline on the callback thread after a nack, and with one consumer thread that is how long the
     # pod stops working. The subscription's own retry_policy.minimum_backoff already spaces redeliveries.
     entur.pubsub.consumer.retry.delay=1000
+    # A subscriber that fails on a non-retryable status never restarts. Break liveness so
+    # the pod is replaced; the ERROR line alone would leave it running and consuming nothing.
+    entur.pubsub.consumer.break-liveness-on-terminal-failure=true
 
     # Blobstore
     blobstore.gcs.project.id={{ .Values.gcp.blobstoreProjectId }}
