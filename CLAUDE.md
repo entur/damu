@@ -8,42 +8,6 @@ export of the stop places.
 
 ## Architecture
 
-### Technology Stack
-- **Java 25**
-- **Spring Boot** (no integration framework; PubSub consumers come from `entur-google-pubsub`)
-- **Google Cloud Platform**: Cloud Storage for files, Pub/Sub for messaging
-- **Maven**, parent `org.entur.ror:superpom`
-
-### Key Dependencies
-- `netex-gtfs-converter-java` - the NeTEx to GTFS conversion itself
-- `gtfs-validator-main` - MobilityData GTFS validation
-- `entur-helpers` - `AbstractEnturGooglePubSubConsumer`, GCS blob store
-- `zt-zip` - ZIP handling
-
-Versions live in pom.xml; do not trust versions written in this file.
-
-## Project Structure
-
-```
-damu/
-├── src/main/java/no/entur/damu/
-│   ├── App.java              # Spring Boot application
-│   ├── Constants.java        # Wire names and blob path fragments
-│   ├── DamuMdc.java          # correlationId and codespace for structured logging
-│   ├── pubsub/               # Consumer, publisher, attribute handling, destination names
-│   ├── export/               # GTFS export and stop place GTFS export
-│   ├── aggregation/          # National GTFS merge
-│   ├── validation/           # GTFS validation and report upload
-│   ├── stop/                 # Stop area repository, registry fetchers, refresh job
-│   ├── gtfs/                 # GTFS merging and validation helpers
-│   ├── netex/                # Entur customisations of the converter library
-│   ├── services/             # Blob store access
-│   └── config/               # Blob store profiles
-├── helm/                     # Kubernetes deployment configs
-├── terraform/                # Infrastructure as code
-└── pom.xml
-```
-
 ### How a request runs
 
 `GtfsRouteDispatcherConsumer` reads a message off `GtfsRouteDispatcherTopic` and switches on its
@@ -134,6 +98,3 @@ emulators and creates the topics.
 - **[Marduk](https://github.com/entur/marduk)** - orchestration service, and damu's only client
 - **[Chouette](https://github.com/entur/chouette)** / **[Uttu](https://github.com/entur/uttu)** - NeTEx export sources
 
-## License
-
-Licensed under EUPL-1.2 (see LICENSE.txt)
