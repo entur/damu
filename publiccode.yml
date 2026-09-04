@@ -1,0 +1,53 @@
+publiccodeYmlVersion: "0.5.0"
+
+name: Damu
+url: https://github.com/entur/damu
+landingURL: https://github.com/entur/damu
+
+platforms:
+  - linux
+  - web
+
+categories:
+  - data-collection
+  - geographic-information-systems
+
+developmentStatus: stable
+softwareType: standalone/backend
+
+organisation:
+  name: Entur AS
+  uri: https://entur.no
+
+usedBy:
+  - Norway (nationwide), Entur
+
+description:
+  en:
+    localisedName: Damu
+    shortDescription: Converts NeTEx datasets to GTFS.
+    longDescription: >
+      Damu downloads exported NeTEx datasets from cloud storage, converts them with the netex-gtfs-converter-java
+      library, uploads the GTFS archive and notifies the pipeline. Triggered by PubSub when a NeTEx export
+      completes.
+    documentation: https://github.com/entur/damu/blob/master/README.md
+    features:
+      - NeTEx to GTFS conversion
+      - Event-driven, triggered by completed NeTEx exports
+      - Built on netex-gtfs-converter-java
+
+legal:
+  license: EUPL-1.2
+  mainCopyrightOwner: Entur AS
+
+maintenance:
+  type: internal
+  contacts:
+    - name: Entur Open Data and Journey Planning
+      email: kollektivdata@entur.org
+      affiliation: Entur AS
+
+localisation:
+  localisationReady: false
+  availableLanguages:
+    - en
