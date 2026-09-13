@@ -25,7 +25,7 @@
     <properties>
         <entur.helpers.version>7.3.0</entur.helpers.version>
         <spring-cloud-gcp-dependencies.version>8.1.1</spring-cloud-gcp-dependencies.version>
-        <netex-gtfs-converter-java.version>3.0.7</netex-gtfs-converter-java.version>
+        <netex-gtfs-converter-java.version>3.0.8</netex-gtfs-converter-java.version>
         <zt-zip.version>1.17</zt-zip.version>
         <commons-csv.version>1.14.1</commons-csv.version>
         <prettier-java.version>2.1.0</prettier-java.version>
