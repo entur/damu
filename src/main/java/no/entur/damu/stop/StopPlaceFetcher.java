@@ -1,7 +1,7 @@
 package no.entur.damu.stop;
 
 import org.entur.netex.gtfs.export.exception.StopPlaceNotFoundException;
-import org.rutebanken.netex.model.StopPlace;
+import org.entur.netex2.model.StopPlace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
