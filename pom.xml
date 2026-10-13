@@ -25,7 +25,7 @@
     <properties>
         <entur.helpers.version>7.3.0</entur.helpers.version>
         <spring-cloud-gcp-dependencies.version>8.1.1</spring-cloud-gcp-dependencies.version>
-        <netex-gtfs-converter-java.version>3.0.12</netex-gtfs-converter-java.version>
+        <netex-gtfs-converter-java.version>4.0.0-SNAPSHOT</netex-gtfs-converter-java.version>
         <zt-zip.version>1.17</zt-zip.version>
         <commons-csv.version>1.14.1</commons-csv.version>
         <prettier-java.version>2.1.0</prettier-java.version>
@@ -241,5 +241,23 @@
             </build>
         </profile>
     </profiles>
+
+    <repositories>
+        <!--
+          netex-gtfs-converter-java 4.0.0-SNAPSHOT (NeTEx 2.0) is only published to the Maven Central
+          snapshot repository. Remove this once 4.0.0 is released.
+        -->
+        <repository>
+            <id>central-snapshots</id>
+            <name>Maven Central Snapshots</name>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
 </project>

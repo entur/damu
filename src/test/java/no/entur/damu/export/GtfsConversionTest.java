@@ -11,11 +11,11 @@ import java.nio.file.Path;
 import no.entur.damu.DamuPipelineTestBase;
 import no.entur.damu.stop.QuayFetcher;
 import org.entur.netex.gtfs.export.stop.StopAreaRepositoryFactory;
+import org.entur.netex2.model.LocationStructure;
+import org.entur.netex2.model.Quay;
+import org.entur.netex2.model.SimplePoint_VersionStructure;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.rutebanken.netex.model.LocationStructure;
-import org.rutebanken.netex.model.Quay;
-import org.rutebanken.netex.model.SimplePoint_VersionStructure;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
