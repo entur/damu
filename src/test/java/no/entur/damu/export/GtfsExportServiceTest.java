@@ -32,12 +32,12 @@ import no.entur.damu.stop.StopPlaceFetcher;
 import no.entur.damu.validation.GtfsValidationService;
 import org.entur.netex.gtfs.export.exception.GtfsExportException;
 import org.entur.netex.gtfs.export.stop.StopAreaRepositoryFactory;
+import org.entur.netex2.model.LocationStructure;
+import org.entur.netex2.model.MultilingualString;
+import org.entur.netex2.model.Quay;
+import org.entur.netex2.model.SimplePoint_VersionStructure;
+import org.entur.netex2.model.StopPlace;
 import org.junit.jupiter.api.Test;
-import org.rutebanken.netex.model.LocationStructure;
-import org.rutebanken.netex.model.MultilingualString;
-import org.rutebanken.netex.model.Quay;
-import org.rutebanken.netex.model.SimplePoint_VersionStructure;
-import org.rutebanken.netex.model.StopPlace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
@@ -215,7 +215,7 @@ class GtfsExportServiceTest extends DamuPipelineTestBase {
             "NSR:StopPlace:" +
             invocation.getArgument(0, String.class).replaceAll("[^0-9]", "")
           )
-          .withName(new MultilingualString().withValue("Test Stop Place"))
+          .withName(new MultilingualString().withContent("Test Stop Place"))
           .withCentroid(osloCentroid())
       );
   }
