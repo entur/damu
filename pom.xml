@@ -28,6 +28,7 @@
         <netex-gtfs-converter-java.version>3.0.15</netex-gtfs-converter-java.version>
         <zt-zip.version>1.17</zt-zip.version>
         <commons-csv.version>1.14.1</commons-csv.version>
+        <flogger.version>0.6</flogger.version>
         <prettier-java.version>2.1.0</prettier-java.version>
         <prettier-maven-plugin.version>0.22</prettier-maven-plugin.version>
         <plugin.prettier.goal>write</plugin.prettier.goal>
@@ -125,10 +126,17 @@
             <artifactId>gtfs-validator-main</artifactId>
             <version>6.0.0</version>
         </dependency>
+        <!-- gtfs-validator brings in its own flogger core; keep the core and the backend on the same version -->
+        <dependency>
+            <groupId>com.google.flogger</groupId>
+            <artifactId>flogger</artifactId>
+            <version>${flogger.version}</version>
+            <scope>runtime</scope>
+        </dependency>
         <dependency>
             <groupId>com.google.flogger</groupId>
             <artifactId>flogger-system-backend</artifactId>
-            <version>0.6</version>
+            <version>${flogger.version}</version>
             <scope>runtime</scope>
         </dependency>
 
