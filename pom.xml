@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.entur.ror</groupId>
         <artifactId>superpom</artifactId>
-        <version>7.0.0</version>
+        <version>7.2.0</version>
     </parent>
 
     <groupId>no.entur.damu</groupId>
@@ -23,12 +23,12 @@
         <developerConnection>scm:git:ssh://git@github.com:entur/damu.git</developerConnection>
     </scm>
     <properties>
-        <entur.helpers.version>7.3.0</entur.helpers.version>
-        <spring-cloud-gcp-dependencies.version>8.1.1</spring-cloud-gcp-dependencies.version>
+        <entur.helpers.version>7.4.0</entur.helpers.version>
+        <spring-cloud-gcp-dependencies.version>8.3.1</spring-cloud-gcp-dependencies.version>
         <netex-gtfs-converter-java.version>3.0.15</netex-gtfs-converter-java.version>
-        <zt-zip.version>1.17</zt-zip.version>
+        <zt-zip.version>1.18.3</zt-zip.version>
         <commons-csv.version>1.14.1</commons-csv.version>
-        <flogger.version>0.6</flogger.version>
+        <flogger.version>0.9</flogger.version>
         <prettier-java.version>2.1.0</prettier-java.version>
         <prettier-maven-plugin.version>0.22</prettier-maven-plugin.version>
         <plugin.prettier.goal>write</plugin.prettier.goal>
