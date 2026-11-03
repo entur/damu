@@ -22,7 +22,7 @@ jobs:
         run: |
           curl --proto '=https' --tlsv1.2 -fsSL -o "$RUNNER_TEMP/liberica.tar.gz" "https://github.com/bell-sw/Liberica/releases/download/25.0.5.0.3+5/bellsoft-jdk25.0.5.0.3+5-linux-amd64.tar.gz"
           echo "619c84961ce12dd1cd455719680e22d080bee63dbfe64711e2ef47243114e3ef  $RUNNER_TEMP/liberica.tar.gz" | sha256sum -c -
-      - uses: actions/setup-java@v6.0.1
+      - uses: actions/setup-java@v6.1.0
         with:
           distribution: jdkfile
           jdkFile: ${{ runner.temp }}/liberica.tar.gz
@@ -81,13 +81,13 @@ jobs:
   docker-build:
     if: github.repository_owner == 'entur' && github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: [maven-verify]
-    uses: entur/gha-docker/.github/workflows/build.yml@v1.11.0
+    uses: entur/gha-docker/.github/workflows/build.yml@v1.13.0
     with:
       build_artifact_name: artifact
       build_artifact_path: target
   docker-push:
     needs: [docker-build, docker-smoke]
-    uses: entur/gha-docker/.github/workflows/push.yml@v1.11.0
+    uses: entur/gha-docker/.github/workflows/push.yml@v1.13.0
 
   helm-lint:
     uses: entur/gha-helm/.github/workflows/lint.yml@v2.1.0
