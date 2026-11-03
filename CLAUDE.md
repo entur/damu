@@ -56,6 +56,16 @@ mvn prettier:check -PprettierCheck
 Use the compose stack in the parent `marduk-pipeline` repository, which brings up the PubSub and GCS
 emulators and creates the topics.
 
+### Docker image
+The multi-stage `Dockerfile` extracts the Spring Boot layered jar in a Liberica JRE builder stage and
+runs it on `gcr.io/distroless/java25-debian13:nonroot` (Temurin JRE, no shell, no package manager,
+uid 65532). JVM flags come from `JDK_JAVA_OPTIONS` in the Helm ConfigMap, which the `java` launcher
+reads itself. There is no shell in the image: to inspect it, build with the `debug-nonroot` tag of the
+same base image, or use `kubectl debug` with an ephemeral container in the cluster.
+```bash
+mvn package -DskipTests && docker build -t damu:local .
+```
+
 ## Configuration
 
 - `helm/damu/templates/configmap.yaml` is the production configuration.
