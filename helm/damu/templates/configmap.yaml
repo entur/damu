@@ -3,7 +3,6 @@ data:
   application.properties: |+
 
     # Spring
-    spring.main.sources=no.entur.damu
     spring.profiles.active=gcs-blobstore
     server.port={{ .Values.common.service.internalPort }}
 
@@ -64,7 +63,6 @@ data:
     logging.config=classpath:logback.xml
     logging.level.no.entur=INFO
     logging.level.no.entur.damu=INFO
-    logging.level.org.apache=INFO
     # gtfs-validator 8 logs its "validators skipped because the data is absent" table at WARN. Flogger
     # gives the whole class one level, so this also drops the INFO lines from ValidationRunner.
     logging.level.org.mobilitydata.gtfsvalidator.runner.ValidationRunner=ERROR
