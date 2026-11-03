@@ -124,7 +124,7 @@
         <dependency>
             <groupId>org.mobilitydata.gtfs-validator</groupId>
             <artifactId>gtfs-validator-main</artifactId>
-            <version>6.0.0</version>
+            <version>8.0.1</version>
         </dependency>
         <!-- gtfs-validator brings in its own flogger core; keep the core and the backend on the same version -->
         <dependency>
