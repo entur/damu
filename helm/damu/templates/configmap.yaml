@@ -3,7 +3,6 @@ data:
   application.properties: |+
 
     # Spring
-    spring.main.sources=no.entur.damu
     spring.profiles.active=gcs-blobstore
     server.port={{ .Values.common.service.internalPort }}
 
@@ -64,33 +63,9 @@ data:
     logging.config=classpath:logback.xml
     logging.level.no.entur=INFO
     logging.level.no.entur.damu=INFO
-    logging.level.org.apache=INFO
     # gtfs-validator 8 logs its "validators skipped because the data is absent" table at WARN. Flogger
     # gives the whole class one level, so this also drops the INFO lines from ValidationRunner.
     logging.level.org.mobilitydata.gtfsvalidator.runner.ValidationRunner=ERROR
-
-    # ----------------------------------------------------------------------------------------------
-    # Camel-era keys. Delete these in a later release, once the Camel version can no longer come back.
-    #
-    # Nothing here is read by this version: no property below matches anything it binds, and Spring
-    # ignores the rest. They are here for the version being replaced.
-    #
-    # helm applies this ConfigMap before the first pod is replaced, and kubelet re-syncs the mounted
-    # volume into pods that are still running the old jar. Any old pod that restarts during the rollout,
-    # or any rollback that swaps the image without also rolling back this ConfigMap, boots the old code
-    # against whatever is in this file. damu.netex.stop.cache.refresh.quartz.trigger is the one that
-    # matters most: its code default is a cron, but dropping the key from a running old pod would move
-    # the stop place cache refresh from 01:00 and 14:00 to 03:00 without anything saying so.
-    marduk.pubsub.project.id={{ .Values.gcp.pubsubProjectId }}
-    camel.main.name=damu
-    camel.main.stream-caching-enabled=false
-    camel.main.stream-caching-spool-enabled=true
-    camel.component.google-pubsub.synchronous-pull-retryable-codes=DEADLINE_EXCEEDED
-    # the Camel shutdown timeout must be shorter than the Kubernetes terminationGracePeriod
-    damu.shutdown.timeout=25
-    damu.camel.redelivery.max=0
-    damu.netex.stop.cache.refresh.quartz.trigger=?cron=0+0+01,14+?+*+*
-    # ----------------------------------------------------------------------------------------------
 
 
 kind: ConfigMap

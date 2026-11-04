@@ -234,11 +234,14 @@ pod is replaced and kubelet re-syncs it into pods still running the old jar. The
 `damu.netex.stop.cache.refresh.quartz.trigger`: dropping it would not fail the old code, it would move
 the stop place cache refresh from 01:00 and 14:00 to 03:00 with nothing saying so.
 
-Delete that block in a later release. The values it renders are literals in the ConfigMap, so there is nothing in `values.yaml` to delete with it.
+That block, and the Camel master component's Role and RoleBinding in `rbac.yaml`, were removed in a
+later release once the Camel version could no longer come back. The values it rendered were literals in
+the ConfigMap, so nothing in `values.yaml` went with it.
 
-Rollback: `git revert` plus a full redeploy, or `helm rollback`. An image-only rollback
-(`kubectl rollout undo`) restores the pod template but not the ConfigMap, which is a separate unversioned
-object referenced by name — that is survivable here only because the old keys are still present.
+Rollback of the Camel removal itself: `git revert` plus a full redeploy, or `helm rollback`. An image-only
+rollback (`kubectl rollout undo`) restores the pod template but not the ConfigMap, which is a separate
+unversioned object referenced by name — that was survivable only while the old keys were still present,
+so a rollback now has to go through helm.
 
 Nothing needs to be deployed downstream first. Damu introduces no new status value and no new attribute;
 it only stops sending `breadcrumbId`, which nothing reads.

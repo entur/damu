@@ -8,4 +8,8 @@ When [Chouette](https://github.com/entur/chouette) or [Uttu](https://github.com/
 
 # Deployment
 
-EnTur deploys Damu using [Harness](https://app.harness.io/ng/account/8VwWgE0WRK67_PWDpkooNA/all/cd/orgs/entur/projects/ror/services/damu)
+Damu is built and deployed by GitHub Actions. A push to `master` builds and pushes the image, deploys it
+to dev, and then waits for manual approval before tst and again before prd (`.github/workflows/push.yml`).
+A previously built image can be redeployed to any environment with the *Manual deploy* workflow
+(`.github/workflows/manual-deploy.yml`), using the git tag the build produced. The Helm chart lives in
+`helm/damu`, with one values file per environment under `helm/damu/env/`.

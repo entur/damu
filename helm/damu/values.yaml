@@ -10,7 +10,9 @@ common:
   container:
     labels: { customLogRetention: enabled }
     forceReplicas: 1
-    image: <+artifacts.primary.image>
+    # Placeholder only: the common chart requires a value so the chart lints and templates. Every
+    # deploy sets common.container.image to the built image (gha-helm's image_set_path default).
+    image: damu
     cpu: 2
     memory: 18000
     memoryLimit: 20000
