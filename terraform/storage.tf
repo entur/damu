@@ -23,3 +23,12 @@ resource "google_storage_bucket" "storage_bucket" {
     log_object_prefix = "${var.bucket_instance_prefix}-${var.bucket_instance_suffix}"
   }
 }
+
+# Damu uploads the GTFS validation reports to this bucket. An upload replaces the existing object,
+# which needs storage.objects.delete, so roles/storage.objectCreator is not enough. The role is
+# granted on the bucket rather than on the project, so that the account reaches only this bucket.
+resource "google_storage_bucket_iam_member" "storage_bucket_object_user" {
+  bucket = google_storage_bucket.storage_bucket.name
+  role   = "roles/storage.objectUser"
+  member = "serviceAccount:${var.damu_service_account}"
+}
