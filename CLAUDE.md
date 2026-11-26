@@ -71,6 +71,9 @@ mvn package -DskipTests && docker build -t damu:local .
 - `helm/damu/templates/configmap.yaml` is the production configuration.
 - `src/test/resources/application.properties` is the test configuration.
 - Profiles: `gcs-blobstore` (deployed), `local-disk-blobstore`, `in-memory-blobstore` (tests).
+- GCP access of the runtime account `application@ent-damu-<env>`: the marduk subscription, topics and
+  bucket in `entur/marduk/terraform/iam.tf`, the internal bucket in `terraform/storage.tf`, the project
+  roles in `entur/ror-tf-gcp-common-infrastructure/.entur/`.
 
 ## Key Files to Review
 

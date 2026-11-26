@@ -3,6 +3,10 @@ variable "gcp_resources_project" {
   description = "The GCP project hosting the project resources"
 }
 
+variable "damu_service_account" {
+  description = "The email of the damu application's runtime service account, application@ent-damu-<env>"
+}
+
 variable "labels" {
   description = "Labels used in all resources"
   type        = map(string)
