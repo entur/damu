@@ -137,9 +137,16 @@ jobs:
     secrets: inherit
 
   # --- TST ---
+  supersede-tst:
+    if: ${{ success() && github.ref == 'refs/heads/master' }}
+    needs: [ deploy-dev ]
+    uses: ./.github/workflows/supersede.yml
+    permissions:
+      actions: write
+
   approval-tst:
     if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && github.ref == 'refs/heads/master' }}
-    needs: [ deploy-dev, helm-lint, tf-plan-dev, tf-apply-dev, docker-push ]
+    needs: [ deploy-dev, helm-lint, tf-plan-dev, tf-apply-dev, docker-push, supersede-tst ]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment: Approve
@@ -189,9 +196,16 @@ jobs:
     secrets: inherit
 
   # --- PRD ---
+  supersede-prd:
+    if: ${{ success() && github.ref == 'refs/heads/master' }}
+    needs: [ deploy-tst ]
+    uses: ./.github/workflows/supersede.yml
+    permissions:
+      actions: write
+
   approval-prd:
     if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && github.ref == 'refs/heads/master' }}
-    needs: [ deploy-tst, approval-tst, tf-plan-tst, tf-apply-tst, docker-push ]
+    needs: [ deploy-tst, approval-tst, tf-plan-tst, tf-apply-tst, docker-push, supersede-prd ]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment: Approve
